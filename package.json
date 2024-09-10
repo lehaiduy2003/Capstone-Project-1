@@ -19,7 +19,6 @@
   "homepage": "https://github.com/lehaiduy2003/Capstone-Project-1#readme",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "expo": "^51.0.32",
     "express": "^4.19.2"
   },
   "devDependencies": {
