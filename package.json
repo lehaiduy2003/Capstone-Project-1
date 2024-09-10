@@ -2,10 +2,10 @@
   "name": "trus",
   "version": "1.0.0",
   "description": "capstone project 1",
-  "main": "index.js",
+  "BE": "server.js",
   "scripts": {
     "test": "test",
-    "dev": "node index.js"
+    "dev": "node BE/server.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
   "homepage": "https://github.com/lehaiduy2003/Capstone-Project-1#readme",
   "dependencies": {
     "dotenv": "^16.4.5",
+    "expo": "^51.0.32",
     "express": "^4.19.2"
   },
   "devDependencies": {
