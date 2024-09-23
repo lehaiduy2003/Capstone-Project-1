@@ -1,21 +1,22 @@
+import Container from "@/components/Container";
 import { Link } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text } from "react-native";
 
 const HomeScreen = () => {
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#fff",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-  });
+  const check = process.env.EXPO_PUBLIC_API_URL;
+  console.log(check);
+
   return (
-    <View style={styles.container}>
+    <Container
+      flex={1}
+      bgColor="#fff"
+      alignItems="center"
+      justifyContent="center"
+    >
       <Text>Home</Text>
       <Link href="/signUp">Sign Up</Link>
-    </View>
+    </Container>
   );
 };
 

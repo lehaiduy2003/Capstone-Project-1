@@ -1,4 +1,4 @@
-import Container from "@/components/container";
+import Container from "@/components/Container";
 import Title from "@/components/Title";
 import React from "react";
 
@@ -11,10 +11,16 @@ const HomeScreen = () => {
       justifyContent="flex-start"
       paddingVertical={50}
     >
-      <Title title="Create Account" fontSize={30} fontWeight={"bold"} />
+      <Title
+        title="Create Account"
+        fontSize={30}
+        fontWeight={"bold"}
+        paddingHorizontal={10}
+      />
       <Title
         title="Starting with create your account"
-        fontSize={16}
+        fontSize={14}
+        paddingHorizontal={10}
         fontStyle="italic"
       />
     </Container>
