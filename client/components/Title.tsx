@@ -7,6 +7,8 @@ interface Props {
   fontWeight?: TextStyle["fontWeight"];
   fontStyle?: TextStyle["fontStyle"];
   fontFamily?: string;
+  paddingVertical?: number;
+  paddingHorizontal?: number;
   color?: string;
 }
 
@@ -16,6 +18,8 @@ const Title = ({
   fontWeight = "condensedBold",
   fontFamily = "sans-serif",
   fontStyle = "normal",
+  paddingHorizontal = 0,
+  paddingVertical = 0,
   color = "black",
 }: Props) => {
   return (
@@ -25,6 +29,8 @@ const Title = ({
         fontWeight: fontWeight,
         fontFamily: fontFamily,
         fontStyle: fontStyle,
+        paddingHorizontal: paddingHorizontal,
+        paddingVertical: paddingVertical,
         color: color,
       }}
     >
