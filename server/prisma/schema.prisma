@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
 }
 
 datasource db {
@@ -7,26 +8,132 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-type SalesCustomer {
-  age          Int
-  email        String
-  gender       String
-  satisfaction Int
+type AdministratorsActivities {
+  activity_type String
+  timestamp     DateTime @db.Date
 }
 
-type SalesItems {
-  name     String
-  price    Float
-  quantity Int
-  tags     String[]
+type PaymentsGatewayResponse {
+  response_code    Int
+  response_message String
 }
 
-model sales {
-  id             String        @id @default(auto()) @map("_id") @db.ObjectId
-  couponUsed     Boolean
-  customer       SalesCustomer
-  items          SalesItems[]
-  purchaseMethod String
-  saleDate       DateTime      @db.Date
-  storeLocation  String
+type RecyclingOrganizationsDashboardData {
+  items_recycled Int
+  total_sales    Int
+}
+
+model administrators {
+  id         String                     @id @default(auto()) @map("_id") @db.ObjectId
+  activities AdministratorsActivities[]
+  created_at DateTime                   @db.Date
+  email      String
+  password   String
+  updated_at DateTime                   @db.Date
+  username   String
+}
+
+model oauthTokens {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  access_token  String
+  expires_at    DateTime @db.Date
+  provider      String
+  refresh_token String
+  user_id       String   @db.ObjectId
+}
+
+model payments {
+  id               String                  @id @default(auto()) @map("_id") @db.ObjectId
+  amount           Float
+  gateway_response PaymentsGatewayResponse
+  organization_id  String                  @db.ObjectId
+  payment_date     DateTime                @db.Date
+  payment_method   String
+  payment_status   String
+  transaction_id   String                  @db.ObjectId
+  user_id          String                  @db.ObjectId
+}
+
+model products {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  category    String
+  created_at  DateTime @db.Date
+  description String
+  images      String[]
+  name        String
+  price       Float
+  seller_id   String   @db.ObjectId
+  status      String
+  updated_at  DateTime @db.Date
+}
+
+model recyclingItems {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  contributor_id  String   @db.ObjectId
+  created_at      DateTime @db.Date
+  description     String
+  name            String
+  organization_id String   @db.ObjectId
+  status          String
+  type            String
+  updated_at      DateTime @db.Date
+}
+
+model recyclingOrganizations {
+  id                   String                              @id @default(auto()) @map("_id") @db.ObjectId
+  avatar               String
+  bio                  String
+  created_at           DateTime                            @db.Date
+  dashboard_data       RecyclingOrganizationsDashboardData
+  email                String
+  organization_name    String
+  password             String
+  payments             String[]
+  products_for_sale    String[]
+  recycling_categories String[]
+  transactions         String[]
+  updated_at           DateTime                            @db.Date
+}
+
+model reputationScores {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  date         DateTime @db.Date
+  reason       String
+  score_change Int
+  user_id      String   @db.ObjectId
+}
+
+model transactions {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  amount            Float
+  buyer_id          String   @db.ObjectId
+  date              DateTime @db.Date
+  payment_id        String   @db.ObjectId
+  product_id        String   @db.ObjectId
+  recycling_item_id String   @db.ObjectId
+  seller_id         String   @db.ObjectId
+  status            String
+  transaction_type  String
+}
+
+model users {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  address          String
+  avatar           String
+  bio              String
+  birthDate        DateTime @db.Date
+  created_at       DateTime @db.Date
+  email            String
+  name             String
+  oauth_id         String
+  oauth_provider   String
+  password         String
+  payments         String[]
+  phone_number     String
+  products         String[]
+  recycling_items  String[]
+  reputation_score Float
+  transactions     String[]
+  updated_at       DateTime @db.Date
+  username         String
 }
