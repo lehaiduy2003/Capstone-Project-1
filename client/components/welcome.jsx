@@ -1,10 +1,9 @@
-import { Image, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import ScreenWrapper from '../components/ScreenWrapper'
-import { wp } from '../helpers/common'
-import { hp } from '../helpers/common'
-import { theme } from '../constants/theme'
+import { Image, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
 import Button from '../components/Button'
+import ScreenWrapper from '../components/ScreenWrapper'
+import { theme } from '../constants/theme'
+import { hp, wp } from '../helpers/common'
 //import { router } from 'expo-router'
 import { useRouter } from 'expo-router'
 const Welcome = () => {
@@ -34,6 +33,7 @@ const Welcome = () => {
                             Already have an account?
                         </Text>
                         <Pressable onPress={() => { router.push('login') }}>
+                            {/* <Link style={[styles.loginText, { color: theme.colors.primaryDark, fontWeight: theme.fonts.semibold href="#"/> */}
                             <Text style={[styles.loginText, { color: theme.colors.primaryDark, fontWeight: theme.fonts.semibold }]}>
                                 Login
                             </Text>

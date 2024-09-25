@@ -1,16 +1,15 @@
-import { Alert, Pressable, StatusBar, StyleSheet, Text, TextInput, View, TouchableOpacity } from 'react-native'
-import React, { useRef } from 'react'
-import ScreenWrapper from '../components/ScreenWrapper'
-import { theme } from '../constants/theme'
+import { useRouter } from 'expo-router'
+import React, { useRef, useState } from 'react'
+import { Alert, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
 import Icon from '../assets/icons'
 import BackButton from '../components/BackButton'
-import { useRouter } from 'expo-router'
-import { hp, wp } from '../helpers/common'
-import Input from '../components/Input'
-import { useState } from 'react'
 import Button from '../components/Button'
 import ButtonGoogle from '../components/ButtonGoogle'
+import Input from '../components/Input'
 import InputPass from '../components/InputPass'
+import ScreenWrapper from '../components/ScreenWrapper'
+import { theme } from '../constants/theme'
+import { hp, wp } from '../helpers/common'
 
 
 const Login = () => {
@@ -20,7 +19,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [password, setPassword] = useState('');
 
-    const onSubmit = async () => {
+    const onSubmit = () => {
         if (!emailRef.current || !passwordRef.current) {
             Alert.alert('Login', "Please fill all fields");
             return;
@@ -28,7 +27,7 @@ const Login = () => {
 
         let email = emailRef.current.trim();
         let password = passwordRef.current.trim();
-        setLoading(true);
+        setLoading(false);
         // const { error } = await supabase.auth.signInWithPassword({
         //     email,
         //     password
