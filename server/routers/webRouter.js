@@ -5,7 +5,7 @@ const router = require('./router')
 
 router.get('/', (req, res) => {
   console.log('GET /');
-  getHomepage(req, res)
+  //getHomepage(req, res)
 })
 
 module.exports = router

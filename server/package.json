@@ -4,7 +4,7 @@
   "description": "capstone project 1",
   "BE": "server.js",
   "scripts": {
-    "test": "test",
+    "test": "jest",
     "dev": "nodemon server.js",
     "start": "npx expo start"
   },
@@ -19,14 +19,16 @@
   },
   "homepage": "https://github.com/lehaiduy2003/Capstone-Project-1#readme",
   "dependencies": {
-    "@prisma/client": "^5.19.1",
     "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.9.0",
     "trus": "file:"
   },
   "devDependencies": {
-    "nodemon": "3.1.4",
-    "prisma": "5.19.1"
+    "jest": "^29.7.0",
+    "nodemon": "3.1.4"
   }
 }
