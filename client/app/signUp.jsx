@@ -1,129 +1,114 @@
-import { useRouter } from 'expo-router'
-import React, { useRef, useState } from 'react'
-import { Alert, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
-import Icon from '../assets/icons'
-import BackButton from '../components/BackButton'
-import Button from '../components/Button'
-import ButtonGoogle from '../components/ButtonGoogle'
-import Input from '../components/Input'
-import ScreenWrapper from '../components/ScreenWrapper'
-import { theme } from '../constants/theme'
-import { hp, wp } from '../helpers/common'
+import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import Icon from "../assets/icons";
+import BackButton from "../components/BackButton";
+import Button from "../components/Button";
+import ButtonGoogle from "../components/ButtonGoogle";
+import Input from "../components/Input";
+import ScreenWrapper from "../components/ScreenWrapper";
+import { theme } from "../constants/theme";
+import { hp, wp } from "../helpers/common";
+import useFormAction from "../hooks/useFormAction";
 
 const SignUp = () => {
-    const router = useRouter();
-    const emailRef = useRef("");
-    // const firstnameRef = useRef("");
-    // const lastnameRef = useRef("");
-    const nameRef = useRef("");
-    const passwordRef = useRef("");
-    const [loading, setLoading] = useState(false);
+  const api_url = process.env.EXPO_PUBLIC_API_URL;
+  const { router, nameRef, emailRef, passwordRef, loading, onSubmit } =
+    useFormAction(api_url);
+  return (
+    <ScreenWrapper bg={"white"}>
+      <StatusBar style="dark" />
+      <View style={styles.container}>
+        <BackButton router={router} />
 
-    const onSubmit = () => {
-        if (!emailRef.current || !passwordRef.current) {
-            Alert.alert('Sign Up', "Please fill all fields");
-            return;
-        }
-
-        // let firstname = firstnameRef.current.trim();
-        // let lastname = lastnameRef.current.trim();
-        let name = nameRef.current.trim();
-        let email = emailRef.current.trim();
-        let password = passwordRef.current.trim();
-
-    }
-    return (
-        <ScreenWrapper bg={"white"}>
-            <StatusBar style="dark" />
-            <View style={styles.container}>
-                <BackButton router={router} />
-
-                {/* Welcome */}
-                <View>
-                    <Text style={styles.welcomeText}>Let's</Text>
-                    <Text style={styles.welcomeText}>Get Started</Text>
-                </View>
-                {/* Form */}
-                <View style={styles.form}>
-                    <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
-                        Please fill the details to create an account
-                    </Text>
-                    {/* <Input
+        {/* Welcome */}
+        <View>
+          <Text style={styles.welcomeText}>Let's</Text>
+          <Text style={styles.welcomeText}>Get Started</Text>
+        </View>
+        {/* Form */}
+        <View style={styles.form}>
+          <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
+            Please fill the details to create an account
+          </Text>
+          {/* <Input
                         icon={<Icon name="user" size={26} strokeWidth={1.6} />}
                         placeholder="Enter your first name"
-                        onChangeText={value => firstnameRef.current = value}
+                        onChangeText={value => firstNameRef.current = value}
                     /> */}
-                    <Input
-                        icon={<Icon name="user" size={26} strokeWidth={1.6} />}
-                        placeholder="Enter your name"
-                        onChangeText={value => nameRef.current = value}
-                    />
-                    <Input
-                        icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
-                        placeholder="Enter your email"
-                        onChangeText={value => emailRef.current = value}
-                    />
-                    <Input
-                        icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
-                        placeholder="Enter your password"
-                        secureTextEntry
-                        onChangeText={value => passwordRef.current = value}
-                    />
-                    <Button title="Sign Up" onPress={onSubmit} loading={loading} />
-                    <Text style={styles.footerText}>
-                        Or using other method
-                    </Text>
-                    {/* Google Button */}
-                    <ButtonGoogle icon={<Icon name="google" />} title={'   Sign up with Google'} />
-
-
-
-                </View>
-                {/* Footer */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>
-                        Already have an account?
-                    </Text>
-                    <Pressable onPress={() => router.push('login')}>
-                        <Text style={[styles.footerText, { color: theme.colors.primaryDark, fontWeight: theme.fonts.semibold }]}>Login</Text>
-                    </Pressable>
-                </View>
-
-            </View>
-        </ScreenWrapper>
-    )
-}
-
-export default SignUp
+          <Input
+            icon={<Icon name="user" size={26} strokeWidth={1.6} />}
+            placeholder="Enter your name"
+            onChangeText={(value) => (nameRef.current = value)}
+          />
+          <Input
+            icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
+            placeholder="Enter your email"
+            onChangeText={(value) => (emailRef.current = value)}
+          />
+          <Input
+            icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
+            placeholder="Enter your password"
+            secureTextEntry
+            onChangeText={(value) => (passwordRef.current = value)}
+          />
+          <Button title="Sign Up" onPress={onSubmit} loading={loading} />
+          <Text style={styles.footerText}>Or using other method</Text>
+          {/* Google Button */}
+          {/*style lại nghe, dùng flex - justify-content: space-between đi*/}
+          <ButtonGoogle
+            icon={<Icon name="google" />}
+            title={"   Sign up with Google"}
+          />
+        </View>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Already have an account?</Text>
+          <Pressable onPress={() => router.push("login")}>
+            <Text
+              style={[
+                styles.footerText,
+                {
+                  color: theme.colors.primaryDark,
+                  fontWeight: theme.fonts.semibold,
+                },
+              ]}
+            >
+              Login
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </ScreenWrapper>
+  );
+};
+export default SignUp;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        gap: 45,
-        paddingHorizontal: wp(5),
-    },
-    welcomeText: {
-        fontSize: hp(4),
-        fontWeight: theme.fonts.bold,
-        color: theme.colors.text,
-    },
-    form: {
-        gap: 20,
-    },
-    forgotPassword: {
-        textAlign: 'right',
-        fontWeight: theme.fonts.semibold,
-        color: theme.colors.text,
-    },
-    footer: {
-        textAlign: 'center',
-        color: theme.colors.text,
-        fontSize: hp(1.6),
-    },
-    footerText: {
-        textAlign: 'center',
-        color: theme.colors.text,
-        fontSize: hp(1.6),
-    }
-
-})
+  container: {
+    flex: 1,
+    gap: 45,
+    paddingHorizontal: wp(5),
+  },
+  welcomeText: {
+    fontSize: hp(4),
+    fontWeight: theme.fonts.bold,
+    color: theme.colors.text,
+  },
+  form: {
+    gap: 20,
+  },
+  forgotPassword: {
+    textAlign: "right",
+    fontWeight: theme.fonts.semibold,
+    color: theme.colors.text,
+  },
+  footer: {
+    textAlign: "center",
+    color: theme.colors.text,
+    fontSize: hp(1.6),
+  },
+  footerText: {
+    textAlign: "center",
+    color: theme.colors.text,
+    fontSize: hp(1.6),
+  },
+});
