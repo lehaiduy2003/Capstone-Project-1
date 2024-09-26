@@ -1,5 +1,5 @@
-const { userSignUp, generateTokens, verifyToken, refreshAccessToken } = require('../services/authService');
-const getTokenFromHeaders = require('../utils/authHeader');
+const { userSignUp, generateTokens, verifyToken, refreshAccessToken, modifyToken } = require('../services/authService');
+const { getTokenFromHeaders } = require('../utils/token');
 
 async function signUp(req, res) {
   const { name, email, password } = req.body;
@@ -15,12 +15,15 @@ async function signUp(req, res) {
 
 async function generateNewAccessToken(req, res) {
   const refreshToken = getTokenFromHeaders(req);
+  //console.log(req.user);
+  const accessToken = refreshAccessToken(refreshToken);
+  const result = await modifyToken(req.user.sub, accessToken)
 
-  if (await verifyToken(refreshToken)) {
-    const accessToken = refreshAccessToken(refreshToken);
-    return res.status(200).send({ data: { accessToken } });
+  if (result.modifiedCount !== 0) {
+    return res.status(200).send({ accessToken: accessToken });
   }
-  res.status(401).send({ error: 'Invalid token' });
+  else
+    return res.status(400).send({ error: `can't refresh access token` });
 }
 
 module.exports = { signUp, generateNewAccessToken };

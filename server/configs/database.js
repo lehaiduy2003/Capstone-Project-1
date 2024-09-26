@@ -1,11 +1,10 @@
 // const { MongoClient } = require('mongodb');
+// const client = new MongoClient(process.env.DATABASE_URL);
 
-// let mongoClient
-
-// if (!global.mongoClient) {
-//   global.mongoClient = new MongoClient(process.env.DATABASE_URL);
+// async function getDbConnection() {
+//   const connection = await client.connect();
+//   const database = connection.db('EcoTrade');
+//   return database;
 // }
 
-// mongoClient = global.mongoClient
-
-// module.exports = mongoClient
+// module.exports = { getDbConnection };

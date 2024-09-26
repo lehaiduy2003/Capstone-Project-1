@@ -1,18 +1,28 @@
-const jwt = require('jsonwebtoken');
-const { SECRET_ENCODED } = require('../constants/key');
-const getTokenFromHeaders = require('../utils/authHeader');
 
+const { getTokenFromHeaders } = require('../utils/token');
+const jwt = require('jsonwebtoken');
+
+// Middleware to authenticate the token - check if the token is valid
 function authenticateToken(req, res, next) {
 
   const token = getTokenFromHeaders(req);
 
-  if (token === null || token === undefined) {
-    console.log('token null');
-    return res.sendStatus(401)
-  }
-  console.log('token: ', token);
-  next()
+  if (!token) return res.sendStatus(401);
 
+  jwt.verify(token, process.env.SECRET_KEY, (error, payload) => {
+    if (error || !payload) {
+      console.log(error);
+      return res.sendStatus(403)
+    }
+
+    // Check expire time of the JWT (exp)
+    // compare with milliseconds
+    if (payload.exp && Date.now() > payload.exp) {
+      return res.sendStatus(401)
+    }
+    req.user = payload
+    next()
+  })
 }
 
 module.exports = authenticateToken;

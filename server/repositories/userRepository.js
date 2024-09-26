@@ -14,6 +14,7 @@ async function checkUser(email) {
     return user
   } catch (error) {
     console.error(error)
+    return null
   }
   finally {
     await client.close()
@@ -37,6 +38,7 @@ async function createUser(name, email, password) {
     }
   } catch (error) {
     console.error(error)
+    return null
   }
   finally {
     await client.close()

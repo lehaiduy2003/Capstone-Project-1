@@ -1,32 +1,69 @@
 
-const { MongoClient } = require('mongodb')
+const { MongoClient, ObjectId } = require('mongodb')
+let connection
+const client = new MongoClient(process.env.DATABASE_URL);
+async function tokenCollection() {
+  connection = await client.connect();
+  const database = connection.db('EcoTrade');
+  const collection = database.collection('oauthTokens');
+  return collection;
+}
 
 // Connection URL
-const client = new MongoClient(process.env.DATABASE_URL);
 
 async function saveTokens(userId, accessToken, refreshToken) {
   try {
-    const connection = await client.connect();
-    const database = connection.db('EcoTrade');
-    const collection = database.collection('oauthTokens');
-    await collection.findOneAndUpdate({ userId: userId }, { $set: { accessToken: accessToken, refreshToken: refreshToken } })
+    const collection = await tokenCollection();
+    await collection.insertOne({ user_id: userId, accessToken: accessToken, refreshToken: refreshToken })
+    //const result = await collection.findOne({ user_id: userId })
+    //console.log(result);
     return true
   } catch (error) {
     console.error(error)
     return false
   }
   finally {
-    await client.close()
+    if (connection) {
+      await connection.close();
+    }
   }
+}
+
+async function updateToken(userId, token) {
+  try {
+    //console.log(userId);
+
+    const collection = await tokenCollection();
+    const id = ObjectId.createFromHexString(userId);
+    console.log(id);
+
+    //const oauth = await collection.findOne({ user_id: id })
+    //console.log(oauth);
+
+    const result = await collection.updateOne(
+      { user_id: id },
+      {
+        $set: { accessToken: token },
+      },
+
+    );
+    return result
+  } catch (error) {
+    console.error(error)
+    return null
+  }
+  finally {
+    if (connection) {
+      await connection.close();
+    }
+  }
+
 }
 
 async function findToken(token) {
   try {
-    const connection = await client.connect();
-    const database = connection.db('EcoTrade');
-    const collection = database.collection('oauthTokens');
+    const collection = await tokenCollection();
     const refToken = await collection.findOne({ refreshToken: token })
-    console.log('refreshAccessToken:', refToken.refreshToken);
 
     return refToken.refreshToken
   } catch (error) {
@@ -34,8 +71,11 @@ async function findToken(token) {
     return null
   }
   finally {
-    await client.close()
+    if (connection) {
+      await connection.close();
+    }
   }
 }
 
-module.exports = { saveTokens, findToken }
+module.exports = { saveTokens, findToken, updateToken }
+

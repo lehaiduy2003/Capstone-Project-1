@@ -1,8 +1,9 @@
-const { SECRET_ENCODED } = require("../constants/key");
-const { saveTokens, findToken } = require("../repositories/tokenRepository");
+
+const { saveTokens, findToken, updateToken } = require("../repositories/tokenRepository");
 const { createUser } = require("../repositories/userRepository");
 const jwt = require('jsonwebtoken')
 const { hashPassword } = require("../utils/password");
+const { signToken } = require("../utils/token");
 
 function userSignUp(name, email, password) {
   const hashedPassword = hashPassword(password);
@@ -10,49 +11,48 @@ function userSignUp(name, email, password) {
 }
 
 function generateTokens(user) {
+  console.log(user);
 
   const refreshToken = jwt.sign({
     sub: user._id,
     iat: Date.now(),
     exp: Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
-  }, SECRET_ENCODED, { algorithm: "HS512" }, {
+  }, process.env.SECRET_KEY, { algorithm: "HS512" }, {
     expiresIn: '30d'
   });
 
   const accessToken = jwt.sign({
-    iss: `http://${process.env.HOST}:${process.env.PORT}`,
-    aud: 'EcoTrade',
     sub: user._id,
     iat: Date.now(),
     exp: Date.now() + 24 * 60 * 60 * 1000, // 1 day
+    iss: `http://${process.env.HOSTNAME}:${process.env.PORT}`,
+    aud: 'EcoTrade',
     role: 'customer'
-  }, SECRET_ENCODED, { algorithm: "HS512" }, {
+  }, process.env.SECRET_KEY, { algorithm: "HS512" }, {
     expiresIn: '1d'
   });
 
-  const isSuccess = saveTokens(user.id, accessToken, refreshToken);
+  const isSuccess = saveTokens(user._id, accessToken, refreshToken);
   return isSuccess ? { refreshToken, accessToken } : null;
 }
 
 function refreshAccessToken(refreshToken) {
-  try {
-    const payloadDecoded = jwt.verify(refreshToken, SECRET_ENCODED);
-    const accessToken = jwt.sign({
-      iss: `http://${process.env.HOST}:${process.env.PORT}`,
-      aud: 'EcoTrade',
-      sub: payloadDecoded.sub,
-      iat: Date.now(),
-      exp: Date.now() + 24 * 60 * 60 * 1000, // 1 day
-      role: 'customer'
-    }, SECRET_ENCODED, { algorithm: "HS512" }, {
-      expiresIn: '1d'
-    });
-    const isSuccess = saveTokens(payloadDecoded.sub, accessToken, refreshToken);
-    return isSuccess ? accessToken : null;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
+  const payloadDecoded = jwt.verify(refreshToken, process.env.SECRET_KEY);
+  const accessToken = jwt.sign({
+    sub: payloadDecoded.sub,
+    iat: Date.now(),
+    exp: Date.now() + 24 * 60 * 60 * 1000, // 1 day
+    iss: `http://${process.env.HOSTNAME}:${process.env.PORT}`,
+    aud: 'EcoTrade',
+    role: 'customer'
+  }, process.env.SECRET_KEY, { algorithm: "HS512" }, {
+    expiresIn: '1d'
+  });
+  return accessToken
+}
+
+function modifyToken(userId, token) {
+  return updateToken(userId, token);
 }
 
 function verifyToken(token) {
@@ -61,4 +61,4 @@ function verifyToken(token) {
 }
 
 
-module.exports = { userSignUp, generateTokens, verifyToken, refreshAccessToken };
+module.exports = { userSignUp, generateTokens, verifyToken, refreshAccessToken, modifyToken };
