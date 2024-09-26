@@ -16,8 +16,8 @@ To get started with EcoTrade, follow these steps:
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/lehaiduy2003/TRUS.git
-   cd EcoTrade
+   git clone https://github.com/lehaiduy2003/Capstone-Project-1.git
+   cd Capstone-Project-1
    ```
 
 2. **Install dependencies**:
