@@ -46,6 +46,12 @@ function saveTokensToDb(userId, accessToken, refreshToken) {
   return insertToken(userId, accessToken, refreshToken);
 }
 
+/**
+ *
+ * @param {string} refreshToken - for generating new access token
+ * (decoding the payload of the refresh token to get the user id)
+ * @returns {string} newAccessToken - new access token
+ */
 function refreshAccessToken(refreshToken) {
   const now = Date.now();
   const commonOptions = { algorithm: "HS512" };
