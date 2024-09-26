@@ -8,7 +8,9 @@ const _layout = () => {
         headerShown: false
     }}>
 
-        <Stack.Screen name="index" options={{ headerTitle: false }} />
+        {/* <Stack.Screen name="index" options={{ headerTitle: false }} /> */}
+        <Stack.Screen name="HomePage/homePage" options={{ headerTitle: false }} />
+
 
 
     </Stack>
