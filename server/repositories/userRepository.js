@@ -22,7 +22,7 @@ async function checkUser(email) {
 }
 
 
-async function createUser(name, email, password) {
+async function insertUser(name, email, password) {
   if (await checkUser(email)) {
     console.log('User already exists')
     return null
@@ -45,4 +45,4 @@ async function createUser(name, email, password) {
   }
 }
 
-module.exports = { createUser }
+module.exports = { insertUser }

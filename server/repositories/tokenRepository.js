@@ -11,7 +11,7 @@ async function tokenCollection() {
 
 // Connection URL
 
-async function saveTokens(userId, accessToken, refreshToken) {
+async function insertToken(userId, accessToken, refreshToken) {
   try {
     const collection = await tokenCollection();
     await collection.insertOne({ user_id: userId, accessToken: accessToken, refreshToken: refreshToken })
@@ -35,7 +35,7 @@ async function updateToken(userId, token) {
 
     const collection = await tokenCollection();
     const id = ObjectId.createFromHexString(userId);
-    console.log(id);
+    //console.log(id);
 
     //const oauth = await collection.findOne({ user_id: id })
     //console.log(oauth);
@@ -60,22 +60,22 @@ async function updateToken(userId, token) {
 
 }
 
-async function findToken(token) {
-  try {
-    const collection = await tokenCollection();
-    const refToken = await collection.findOne({ refreshToken: token })
+// async function findToken(token) {
+//   try {
+//     const collection = await tokenCollection();
+//     const refToken = await collection.findOne({ refreshToken: token })
 
-    return refToken.refreshToken
-  } catch (error) {
-    console.error(error)
-    return null
-  }
-  finally {
-    if (connection) {
-      await connection.close();
-    }
-  }
-}
+//     return refToken.refreshToken
+//   } catch (error) {
+//     console.error(error)
+//     return null
+//   }
+//   finally {
+//     if (connection) {
+//       await connection.close();
+//     }
+//   }
+// }
 
-module.exports = { saveTokens, findToken, updateToken }
+module.exports = { insertToken, updateToken }
 
