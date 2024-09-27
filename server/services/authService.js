@@ -1,92 +1,66 @@
-const { insertToken, updateToken } = require("../repositories/tokenRepository");
-const { insertUser } = require("../repositories/userRepository");
-const jwt = require("jsonwebtoken");
+//const { insertToken, updateToken } = require("../repositories/tokenRepository");
+const { insertUser, checkUser } = require("../repositories/userRepository");
+
 const { hashPassword } = require("../utils/password");
+const { generateTokens, refreshToken } = require("../utils/token");
 
-function userSignUp(name, email, password) {
+async function userSignUp(name, email, password) {
   const hashedPassword = hashPassword(password.toString());
-  return insertUser(name, email, hashedPassword);
-}
-
-const SECRET_KEY = process.env.SECRET_KEY;
-const commonOptions = { algorithm: "HS512" };
-
-function generateTokens(user) {
-  //console.log(user);
-
-  const now = Date.now();
-
-  const refreshToken = jwt.sign(
-    {
-      sub: user._id,
-      iat: now,
-      exp: now + 30 * 24 * 60 * 60 * 1000, // 30 days
-    },
-    SECRET_KEY,
-    commonOptions
-  );
-
-  const accessToken = jwt.sign(
-    {
-      sub: user._id,
-      iat: now,
-      exp: now + 24 * 60 * 60 * 1000, // 1 day
-      iss: `http://${process.env.HOSTNAME}:${process.env.PORT}`,
-      aud: "EcoTrade",
-      role: "customer",
-    },
-    SECRET_KEY,
-    commonOptions
-  );
-
-  return { refreshToken, accessToken };
-}
-
-function saveTokensToDb(userId, accessToken, refreshToken) {
-  return insertToken(userId, accessToken, refreshToken);
-}
-
-/**
- *
- * @param {string} refreshToken - for generating new access token
- * (decoding the payload of the refresh token to get the user id)
- * @returns {string} newAccessToken - new access token
- */
-function refreshAccessToken(refreshToken) {
-  const now = Date.now();
-  const commonOptions = { algorithm: "HS512" };
-  const payloadDecoded = jwt.verify(refreshToken, SECRET_KEY); // decode the token to get the information
-  const newAccessToken = jwt.sign(
-    {
-      sub: payloadDecoded.sub,
-      iat: now,
-      exp: now + 24 * 60 * 60 * 1000, // 1 day
-      iss: `http://${process.env.HOSTNAME}:${process.env.PORT}`,
-      aud: "EcoTrade",
-      role: "customer",
-    },
-    SECRET_KEY,
-    commonOptions,
-    {
-      expiresIn: "1d",
+  try {
+    const newUser = await insertUser(name, email, hashedPassword);
+    if (!newUser) {
+      return null;
     }
-  );
-  return newAccessToken;
+    const { refreshToken, accessToken } = generateTokens(newUser);
+    return { newUser, refreshToken, accessToken };
+  } catch (error) {
+    console.error("Error during sign up:", error);
+    throw error;
+  }
 }
 
-function modifyToken(userId, token) {
-  return updateToken(userId, token);
-}
+// function saveTokensToDb(userId, accessToken, refreshToken) {
+//   return insertToken(userId, accessToken, refreshToken);
+// }
+
+// function modifyToken(userId, token) {
+//   return updateToken(userId, token);
+// }
 
 // function verifyToken(token) {
 //   const tokenFound = findToken(token);
 //   return tokenFound
 // }
+function getNewAccessToken(token) {
+  return refreshToken(token);
+}
+
+async function userSignIn(email, password) {
+  try {
+    const user = await checkUser(email); // Sử dụng userRepository
+
+    if (!user) {
+      return null; // User không tồn tại
+    }
+
+    const [salt, hash] = user.password.split(":");
+    const isPasswordValid = verifyPassword(password, salt, hash); // Sử dụng utils/password
+
+    if (!isPasswordValid) {
+      return null; // Mật khẩu không đúng
+    }
+
+    const { refreshToken, accessToken } = generateTokens(user);
+    return { user, refreshToken, accessToken };
+  } catch (error) {
+    console.error("Error during sign in:", error);
+    throw error;
+  }
+}
 
 module.exports = {
   userSignUp,
   generateTokens,
-  refreshAccessToken,
-  modifyToken,
-  saveTokensToDb,
+  getNewAccessToken,
+  userSignIn,
 };
