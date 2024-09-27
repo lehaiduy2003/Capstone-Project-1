@@ -1,5 +1,8 @@
-const { signUp, generateNewAccessToken } =
-  require("../controllers/authController").default;
+const {
+  signUp,
+  generateNewAccessToken,
+  signIn,
+} = require("../controllers/authController");
 const authenticateToken = require("../middlewares/authentication");
 const router = require("./router");
 

@@ -1,7 +1,7 @@
 //const { insertToken, updateToken } = require("../repositories/tokenRepository");
 const { insertUser, checkUser } = require("../repositories/userRepository");
 
-const { hashPassword } = require("../utils/password");
+const { hashPassword, verifyPassword } = require("../utils/password");
 const { generateTokens, refreshToken } = require("../utils/token");
 
 async function userSignUp(name, email, password) {
