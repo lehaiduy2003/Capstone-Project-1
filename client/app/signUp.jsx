@@ -10,7 +10,9 @@ import { hp, wp } from "../helpers/common";
 import useFormAction from "../hooks/useFormAction";
 
 const SignUp = () => {
-  const api_url = process.env.EXPO_PUBLIC_API_URL;
+  const api_url = process.env.EXPO_PUBLIC_API_URL + "/auth/sign-up";
+  //console.log(api_url);
+
   const { router, nameRef, emailRef, passwordRef, loading, onSubmit } =
     useFormAction(api_url);
   return (

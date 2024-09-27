@@ -25,6 +25,8 @@ export async function requestNewAccessToken() {
 }
 
 export async function fetchData(url, body) {
+  //console.log(body);
+
   const response = await fetch(url, {
     method: "POST",
     headers: {

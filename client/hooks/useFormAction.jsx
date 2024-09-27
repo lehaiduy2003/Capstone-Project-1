@@ -26,7 +26,7 @@ const useFormAction = (apiUrl) => {
 
     try {
       setLoading(true);
-      const response = await fetchData(`${apiUrl}/auth/sign-up`, body);
+      const response = await fetchData(`${apiUrl}`, body);
       const data = await response.json();
       //console.log(data);
 
@@ -36,7 +36,7 @@ const useFormAction = (apiUrl) => {
       ]);
 
       console.log("Tokens saved successfully");
-      router.push("homePage");
+      router.push("HomePage/homePage");
     } catch (error) {
       console.error("Error during sign up:", error);
       Alert.alert("Sign Up", "An error occurred. Please try again.");

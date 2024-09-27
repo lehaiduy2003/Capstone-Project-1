@@ -1,11 +1,10 @@
+const { getHomepage } = require("../controllers/homeController");
 
-const { getHomepage } = require('../controllers/homeController')
+const router = require("./router");
 
-const router = require('./router')
+router.get("/", (req, res) => {
+  console.log("GET /");
+  res.send("Hello World");
+});
 
-router.get('/', (req, res) => {
-  console.log('GET /');
-  //getHomepage(req, res)
-})
-
-module.exports = router
+module.exports = router;
