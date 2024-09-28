@@ -50,4 +50,4 @@ async function insertUser(name, email, password) {
   }
 }
 
-module.exports = { insertUser };
+module.exports = { insertUser, checkUser };
