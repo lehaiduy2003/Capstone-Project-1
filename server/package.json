@@ -12,6 +12,9 @@
     "type": "git",
     "url": "git+https://github.com/lehaiduy2003/Capstone-Project-1.git"
   },
+  "jest": {
+    "setupFiles": ["<rootDir>/jest.setup.js"]
+  },
   "author": "c1se.43",
   "license": "ISC",
   "bugs": {

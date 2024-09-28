@@ -60,7 +60,6 @@ async function userSignIn(email, password) {
 
 module.exports = {
   userSignUp,
-  generateTokens,
   getNewAccessToken,
   userSignIn,
 };
