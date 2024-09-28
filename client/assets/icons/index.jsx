@@ -25,6 +25,8 @@ import Video from './Video';
 import ViewOn from './ViewOn';
 import ViewOff from './ViewOff';
 import Cart from './Cart';
+import Filter from './Filter';
+import HeartCheck from './HeartCheck';
 
 const icons = {
   home: Home,
@@ -50,7 +52,9 @@ const icons = {
   video: Video,
   viewon: ViewOn,
   viewoff: ViewOff,
-  cart: Cart
+  cart: Cart,
+  filter: Filter,
+  heartCheck: HeartCheck
 }
 
 const Icon = ({ name, ...props }) => {
