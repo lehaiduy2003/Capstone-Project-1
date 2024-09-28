@@ -23,6 +23,7 @@ export default Input
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         height: hp(7.2),
@@ -33,6 +34,7 @@ const styles = StyleSheet.create({
         borderCurve: 'continuous',
         paddingHorizontal: 18,
         gap: 12,
-        backgroundColor: '#F4F6F8'
+        backgroundColor: '#F4F6F8',
+        marginRight: 10,
     }
 })

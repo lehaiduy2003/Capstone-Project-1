@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stack } from 'expo-router';
+import { Stack, Tabs } from 'expo-router';
 
 
 const _layout = () => {
@@ -8,9 +8,12 @@ const _layout = () => {
         headerShown: false
     }}>
 
-        {/* <Stack.Screen name="index" options={{ headerTitle: false }} /> */}
-        <Stack.Screen name="HomePage/homePage" options={{ headerTitle: false }} />
+        <Stack.Screen name="welcome" options={{ headerTitle: false }} />
+        {/* <Stack.Screen name="HomePage/homePage" options={{ headerTitle: false }} /> */}
 
+        {/* <Tabs>
+            <Tabs.Screen name="index" options={{ title: "Home" }} />
+        </Tabs> */}
 
 
     </Stack>

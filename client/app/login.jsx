@@ -24,7 +24,7 @@ const Login = () => {
             Alert.alert('Login', "Please fill all fields");
             return;
         } else {
-            router.push('homePage');
+            router.push('../(tabs)/homePage');
         }
 
         let email = emailRef.current.trim();
@@ -65,7 +65,7 @@ const Login = () => {
                         Forgot Password?
                     </Text>
                     {/* Button */}
-                    <Button title={'Login'} loading={loading} onPress={() => router.push('HomePage/homePage')} />
+                    <Button title={'Login'} loading={loading} onPress={() => router.push('../(tabs)/homePage')} />
                     <Text style={styles.footerText}>
                         Or using other method
                     </Text>
