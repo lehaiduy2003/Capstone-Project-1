@@ -8,13 +8,49 @@ import ScreenWrapper from "../components/ScreenWrapper";
 import { theme } from "../constants/theme";
 import { hp, wp } from "../helpers/common";
 import useFormAction from "../hooks/useFormAction";
+import { useState } from "react";
+import InputPass from "../components/InputPass";
+import { emailIsValid, passwordMatches } from "../utils/inputValidation";
 
 const SignUp = () => {
   const api_url = process.env.EXPO_PUBLIC_API_URL + "/auth/sign-up";
   //console.log(api_url);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false);
 
-  const { router, nameRef, emailRef, passwordRef, loading, onSubmit } =
-    useFormAction(api_url);
+  const { router, loading, onSubmit } = useFormAction(
+    api_url,
+    email,
+    password,
+    confirmPassword
+  );
+
+  const onChangeEmail = (value) => {
+    setEmail(value);
+    emailIsValid(value) ? setEmailError(false) : setEmailError(true);
+    //console.log(emailError);
+  };
+
+  const onChangePassword = (value) => {
+    setPassword(value);
+    if (confirmPassword) {
+      passwordMatches(value, confirmPassword)
+        ? setConfirmPasswordError(false)
+        : setConfirmPasswordError(true);
+    }
+  };
+
+  const onChangeConfirmPassword = (value) => {
+    setConfirmPassword(value);
+    passwordMatches(password, value)
+      ? setConfirmPasswordError(false)
+      : setConfirmPasswordError(true);
+    console.log(confirmPasswordError);
+  };
+
   return (
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
@@ -31,31 +67,27 @@ const SignUp = () => {
           <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
             Please fill the details to create an account
           </Text>
-          {/* <Input
-                        icon={<Icon name="user" size={26} strokeWidth={1.6} />}
-                        placeholder="Enter your first name"
-                        onChangeText={value => firstNameRef.current = value}
-                    /> */}
-          <Input
-            icon={<Icon name="user" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your name"
-            onChangeText={(value) => (nameRef.current = value)}
-          />
           <Input
             icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
             placeholder="Enter your email"
-            onChangeText={(value) => (emailRef.current = value)}
+            onChangeText={onChangeEmail}
+            emailStatus={emailError}
           />
-          <Input
+          <InputPass
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
+            iconRight={<Icon name="viewOn" size={26} strokeWidth={1.6} />}
             placeholder="Enter your password"
-            secureTextEntry
-            onChangeText={(value) => (passwordRef.current = value)}
+            onChangeText={onChangePassword}
+          />
+          <InputPass
+            icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
+            iconRight={<Icon name="viewOn" size={26} strokeWidth={1.6} />}
+            placeholder="Confirm your password"
+            onChangeText={onChangeConfirmPassword}
           />
           <Button title="Sign Up" onPress={onSubmit} loading={loading} />
           <Text style={styles.footerText}>Or using other method</Text>
           {/* Google Button */}
-          {/*style lại nghe, dùng flex - justify-content: space-between đi*/}
           <ButtonGoogle
             icon={<Icon name="google" />}
             title={"   Sign up with Google"}
@@ -97,11 +129,6 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 20,
-  },
-  forgotPassword: {
-    textAlign: "right",
-    fontWeight: theme.fonts.semibold,
-    color: theme.colors.text,
   },
   footer: {
     textAlign: "center",

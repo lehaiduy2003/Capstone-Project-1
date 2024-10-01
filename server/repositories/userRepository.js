@@ -13,7 +13,7 @@ async function checkUser(email) {
   }
 }
 
-async function insertUser(name, email, password) {
+async function insertUser(email, password) {
   if (await checkUser(email)) {
     console.log("User already exists");
     return null;
@@ -21,7 +21,6 @@ async function insertUser(name, email, password) {
   try {
     const collection = await connectDb("users");
     const user = await collection.insertOne({
-      name: name,
       email: email,
       password: password,
     });

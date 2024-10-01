@@ -4,10 +4,10 @@ const { insertUser, checkUser } = require("../repositories/userRepository");
 const { hashPassword, verifyPassword } = require("../utils/password");
 const { generateTokens, refreshToken } = require("../utils/token");
 
-async function userSignUp(name, email, password) {
-  const hashedPassword = hashPassword(password.toString());
+async function userSignUp(email, password) {
+  const hashedPassword = hashPassword(password);
   try {
-    const newUser = await insertUser(name, email, hashedPassword);
+    const newUser = await insertUser(email, hashedPassword);
     if (!newUser) {
       return null;
     }

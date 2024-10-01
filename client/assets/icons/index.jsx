@@ -1,32 +1,32 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import Home from './Home';
-import Mail from './Mail';
-import Lock from './Lock';
-import User from './User';
-import Heart from './Heart';
-import Plus from './Plus';
-import Search from './Search';
-import Location from './Location';
-import Call from './Call';
-import { theme } from '../../constants/theme';
-import Camera from './Camera';
-import Edit from './Edit';
-import ArrowLeft from './ArrowLeft';
-import ThreeDotsCircle from './ThreeDotsCircle';
-import ThreeDotsHorizontal from './ThreeDotsHorizontal';
-import Comment from './Comment';
-import Share from './Share';
-import Send from './Send';
-import Delete from './Delete';
-import Logout from './logout';
-import Image from './Image';
-import Video from './Video';
-import ViewOn from './ViewOn';
-import ViewOff from './ViewOff';
-import Cart from './Cart';
-import Filter from './Filter';
-import HeartCheck from './HeartCheck';
+import { View, Text } from "react-native";
+import React from "react";
+import Home from "./Home";
+import Mail from "./Mail";
+import Lock from "./Lock";
+import User from "./User";
+import Heart from "./Heart";
+import Plus from "./Plus";
+import Search from "./Search";
+import Location from "./Location";
+import Call from "./Call";
+import { theme } from "../../constants/theme";
+import Camera from "./Camera";
+import Edit from "./Edit";
+import ArrowLeft from "./ArrowLeft";
+import ThreeDotsCircle from "./ThreeDotsCircle";
+import ThreeDotsHorizontal from "./ThreeDotsHorizontal";
+import Comment from "./Comment";
+import Share from "./Share";
+import Send from "./Send";
+import Delete from "./Delete";
+import Logout from "./logout";
+import Image from "./Image";
+import Video from "./Video";
+import ViewOn from "./ViewOn";
+import ViewOff from "./ViewOff";
+import Cart from "./Cart";
+import Filter from "./Filter";
+import HeartCheck from "./HeartCheck";
 
 const icons = {
   home: Home,
@@ -50,12 +50,12 @@ const icons = {
   logout: Logout,
   image: Image,
   video: Video,
-  viewon: ViewOn,
-  viewoff: ViewOff,
+  viewOn: ViewOn,
+  viewOff: ViewOff,
   cart: Cart,
   filter: Filter,
-  heartCheck: HeartCheck
-}
+  heartCheck: HeartCheck,
+};
 
 const Icon = ({ name, ...props }) => {
   const IconComponent = icons[name];
@@ -67,7 +67,7 @@ const Icon = ({ name, ...props }) => {
       color={theme.colors.textLight}
       {...props}
     />
-  )
-}
+  );
+};
 
 export default Icon;

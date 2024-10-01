@@ -6,13 +6,15 @@ const {
 const { getTokenFromHeaders } = require("../utils/token");
 
 async function signUp(req, res) {
-  const { name, email, password } = req.body;
+  const { email, password } = req.body;
   // Validate input data
-  if (!name || !email || !password) {
+  if (!email || !password) {
     return res.status(400).send({ error: "Invalid input data" });
   }
   try {
-    const result = await userSignUp(name, email, password);
+    const result = await userSignUp(email, password);
+    //console.log(result);
+
     if (!result) {
       return res.status(409).send({ error: "User already exists" });
     }
