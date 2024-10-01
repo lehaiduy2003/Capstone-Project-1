@@ -1,26 +1,15 @@
-// or as an es module:
-const { MongoClient } = require("mongodb");
-let connection;
-const client = new MongoClient(process.env.DATABASE_URL);
-async function userCollection() {
-  connection = await client.connect();
-  const database = connection.db("EcoTrade");
-  const collection = database.collection("users");
-  return collection;
-}
+const { connection, closeConnection } = require("../configs/database");
 
 async function checkUser(email) {
   try {
-    const collection = await userCollection();
+    const collection = await connection("users");
     const user = await collection.findOne({ email: email });
     return user;
   } catch (error) {
     console.error(error);
     return null;
   } finally {
-    if (connection) {
-      await connection.close();
-    }
+    await closeConnection();
   }
 }
 
@@ -30,7 +19,7 @@ async function insertUser(name, email, password) {
     return null;
   }
   try {
-    const collection = await userCollection();
+    const collection = await connection("users");
     const user = await collection.insertOne({
       name: name,
       email: email,
@@ -44,9 +33,7 @@ async function insertUser(name, email, password) {
     console.error(error);
     return null;
   } finally {
-    if (connection) {
-      await connection.close();
-    }
+    await closeConnection();
   }
 }
 

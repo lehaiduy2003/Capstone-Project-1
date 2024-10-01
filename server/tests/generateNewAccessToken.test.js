@@ -1,6 +1,6 @@
-require("dotenv").config({ path: ".env.test" });
+// server/controllers/authController.test.js
 const { generateNewAccessToken } = require("../controllers/authController");
-const { refreshAccessToken, modifyToken } = require("../services/authService");
+const { getNewAccessToken } = require("../services/authService");
 const { getTokenFromHeaders } = require("../utils/token");
 
 jest.mock("../services/authService");
@@ -21,39 +21,35 @@ describe("generateNewAccessToken controller", () => {
     res = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn(),
+      sendStatus: jest.fn(),
     };
   });
 
-  test("should return 200 and new access token if refresh is successful", async () => {
-    getTokenFromHeaders.mockReturnValue("refreshToken");
-    refreshAccessToken.mockReturnValue("newAccessToken");
-    modifyToken.mockResolvedValue({ modifiedCount: 1 });
+  test("should return 400 if refresh token is invalid", () => {
+    getTokenFromHeaders.mockReturnValue(null);
 
-    await generateNewAccessToken(req, res);
+    generateNewAccessToken(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith({ error: "Invalid refresh token" });
+  });
+
+  test("should return 200 and new access token if refresh is successful", () => {
+    getTokenFromHeaders.mockReturnValue("refreshToken");
+    getNewAccessToken.mockReturnValue("newAccessToken");
+
+    generateNewAccessToken(req, res);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({ accessToken: "newAccessToken" });
   });
 
-  test("should return 400 if refresh token is invalid", async () => {
-    getTokenFromHeaders.mockReturnValue("invalidRefreshToken");
-    refreshAccessToken.mockReturnValue(null);
-    modifyToken.mockResolvedValue({ modifiedCount: 0 });
-
-    await generateNewAccessToken(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.send).toHaveBeenCalledWith({
-      error: "Can't refresh access token",
+  test("should return 500 if an internal server error occurs", () => {
+    getTokenFromHeaders.mockImplementation(() => {
+      throw new Error("Internal server error");
     });
-  });
 
-  test("should return 500 if modifyToken throws an error", async () => {
-    getTokenFromHeaders.mockReturnValue("refreshToken");
-    refreshAccessToken.mockReturnValue("newAccessToken");
-    modifyToken.mockRejectedValue(new Error("Database error"));
-
-    await generateNewAccessToken(req, res);
+    generateNewAccessToken(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({ error: "Internal server error" });

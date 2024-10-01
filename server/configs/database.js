@@ -1,10 +1,23 @@
-// const { MongoClient } = require('mongodb');
-// const client = new MongoClient(process.env.DATABASE_URL);
+const { MongoClient } = require("mongodb");
+const client = new MongoClient(process.env.DATABASE_URL);
+let conn;
+async function connection(collectionName) {
+  if (process.env.NODE_ENV === "test") {
+    return {
+      findOne: jest.fn(),
+      insertOne: jest.fn(),
+    };
+  }
+  conn = await client.connect();
+  const database = conn.db("EcoTrade");
+  const collection = database.collection(collectionName);
+  return collection;
+}
 
-// async function getDbConnection() {
-//   const connection = await client.connect();
-//   const database = connection.db('EcoTrade');
-//   return database;
-// }
+async function closeConnection() {
+  if (conn) {
+    await conn.close();
+  }
+}
 
-// module.exports = { getDbConnection };
+module.exports = { connection, closeConnection };
