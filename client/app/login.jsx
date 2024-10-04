@@ -17,25 +17,14 @@ import InputPass from "../components/InputPass";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { theme } from "../constants/theme";
 import { hp, wp } from "../helpers/common";
+import useSignIn from "../hooks/useSignIn"; //  add this line
 
 const Login = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const loading = false;
-  const onSubmit = () => {
-    // if (!emailRef.current || !passwordRef.current) {
-    //   Alert.alert("Login", "Please fill all fields");
-    //   return;
-    // } else {
-    //   router.push("../(tabs)/homePage");
-    // }
+  const { emailRef, passwordRef, loading, onSubmit } = useSignIn();
 
-    // let email = emailRef.current.trim();
-    // let password = passwordRef.current.trim();
-    // setLoading(false);
-    console.log(password);
-  };
+  const [password, setPassword] = useState("");
+
   return (
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
@@ -55,23 +44,32 @@ const Login = () => {
           <Input
             icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
             placeholder="Enter your email"
-            onChangeText={(value) => setEmail(value)}
+            onChangeText={(value) => (emailRef.current = value)}
           />
           <InputPass
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
-            iconRight={<Icon name="viewOn" size={26} strokeWidth={1.6} />}
             placeholder="Enter your password"
-            onChangeText={(value) => setPassword(value)}
+            password={password}
+            setPassword={setPassword}
+            onChangeText={(value) => {
+              setPassword(value);
+              passwordRef.current = value;
+            }}
           />
+          {/* <Input
+            icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
+            placeholder="Enter your password"
+            secureTextEntry
+            onChangeText={(value) => (passwordRef.current = value)}
+          /> */}
 
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
           {/* Button */}
           <Button
             title={"Login"}
             loading={loading}
-            onPress={() => {
-              router.push("../(tabs)/homePage");
-            }}
+            // onPress={() => router.push("../(tabs)/homePage")}
+            onPress={onSubmit}
           />
           <Text style={styles.footerText}>Or using other method</Text>
           {/* Google Button */}

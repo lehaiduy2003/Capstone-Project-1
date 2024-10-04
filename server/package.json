@@ -4,6 +4,7 @@
   "BE": "server.js",
   "scripts": {
     "test": "jest",
+    "ngrok": "ngrok http --domain=factually-selected-vervet.ngrok-free.app 3000",
     "dev": "nodemon server.js",
     "start": "npx expo start",
     "ngrok": "ngrok http --domain=patient-mosquito-infinitely.ngrok-free.app 3000"
@@ -13,7 +14,9 @@
     "url": "git+https://github.com/lehaiduy2003/Capstone-Project-1.git"
   },
   "jest": {
-    "setupFiles": ["<rootDir>/jest.setup.js"]
+    "setupFiles": [
+      "<rootDir>/jest.setup.js"
+    ]
   },
   "author": "c1se.43",
   "license": "ISC",
@@ -27,7 +30,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.9.0"
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.0",
+    "trus": "file:"
   },
   "devDependencies": {
     "jest": "^29.7.0",
