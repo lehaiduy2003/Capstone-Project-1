@@ -27,11 +27,13 @@ const useSignIn = () => {
       email: email,
       password: password,
     };
+    console.log(body);
 
     try {
       setLoading(true);
       const response = await fetchData(
         `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-in`,
+        null,
         body
       );
       // Xử lý phản hồi từ server
@@ -43,7 +45,7 @@ const useSignIn = () => {
           save("refreshToken", data.refreshToken),
         ]);
         console.log("Tokens saved successfully");
-        router.push("HomePage/homePage");
+        router.push("(tabs)/homePage");
       } else {
         if (response.status === 401) {
           const errorData = await response.json();

@@ -14,7 +14,7 @@ import { emailIsValid, passwordMatches } from "../utils/inputValidation";
 
 const SignUp = () => {
   const api_url = process.env.EXPO_PUBLIC_API_URL + "/auth/sign-up";
-  //console.log(api_url);
+  console.log(api_url);
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [password, setPassword] = useState("");

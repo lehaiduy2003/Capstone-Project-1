@@ -25,11 +25,11 @@ const useFormAction = (apiUrl, email, password, confirmPassword) => {
       email: email,
       password: confirmPassword,
     };
-    //console.log(body);
+    console.log(body);
 
     try {
       setLoading(true);
-      const response = await fetchData(`${apiUrl}`, body);
+      const response = await fetchData(`${apiUrl}`, null, body);
       //console.log(response);
       const data = await response.json();
       if (!response.ok) {
