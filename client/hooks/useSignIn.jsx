@@ -37,7 +37,7 @@ const useSignIn = () => {
       // Xử lý phản hồi từ server
       if (response.ok) {
         const data = await response.json();
-        // Lưu trữ token (accessToken, refreshToken)
+        // Storage token (accessToken, refreshToken)
         await Promise.all([
           save("accessToken", data.accessToken),
           save("refreshToken", data.refreshToken),
@@ -45,9 +45,7 @@ const useSignIn = () => {
         console.log("Tokens saved successfully");
         router.push("HomePage/homePage");
       } else {
-        // Xử lý lỗi khi đăng nhập thất bại (ví dụ: sai email, mật khẩu)
         if (response.status === 401) {
-          // Kiểm tra mã trạng thái 401 (Unauthorized)
           const errorData = await response.json();
           Alert.alert(
             "Sign In Error",

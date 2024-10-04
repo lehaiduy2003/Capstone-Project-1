@@ -1,15 +1,20 @@
-const prisma = require('../prisma/db')
+// const prisma = require("../prisma/db");
+const Product = require("../models/product");
 
-async function getSalesCollection() {
-  // try {
-  //   const sales = await prisma.sales.findMany({
-  //     take: 2,
-  //   })
-  //   console.log(sales)
-  //   return sales
-  // } catch (error) {
-  //   console.error(error)
-  // }
+async function getLatestProducts(limit = 5) {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 }).limit(limit);
+    return products;
+  } catch (error) {
+    console.error("Error getting latest products:", error);
+    throw error;
+  }
+  // // test
+  // const explainResult = await Product.find()
+  //   .sort({ createdAt: -1 })
+  //   .limit(limit)
+  //   .explain();
+  // console.log(explainResult);
 }
 
-module.exports = { getSalesCollection }
+module.exports = { getLatestProducts };
