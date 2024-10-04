@@ -12,11 +12,11 @@ const useSignIn = () => {
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async () => {
-    // Lấy giá trị từ các ref
+    // Get values ​​from refs
     const email = emailRef.current.trim();
     const password = passwordRef.current.trim();
 
-    // Kiểm tra xem email và mật khẩu đã được nhập hay chưa
+    // Check if email and password
     console.log(passwordRef.current);
     if (!email || !password) {
       Alert.alert("Sign In", "Please fill all fields");
