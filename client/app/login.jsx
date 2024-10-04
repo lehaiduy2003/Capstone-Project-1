@@ -22,7 +22,7 @@ const Login = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const loading = false;
   const onSubmit = () => {
     // if (!emailRef.current || !passwordRef.current) {
     //   Alert.alert("Login", "Please fill all fields");
@@ -66,7 +66,13 @@ const Login = () => {
 
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
           {/* Button */}
-          <Button title={"Login"} loading={loading} onPress={onSubmit} />
+          <Button
+            title={"Login"}
+            loading={loading}
+            onPress={() => {
+              router.push("../(tabs)/homePage");
+            }}
+          />
           <Text style={styles.footerText}>Or using other method</Text>
           {/* Google Button */}
           <ButtonGoogle

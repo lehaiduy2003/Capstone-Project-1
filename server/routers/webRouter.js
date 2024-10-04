@@ -1,11 +1,11 @@
-const { getHomepage } = require("../controllers/homeController");
+const { getHomepage } = require("../controllers/productController");
 const authenticateToken = require("../middlewares/authentication");
 
 const router = require("./router");
 
 router.get("/", authenticateToken, (req, res) => {
   console.log("GET /");
-  res.send("Hello World");
+  getHomepage(req, res);
 });
 
 module.exports = router;

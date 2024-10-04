@@ -24,55 +24,16 @@ export async function requestNewAccessToken() {
   }
 }
 
-export async function fetchData(url, body) {
+export async function fetchData(url, token, body) {
   //console.log(body);
 
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      authorization: token ? `Bearer ${token}` : null,
     },
     body: JSON.stringify(body),
   });
   return response;
 }
-
-// export async function fetchApi(url, body) {
-//   let accessToken = await getValueFor("accessToken");
-
-//   const makeRequest = async (token) => {
-//     const response = await fetch(url, {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         authorization: `Bearer ${token}`,
-//       },
-//       body: JSON.stringify(body),
-//     });
-//     return response;
-//   };
-
-//   try {
-//     let response = await makeRequest(accessToken);
-
-//     // If access token is expired, request a new one
-//     if (response.status === 401) {
-//       const refreshToken = await getValueFor("refreshToken");
-//       const newAccessToken = await requestNewAccessToken(refreshToken);
-
-//       // If refresh token is expired, throw an error
-//       if (!newAccessToken) {
-//         throw new Error("Unauthorized");
-//       }
-
-//       accessToken = newAccessToken;
-//       response = await makeRequest(accessToken);
-//     }
-
-//     const json = await response.json();
-//     return json;
-//   } catch (error) {
-//     console.error("Error fetching API:", error);
-//     throw new Error(error.message || "An error occurred");
-//   }
-// }
