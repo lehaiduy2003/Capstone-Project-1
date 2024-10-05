@@ -21,4 +21,10 @@ router.post("/sign-in", (req, res) => {
   signIn(req, res); // Gọi controller signIn để xử lý req
 });
 
+// router.post("/sign-out", authenticateToken, (req, res) => {
+//   // Xử lý signOut ở phía server (ví dụ: lưu token vào blacklist)
+//   // ...
+//   res.sendStatus(200);
+// });
+
 module.exports = router;
