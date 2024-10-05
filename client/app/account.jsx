@@ -13,7 +13,7 @@ const account = () => {
       await deleteValueFor("accessToken");
       await deleteValueFor("refreshToken");
       console.log("Signed out successfully!");
-      router.push("welcome"); // Thay 'login' bằng route của màn hình đăng nhập
+      router.push("welcome");
     } catch (error) {
       console.error("Error signing out:", error);
     }
