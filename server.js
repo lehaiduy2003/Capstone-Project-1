@@ -8,7 +8,7 @@ const homeRouter = require("./routers/homeRouter");
 const mongoose = require("mongoose");
 
 const port = process.env.PORT;
-const host = process.env.HOSTNAME;
+const host = process.env.HOST;
 
 //config req.body
 // app.use(express.json()) //for json
@@ -31,9 +31,8 @@ app.use("/", webRouter);
 app.use("/auth", authRouter);
 app.use("/api", homeRouter); // Khai báo router cho homepage
 
-const DATABASE_URL =
-  "mongodb+srv://cap1:wCENzBax5N2h0Y49@cluster0.lpiqm.mongodb.net/EcoTrade?retryWrites=true&w=majority"; // Thay bằng URL của bạn
-mongoose.connect(DATABASE_URL, { serverSelectionTimeoutMS: 30000 }); // Timeout 30 giây
+const dbURL = process.env.DATABASE_URL; // Thay bằng URL của bạn
+mongoose.connect(dbURL, { serverSelectionTimeoutMS: 30000 }); // Timeout 30 giây
 
 app.listen(port, host, () => {
   console.log(`app listening on hostname ${host} and port ${port}`);
