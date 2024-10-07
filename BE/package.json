@@ -1,7 +1,6 @@
 {
   "version": "1.0.0",
   "description": "capstone project 1",
-  "BE": "server.js",
   "scripts": {
     "test": "jest",
     "dev": "nodemon server.local.js",
@@ -23,17 +22,16 @@
   },
   "homepage": "https://github.com/lehaiduy2003/Capstone-Project-1#readme",
   "dependencies": {
-    "cors": "^2.8.5",
-    "crypto-js": "^4.2.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.9.0",
-    "mongoose": "^8.7.0",
-    "trus": "file:"
+    "cors": "2.8.5",
+    "crypto-js": "4.2.0",
+    "dotenv": "16.4.5",
+    "express": "4.21.0",
+    "jsonwebtoken": "9.0.2",
+    "mongodb": "6.9.0",
+    "mongoose": "8.7.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
+    "jest": "29.7.0",
     "nodemon": "3.1.4"
   }
 }
