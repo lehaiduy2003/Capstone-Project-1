@@ -32,7 +32,7 @@ const useSignIn = () => {
     try {
       setLoading(true);
       const response = await fetchData(
-        `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-in`,
+        `${process.env.EXPO_PUBLIC_API_URL}auth/sign-in`,
         null,
         body
       );
