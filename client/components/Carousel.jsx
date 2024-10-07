@@ -30,10 +30,10 @@ const Carousel = () => {
     // Display Images
     const renderItem = ({ item, index }) => {
         return (
-            <View>
+            <Carousel>
                 <Image source={item.image}
                     style={{ width: screenWidth, height: 200 }} />
-            </View>
+            </Carousel>
         )
     };
     return (

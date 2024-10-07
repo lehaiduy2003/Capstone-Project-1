@@ -1,5 +1,4 @@
 {
-  "name": "trus",
   "version": "1.0.0",
   "description": "capstone project 1",
   "BE": "server.js",
@@ -30,6 +29,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.9.0",
+    "mongoose": "^8.7.0",
     "trus": "file:"
   },
   "devDependencies": {

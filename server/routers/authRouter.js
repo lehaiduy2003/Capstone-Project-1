@@ -7,7 +7,7 @@ const authenticateToken = require("../middlewares/authentication");
 const router = require("./router");
 
 router.post("/sign-up", (req, res) => {
-  console.log("POST /sign-up");
+  console.log("POST /auth/sign-up");
   signUp(req, res);
 });
 
@@ -17,8 +17,14 @@ router.post("/refresh-Access-Token", authenticateToken, (req, res) => {
 });
 
 router.post("/sign-in", (req, res) => {
-  console.log("POST /sign-in");
+  console.log("POST /auth/sign-in");
   signIn(req, res); // Gọi controller signIn để xử lý req
 });
+
+// router.post("/sign-out", authenticateToken, (req, res) => {
+//   // Xử lý signOut ở phía server (ví dụ: lưu token vào blacklist)
+//   // ...
+//   res.sendStatus(200);
+// });
 
 module.exports = router;
