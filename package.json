@@ -4,8 +4,8 @@
   "BE": "server.js",
   "scripts": {
     "test": "jest",
-    "dev": "nodemon server.js",
-    "start": "npx expo start"
+    "dev": "nodemon --inspect server.js",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
