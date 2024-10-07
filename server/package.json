@@ -4,10 +4,8 @@
   "BE": "server.js",
   "scripts": {
     "test": "jest",
-    "ngrok": "ngrok http --domain=factually-selected-vervet.ngrok-free.app 3000",
     "dev": "nodemon server.js",
-    "start": "npx expo start",
-    "ngrok": "ngrok http --domain=patient-mosquito-infinitely.ngrok-free.app 3000"
+    "start": "npx expo start"
   },
   "repository": {
     "type": "git",
