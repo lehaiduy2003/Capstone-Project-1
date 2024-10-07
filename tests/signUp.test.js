@@ -1,5 +1,4 @@
 // server/controllers/authController.test.js
-require("dotenv").config({ path: "../.env.test" });
 const { signUp } = require("../controllers/authController");
 const { userSignUp } = require("../services/authService");
 
