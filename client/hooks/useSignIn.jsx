@@ -1,4 +1,3 @@
-// client/hooks/useSignIn.jsx
 import { useState, useRef } from "react";
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";

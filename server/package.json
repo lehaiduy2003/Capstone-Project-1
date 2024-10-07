@@ -5,6 +5,7 @@
   "scripts": {
     "test": "jest",
     "dev": "nodemon server.js",
+    "ngrok": "ngrok http --domain=factually-selected-vervet.ngrok-free.app 3000",
     "start": "npx expo start"
   },
   "repository": {
