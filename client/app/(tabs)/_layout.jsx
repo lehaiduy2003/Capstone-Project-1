@@ -11,7 +11,7 @@ const _layoutNavigation = () => {
         <Tabs.Screen name='orders' options={{ headerShown: false, title: 'Orders' }} />
         <Tabs.Screen name='homePage' options={{ headerShown: false, title: 'Home' }} />
         <Tabs.Screen name='wallet' options={{ headerShown: false, title: 'Wallet' }} />
-        <Tabs.Screen name='account' options={{ headerShown: false, title: 'Account' }} />
+        <Tabs.Screen name='profile' options={{ headerShown: false, title: 'Profile' }} />
 
     </Tabs>
 

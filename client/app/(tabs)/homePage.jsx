@@ -1,19 +1,42 @@
-import { View, Text, StyleSheet, StatusBar, Pressable, FlatList, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import { View, Image, Text, StyleSheet, StatusBar, Pressable, FlatList, TouchableOpacity } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import ScreenWrapper from '../../components/ScreenWrapper'
 import { hp, wp } from '../../helpers/common'
 import { theme } from '../../constants/theme'
 import Icon from '../../assets/icons'
 import Search from '../../components/Search'
+import ArtDesign from 'react-native-vector-icons/AntDesign'
 import Carousel from '../../components/Carousel'
-import ProductCard from '../../components/ProductCard'
+//import ProductCard from '../../components/ProductCard'
+import { getValueFor } from '../../utils/secureStore'
+import { router } from 'expo-router'
 
 
 
 const homePage = () => {
     const [selectedId, setSelectedId] = useState();
     const nameRef = React.useRef('');
-    const [isLiked, setIsLiked] = useState(false)
+    // useEffect(() => {
+    //     const fetchProducts = async () => {
+    //         const accessToken = await getValueFor('accessToken');
+    //         console.log(accessToken);
+
+    //         const response = await fetch('https://patient-mosquito-infinitely.ngrok-free.app/', {
+    //             method: 'GET',
+    //             headers: {
+    //                 contentType: 'application/json',
+    //                 authorization: `Bearer ${accessToken}`
+    //             },
+    //         });
+    //         const data = await response.json();
+    //         console.log(data.products);
+    //         return data;
+    //     }
+    //     fetchProducts()
+    // }, [])
+
+
+
     const DATA = [
         {
             id: '1',
@@ -40,6 +63,23 @@ const homePage = () => {
             title: 'Third Item',
         },
     ];
+    const [products, setProducts] = useState([]);
+    {/* fetch data product*/ }
+    // useEffect(() => {
+    //     getProducts();
+    // }, []);
+    // const getProducts = async () => {
+    //     const response = await fetch("https://fakestoreapi.com/products");
+    //     const data = await response.json();
+    //     setProducts(data);
+    // }
+    useEffect(() => {
+        // Fetch data from an API
+        fetch('https://fakestoreapi.com/products')
+            .then((response) => response.json())
+            .then((data) => setProducts(data))
+            .catch((error) => console.error(error));
+    }, []);
 
 
     const Item = ({ item, onPress, backgroundColor, textColor }) => (
@@ -59,7 +99,8 @@ const homePage = () => {
                 textColor={color}
             />
         );
-    }
+    };
+
     return (
         <ScreenWrapper bg={'white'}>
             <StatusBar style="dark" />
@@ -87,9 +128,6 @@ const homePage = () => {
                     <Icon name="filter" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
 
                 </View>
-                {/* Categories */}
-
-
                 {/* Carousel */}
                 {/* <View>
                     <SafeAreaView>
@@ -100,8 +138,14 @@ const homePage = () => {
                 {/* Products */}
                 <FlatList
                     numColumns={2}
+                    data={products}
+                    renderItem={ProductCard}
+                    keyExtractor={(item) => item.id.toString()}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 300 }}
                     ListHeaderComponent={
                         <>
+                            {/* Categories */}
                             <View>
                                 <FlatList
                                     data={DATA}
@@ -115,29 +159,37 @@ const homePage = () => {
                             </View>
                         </>
                     }
-                    data={[1, 2, 3, 4, 5, 6, 7, 8]}
-                    renderItem={({ item, index }) =>
-                        <ProductCard item={item} isLiked={isLiked} setIsLiked={setIsLiked} />}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 300 }}
                 />
-                <View style={{ flexDirection: 'row' }}>
-                    <ProductCard />
-                    <ProductCard />
-                </View>
-
-                {/* Footer */}
-
-
-
-
-
-
-
             </View>
         </ScreenWrapper>
     )
+};
+
+const handleImagePress = (id) => {
+    router.push('productDetail', { imageId: id });
+};
+const ProductCard = ({ item, isLiked, setIsLiked }) => {
+
+    return (
+        <TouchableOpacity onPress={() => { handleImagePress(item.id) }} style={styles.containerProduct}>
+            <View >
+                <Image source={{ uri: item.image }} style={styles.convertImage} />
+                <View style={styles.content}>
+                    <Text style={styles.title}>{item.title}</Text>
+                    <Text style={styles.price}>{item.price}</Text>
+                </View>
+
+                <TouchableOpacity onPress={() => { setIsLiked(!isLiked) }}
+                    style={styles.likeContainer}>
+                    {isLiked ? (<ArtDesign name='heart' size={20} color={"#E55B5B"} />) : (<ArtDesign name='hearto' size={20} color={"#E55B5B"} />)}
+                </TouchableOpacity>
+            </View>
+        </TouchableOpacity>
+
+    )
 }
+
+
 
 export default homePage
 
@@ -170,7 +222,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingBottom: 20
+        paddingBottom: 20,
     },
     item: {
         height: hp(8),
@@ -183,10 +235,45 @@ const styles = StyleSheet.create({
     title: {
         color: theme.colors.text,
         fontSize: hp(2),
-        fontWeight: theme.fonts.semibold
+        fontWeight: theme.fonts.semibold,
+
     },
     separator: {
         marginLeft: 7,
+    },
+    containerProduct: {
+        flex: 1,
+        marginTop: 10,
+    },
+    convertImage: {
+        width: "90%",
+        height: 200,
+        borderRadius: 20,
+        marginVertical: 5,
+        marginLeft: 10,
+        marginTop: 15,
+        resizeMode: 'cover',
+
+    },
+
+    price: {
+        fontSize: 18,
+        color: "#9C9C9C",
+        fontWeight: theme.fonts.regular,
+    },
+    content: {
+        paddingLeft: 15,
+    },
+    likeContainer: {
+        position: 'absolute',
+        right: 10,
+        top: 20,
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        height: 34,
+        width: 34,
+        alignItems: 'center',
+        borderRadius: 17,
     }
 
 })

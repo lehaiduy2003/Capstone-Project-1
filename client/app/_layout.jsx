@@ -8,10 +8,8 @@ const _layout = () => {
         headerShown: false
     }}>
 
-        <Stack.Screen name="account" options={{ headerTitle: false }} />
-        {/* <Stack.Screen name="HomePage/homePage" options={{ headerTitle: false }} /> */}
-
-
+        {/* <Stack.Screen name="welcome" options={{ headerTitle: false }} /> */}
+        <Stack.Screen name="(tabs)" options={{ headerTitle: false }} />
     </Stack>
 
 

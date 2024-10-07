@@ -13,7 +13,7 @@ const TabBar = ({ state, descriptors, navigation }) => {
         orders: 'shopping-bag',
         homePage: 'home',
         wallet: 'layout',
-        account: 'user',
+        profile: 'user',
 
     }
     const primaryColor = '#0891b2';
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: '#F4F6F8',
-        marginHorizontal: 25,
+        marginHorizontal: 0,
         paddingVertical: 15,
         borderRadius: 20,
         borderCurve: 'continuous',
