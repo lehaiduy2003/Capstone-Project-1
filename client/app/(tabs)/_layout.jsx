@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs } from 'expo-router';
 import TabBar from '../../components/TabBar';
@@ -19,7 +18,7 @@ const _layoutNavigation = () => {
 
 }
 
-// export default _layoutNavigation;
+export default _layoutNavigation;
 
 // import React from "react";
 // import { Tabs } from "expo-router";
