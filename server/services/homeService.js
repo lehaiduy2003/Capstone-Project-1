@@ -1,7 +1,18 @@
-const { getSalesCollection } = require("../repositories/homeRepository");
+const { getLatestProducts } = require("../repositories/homeRepository");
 
-function getAllSales() {
-  return getSalesCollection();
+async function getHomepageData() {
+  try {
+    const latestProducts = await getLatestProducts();
+
+    return {
+      latestProducts,
+    };
+  } catch (error) {
+    console.error("Error getting homepage data:", error);
+    throw error;
+  }
 }
 
-module.exports = { getAllSales };
+module.exports = {
+  getHomepageData,
+};
