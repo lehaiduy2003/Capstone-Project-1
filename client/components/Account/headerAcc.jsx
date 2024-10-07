@@ -12,17 +12,25 @@ import { theme } from "../../constants/theme";
 import { hp, wp } from "../../helpers/common";
 import Icon from "../../assets/icons";
 import { useNavigation } from "@react-navigation/native";
-import { handleSignOut } from "../../app/account";
-
+import { deleteValueFor } from "../../utils/secureStore";
+import { useRouter } from "expo-router";
 const HeaderAcc = () => {
+  const router = useRouter();
   const handleClick = (label) => {
     console.log(`Clicked: ${label}`);
     navigation.navigate("Login");
   };
-
-  {
-    /* Hàm xử lý đăng xuất */
-  }
+  /* Hàm xử lý đăng xuất */
+  const handleSignOut = async () => {
+    try {
+      await deleteValueFor("accessToken");
+      await deleteValueFor("refreshToken");
+      console.log("Signed out successfully!");
+      router.push("welcome");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
   const confirmLogout = () => {
     Alert.alert(
       "Xác nhận đăng xuất",
