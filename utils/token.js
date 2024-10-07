@@ -41,7 +41,7 @@ function generateTokens(user) {
       sub: user._id,
       iat: now,
       exp: now + 24 * 60 * 60 * 1000, // 1 day
-      iss: `http://${process.env.HOSTNAME}:${process.env.PORT}`,
+      iss: `http://${process.env.HOST}:${process.env.PORT}`,
       aud: "EcoTrade",
       role: "customer",
     },
@@ -67,7 +67,7 @@ function refreshToken(token) {
       sub: payloadDecoded.sub,
       iat: now,
       exp: now + 24 * 60 * 60 * 1000, // 1 day
-      iss: `http://${process.env.HOSTNAME}:${process.env.PORT}`,
+      iss: `http://${process.env.HOST}:${process.env.PORT}`,
       aud: "EcoTrade",
       role: "customer",
     },
