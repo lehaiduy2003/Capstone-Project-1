@@ -1,5 +1,9 @@
 import { save, getValueFor } from "./secureStore";
 
+/**
+ * @returns {Promise<string>} - Access token
+ * @description Request a new access token from the server
+ */
 export async function requestNewAccessToken() {
   try {
     const refreshToken = await getValueFor("refreshToken");
