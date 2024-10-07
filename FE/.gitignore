@@ -12,6 +12,7 @@ npm-debug.*
 web-build/
 app-example/
 .env
+.env.local
 # macOS
 .DS_Store
 
