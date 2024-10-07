@@ -41,7 +41,7 @@ const homePage = () => {
                 name={"heart"}
                 size={hp(3.2)}
                 strokeWidth={2}
-                color={theme.colors.text}
+                color={theme.colors.gray}
               />
             </Pressable>
           </View>
