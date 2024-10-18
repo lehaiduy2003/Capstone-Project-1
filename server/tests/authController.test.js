@@ -1,4 +1,8 @@
-const { signUp, signIn, generateNewAccessToken } = require("../controllers/authController");
+const {
+  signUp,
+  signIn,
+  generateNewAccessToken,
+} = require("../controllers/authController");
 const { userSignUp, userSignIn } = require("../services/authService");
 const { getNewAccessToken } = require("../services/authService");
 const errorHandler = require("../middlewares/errorMiddleware");
