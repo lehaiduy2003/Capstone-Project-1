@@ -16,9 +16,11 @@ import { hp } from '../helpers/common'
 import ArtDesign from 'react-native-vector-icons/AntDesign'
 import { router } from "expo-router";
 import Carousel from '../components/Carousel'
+import { theme } from "../constants/theme";
 
 const ProductDetails = () => {
     const [isLiked, setIsLiked] = React.useState(false)
+    const [follow, setfollow] = React.useState(false)
     return (
         <ScreenWrapper bg={"white"}>
             <StatusBar style="dark" />
@@ -30,21 +32,40 @@ const ProductDetails = () => {
                     <Text style={styles.nameproduct}>Máy tính laptop hàng chính hãng (DELL-HP) Ram 8GB Core i5 - i7 ổ SSD 256GB màn 12.5", 14",15.6 inch</Text>
                 </View>
                 <View style={styles.pricelove}>
-                    <Text style={styles.price}>10$</Text>
+                    <Text style={styles.price}>1.000.000₫</Text>
                     <TouchableOpacity onPress={() => { setIsLiked(!isLiked) }}
-                         style={styles.likeContainer}>
+                        style={styles.likeContainer}>
                         {isLiked ? (<ArtDesign name='heart' size={20} color={"#E55B5B"} />) : (<ArtDesign name='hearto' size={20} color={"#E55B5B"} />)}
                     </TouchableOpacity>
                 </View>
-                <View style={styles.information}>
-                    <Image source={require('../assets/images/iconshop.webp')}
-                    style={styles.convertImage} />
-                    <Text style={styles.nameshop}>Hải Nam Computers</Text>
-                    <Button style={styles.Viewshop}
-                        title='follow'
-                        buttonStyle={{ marginHorizontal: wp(3) }}
-                        onPress={() => { router.push('shop') }}
-                    />
+                <View style={styles.informationshop}>
+                    <TouchableOpacity onPress={() => { router.push('userProfile') }}
+                        style={styles.shopprofile}>
+                        <Image source={require('../assets/images/iconshop.webp')}
+                            style={styles.convertImage} />
+                            <View style={styles.nameshopContainer}>
+                                <Text style={styles.nameshop}>Hải Nam Computers</Text>
+                                <View style={styles.addressContainer}>
+                                    <Image source={require('../assets/images/iconaddress.jpg')}
+                                        style={styles.iconaddress} />
+                                    <Text style={styles.address}>Hà Nội</Text>
+                                </View>
+                            </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => { setfollow(!follow) }}
+                        style={styles.follow}>
+                        {follow ? (<Text>Theo dõi</Text>) : (<Text>Đang theo dõi</Text>)}
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.informationcontainer}>
+                    <View style={styles.productContainer}>
+                        <Text style={styles.quantity}>100</Text>
+                        <Text style={styles.product}>Sản phẩm</Text>
+                    </View>
+                    <View style={styles.evaluatecontainer}>
+                        <Text style={styles.proportion}>5.0</Text>
+                        <Text style={styles.evaluate}>Đánh giá</Text>
+                    </View>
                 </View>
                 <View>
                     <Text style={styles.description}>MÔ TẢ VỀ SẢN PHẨM</Text>
@@ -87,7 +108,6 @@ const styles = StyleSheet.create({
     pricelove: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 5,
     },
     price: {
         fontSize: 18,
@@ -106,7 +126,7 @@ const styles = StyleSheet.create({
     },
 
 
-    information: {
+    informationshop: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 5,
@@ -120,26 +140,79 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         marginTop: 5,
     },
-    nameshop: {
-        padding: 10,
-        fontSize: 15,
-        fontWeight: 'bold',
-        right: 15,
-        top: -10,
+
+    shopprofile:{
+        flexDirection: 'row',
     },
 
-    Viewshop: {
-        backgroundColor: 'white',
+    nameshopContainer:{
+        flexDirection: 'column',
+    },
+    nameshop: {
+        top: 5,
+        fontSize: 15,
+        fontWeight: 'bold',
+        marginLeft: 10,
+    },
+    iconaddress: {
+        width: 13,
+        height: 15,
+        borderRadius: 20,
+        marginVertical: 3,
+        marginLeft: 8,
+        top: 8,
+    },
+    addressContainer:{
+        flexDirection: 'row',
+    },
+    address: {
+        top: 10,
+        fontSize: 12,
+        color: "#9C9C9C",
+        marginLeft: 10,
+    },
+
+    informationcontainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        padding: 5,
+        width: '60%',
+        height:auto,
+    },
+    productContainer: {
+        flexDirection: 'row',
+    },
+    quantity: {
+        fontSize: 15,
+        color: "#EE0000",
+    },
+    product: {
+        left: 5,
+        fontSize: 15,
+    },
+    evaluatecontainer: {
+        flexDirection: 'row',
+    },
+    proportion: {
+        fontSize: 15,
+        color: "#EE0000",
+    },
+    evaluate: {
+        left: 5,
+        fontSize: 15,
+    },
+    follow:{
+        backgroundColor: theme.colors.primary,
         justifyContent: 'center',
         height: 34,
         width: 100,
         alignItems: 'center',
-        borderRadius: 2,
-        marginRight: 10,
+        borderRadius: 20,
     },
 
+
     description: {
-        padding: 10,
+        padding: 5,
         fontSize: 20,
         fontWeight: 'bold',
     },

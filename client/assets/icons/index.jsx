@@ -27,6 +27,8 @@ import ViewOff from "./ViewOff";
 import Cart from "./Cart";
 import Filter from "./Filter";
 import HeartCheck from "./HeartCheck";
+import Recycle from "./Recycle";
+import Messenger from "./Messenger";
 
 const icons = {
   home: Home,
@@ -55,6 +57,8 @@ const icons = {
   cart: Cart,
   filter: Filter,
   heartCheck: HeartCheck,
+  recycle: Recycle,
+  messenger: Messenger,
 };
 
 const Icon = ({ name, ...props }) => {

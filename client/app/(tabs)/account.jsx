@@ -2,9 +2,9 @@ import { View, ScrollView, Text, StyleSheet, Dimensions } from "react-native";
 import React from "react";
 import { theme } from "../../constants/theme";
 import { hp, wp } from "../../helpers/common";
-import HeaderAcc from "../../components/Account/headerAcc";
-import OrderMenu from "../../components/Account/orderMenu";
-import OtherFeature from "../../components/Account/otherFeature";
+import HeaderAcc from "../../components/AccountPage/headerAcc";
+import OrderMenu from "../../components/AccountPage/orderMenu";
+import OtherFeature from "../../components/AccountPage/otherFeature";
 
 const { height } = Dimensions.get("window");
 
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerPart: {
-    height: height * 0.15, // Chiếm 20% chi
+    height: height * 0.16, // Chiếm 20% chi
     backgroundColor: theme.colors.primary,
   },
   OrderMenu: {

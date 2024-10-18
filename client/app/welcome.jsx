@@ -1,4 +1,4 @@
-import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import { Pressable, StatusBar, StyleSheet, Text, View, Image } from "react-native";
 import React from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { wp } from "../helpers/common";
@@ -7,21 +7,23 @@ import { theme } from "../constants/theme";
 import Button from "../components/Button";
 //import { router } from 'expo-router'
 import { useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
+
 const welcome = () => {
   const router = useRouter();
   return (
     <ScreenWrapper bg="white">
       <StatusBar style="dark" />
       <View style={styles.container}>
-        {/* welcome image*/}
-        {/* <Image style={styles.welcomeImage} resizeMode="contain" source={require('../assets/images/welcome.png')} /> */}
+        {/* welcome animation*/}
+        <LottieView style={styles.conWelcomeAnimation} source={require('../assets/animation/animation_welcome.json')} autoPlay loop />
+
         {/* title*/}
-        {/* <View style={{ gap: 20 }}>
-                    <Text style={styles.title}>LinkUp!</Text>
-                    <Text style={styles.punchLine}>
-                        Where every moment is a memory
-                    </Text>
-                </View> */}
+        <View style={{ gap: 20 }}>
+          <Text style={styles.punchLine}>
+            Discover Deals, Anytime, Anywhere
+          </Text>
+        </View>
         {/* footer*/}
         <View style={styles.footer}>
           <Button
@@ -67,10 +69,10 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingHorizontal: wp(4),
   },
-  welcomeImage: {
+  conWelcomeAnimation: {
     height: hp(30),
     width: wp(100),
-    alignSelf: "center",
+    alignItem: "center",
   },
 
   title: {
@@ -82,9 +84,10 @@ const styles = StyleSheet.create({
 
   punchLine: {
     color: theme.colors.text,
-    fontSize: hp(1.7),
+    fontSize: hp(2.5),
     textAlign: "center",
     paddingHorizontal: wp(10),
+    //fontWeight: theme.fonts.semibold,
   },
   footer: {
     width: "100%",
