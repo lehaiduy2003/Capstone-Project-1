@@ -92,6 +92,7 @@ export default class ProductService extends SessionService {
         await this.abortTransaction();
         return false;
       }
+<<<<<<< HEAD
       await this.commitTransaction();
       return true;
     } catch (error) {
@@ -104,6 +105,21 @@ export default class ProductService extends SessionService {
     }
   }
 
+=======
+
+      await this.commitTransaction();
+      return true;
+    } catch (error) {
+      await this.abortTransaction();
+      console.error(error);
+      // Return failure
+      return false;
+    } finally {
+      await this.endSession();
+    }
+  }
+
+>>>>>>> develop
   public async readOne(id: string): Promise<Product | null> {
     return await this.productsModel.findProductByUnique("_id", new ObjectId(id));
   }
