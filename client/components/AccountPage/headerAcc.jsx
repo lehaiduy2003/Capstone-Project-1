@@ -9,7 +9,6 @@ const HeaderAcc = () => {
   const router = useRouter();
   const handleClick = (label) => {
     console.log(`Clicked: ${label}`);
-    navigation.navigate("Login");
   };
   /* Hàm xử lý đăng xuất */
   const handleSignOut = async () => {
@@ -45,13 +44,7 @@ const HeaderAcc = () => {
       {/* Phần trái header */}
       <View style={styles.leftHeader}>
         <TouchableOpacity onPress={() => handleClick("Change Avatar")}>
-          <Icon
-            style={{ marginLeft: wp(1) }}
-            name="user"
-            size={hp(6)}
-            strokeWidth={2}
-            color="white"
-          />
+          <Icon style={{ marginLeft: wp(1) }} name="user" size={hp(6)} strokeWidth={2} color="white" />
         </TouchableOpacity>
         <View>
           <Text style={styles.userName}>User Name</Text>

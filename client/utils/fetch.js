@@ -1,3 +1,4 @@
+import urlencoded from "./formURLencoded";
 import { save, getValueFor } from "./secureStore";
 
 /**
@@ -7,10 +8,9 @@ import { save, getValueFor } from "./secureStore";
 export async function requestNewAccessToken() {
   try {
     const refreshToken = await getValueFor("refreshToken");
-    const response = await fetch("/auth/refresh-access-token", {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/refresh`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         authorization: `Bearer ${refreshToken}`,
       },
     });
@@ -20,7 +20,7 @@ export async function requestNewAccessToken() {
     }
 
     const json = await response.json();
-    await save("accessToken", json.accessToken);
+    await save("accessToken", String(json.accessToken));
     return json.accessToken;
   } catch (error) {
     console.error("Error requesting new access token:", error);
@@ -28,16 +28,18 @@ export async function requestNewAccessToken() {
   }
 }
 
-export async function fetchData(url, token, body) {
-  //console.log(body);
+export async function fetchData(url, options) {
+  if (!options) {
+    options = {};
+  }
 
   const response = await fetch(url, {
-    method: "POST",
+    ...options.method,
     headers: {
       "Content-Type": "application/json",
-      authorization: token ? `Bearer ${token}` : null,
+      ...options.headers,
     },
-    body: JSON.stringify(body),
+    ...(options.body ? { body: JSON.stringify(options.body) } : {}),
   });
   return response;
 }

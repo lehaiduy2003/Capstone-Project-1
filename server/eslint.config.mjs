@@ -7,6 +7,6 @@ export default [
   {
     ...eslint.configs.recommended,
     ...tseslint.configs.recommended,
-    ignorePatterns: ["dist/"],
+    ignorePatterns: ["dist/", "tests/", "node_modules/"],
   },
 ];

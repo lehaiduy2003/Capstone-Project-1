@@ -1,42 +1,40 @@
-import BaseService from "./init/BaseService";
+import SessionService from "./init/BaseService";
 
 import TransactionsModel from "../models/TransactionsModel";
 import { Transaction } from "../libs/zod/model/Transaction";
 
-import { Filter } from "../libs/zod/Filter";
-import { keyValue } from "../libs/zod/keyValue";
+import { validateFilter } from "../libs/zod/Filter";
 
-export default class TransactionService extends BaseService<
-  TransactionsModel,
-  Transaction
-> {
-  public constructor() {
-    super("transaction");
+import { ObjectId } from "mongodb";
+import { validateTransactionDTO } from "../libs/zod/dto/TransactionDTO";
+
+export default class TransactionService extends SessionService {
+  private readonly transactionModel: TransactionsModel;
+  public constructor(transactionModel: TransactionsModel) {
+    super();
+    this.transactionModel = transactionModel;
   }
 
-  read(
-    field: keyof Transaction,
-    keyValue: keyValue,
-    filter: Filter,
-  ): Promise<Transaction[] | null> {
-    throw new Error("Method not implemented.");
+  async getTransactionHistory(user_id: string): Promise<Partial<Transaction>[] | null> {
+    return await this.transactionModel.findTransactions(
+      validateFilter({ sort: "updatedAt", order: "desc" }),
+      "user_id",
+      new ObjectId(user_id)
+    );
   }
+
   /**
    * @param {[products:{id: ObjectId, img: string, name: string, price: number, quantity: number}]} products
    * @param {id: ObjectId, address: string, phone: string, name: string} buyer
    * @param {id: ObjectId, address: string, phone: string, name: string} seller
    * @returns {Promise<Document<TransactionsModel> | null>}
    */
-  override async create(
-    data: Partial<Transaction>,
-  ): Promise<Transaction | null> {
+  async create(data: Partial<Transaction>): Promise<Transaction | null> {
     await this.startSession();
     this.startTransaction();
     try {
-      const transaction: Transaction | null = await this.getModel().insert(
-        data,
-        this.getSession(),
-      );
+      const parsedData = validateTransactionDTO(data);
+      const transaction: Transaction | null = await this.transactionModel.insert(parsedData, this.getSession());
       if (!transaction || transaction === null) {
         await this.abortTransaction();
         return null;
@@ -45,25 +43,20 @@ export default class TransactionService extends BaseService<
       return transaction;
     } catch (error) {
       await this.abortTransaction();
-      console.error("error while create transaction: ", error);
-      return null;
+      throw error;
     } finally {
       await this.endSession();
     }
   }
-  override async update(
-    field: keyof Transaction,
-    keyValue: keyValue,
-    data: Partial<Transaction>,
-  ): Promise<boolean> {
+  async updateTransactionById(id: string, data: Partial<Transaction>): Promise<boolean> {
     await this.startSession();
     this.startTransaction();
     try {
-      const isUpdatedTransaction = await this.getModel().updateByUnique(
-        field,
-        keyValue,
+      const isUpdatedTransaction = await this.transactionModel.updateTransactionByUnique(
+        "_id",
+        new ObjectId(id),
         data,
-        this.getSession(),
+        this.getSession()
       );
       if (isUpdatedTransaction === false) {
         await this.abortTransaction();
@@ -73,13 +66,9 @@ export default class TransactionService extends BaseService<
       return isUpdatedTransaction;
     } catch (error) {
       await this.abortTransaction();
-      console.error("error while updating transaction: ", error);
-      return false;
+      throw error;
     } finally {
       await this.endSession();
     }
-  }
-  delete(field: keyof Transaction, keyValue: keyValue): Promise<boolean> {
-    throw new Error("Method not implemented.");
   }
 }

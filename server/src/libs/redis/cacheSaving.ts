@@ -1,9 +1,15 @@
-import { redisConnection } from "../../configs/redis";
+import redisClientPromise from "./config";
 
-export async function saveToCache(key: string, data: object) {
+/**
+ *
+ * @param key key to save the data
+ * @param ex expiration time in seconds
+ * @param data data to save
+ */
+export async function saveToCache(key: string, ex: number, data: object) {
   try {
-    const redisClient = await redisConnection.connect();
-    await redisClient.setEx(key, 3600, JSON.stringify(data));
+    const redisClient = await redisClientPromise();
+    await redisClient.setEx(key, ex, JSON.stringify(data));
   } catch (error) {
     console.error("Error saving to cache: ", error);
   }

@@ -6,6 +6,9 @@
     "outDir": "./dist",
     "esModuleInterop": true,
     "strict": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "types": ["node", "jest"],
     "typeRoots": ["./node_modules/@types", "./global.d.ts"]
   },
   "include": ["src/**/*.ts", "./global.d.ts"],

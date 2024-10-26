@@ -1,17 +1,80 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, Button, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import Header from "../components/Header";
 import { useState, useEffect } from "react";
-import { FlatList, ActivityIndicator, Image, TouchableOpacity } from "react-native";
+import { FlatList, Image, TouchableOpacity } from "react-native";
 import { wp } from "../helpers/common";
 import Loading from "../components/Loading";
 import Icon from "../assets/icons";
 import { theme } from "../constants/theme";
 
+import { initPaymentSheet, presentPaymentSheet, StripeProvider } from "@stripe/stripe-react-native";
+import { getValueFor } from "../utils/secureStore";
+import { Screen } from "react-native-screens";
+
 const checkOut = () => {
-  const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cartItems, setCartItems] = useState([]);
+
+  const checkout = async () => {
+    const token = await getValueFor("accessToken");
+    // Call the API to create a checkout session
+    // This is where you would typically call your backend server to create a checkout session
+    // The backend server would then call the Stripe API to create a session
+    // The client would then redirect to the Stripe hosted checkout page
+    // The client would then be redirected back to the success_url or cancel_url specified in the session
+    const products = [
+      {
+        price: 50000,
+        quantity: 1,
+      },
+      {
+        price: 50000,
+        quantity: 2,
+      },
+    ];
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}checkout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        products,
+        shippingCost,
+        grandTotal,
+      }),
+    });
+    const data = await response.json();
+    return data.clientSecret;
+  };
+
+  const initializePaymentSheet = async () => {
+    const paymentIntent = await checkout();
+
+    const { error } = await initPaymentSheet({
+      merchantDisplayName: "Example, Inc.",
+      paymentIntentClientSecret: paymentIntent,
+    });
+    if (error) {
+      console.log("Payment sheet initialization error:", error);
+      Alert.alert(`Error initializing payment sheet: ${error.message}`);
+      return;
+    }
+    setLoading(false);
+  };
+
+  const openPaymentSheet = async () => {
+    const { error } = await presentPaymentSheet();
+
+    if (error) {
+      Alert.alert(`Error code: ${error.code}`, error.message);
+    } else {
+      Alert.alert("Success", "Your order is confirmed!");
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
     // Fetch data from fakestoreapi.com
@@ -26,6 +89,7 @@ const checkOut = () => {
         console.error("Error fetching data:", error);
         setLoading(false);
       }
+      await initializePaymentSheet();
     };
 
     fetchProducts();
@@ -43,75 +107,77 @@ const checkOut = () => {
   }
 
   return (
-    <ScreenWrapper>
-      <View style={styles.container}>
-        {/*Header*/}
-        <Header title={"Check out"} showBackButton></Header>
-        {/* Shipping Address */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Shipping address</Text>
-          <View style={styles.addressContainer}>
-            <TouchableOpacity style={styles.addressEdit}>
-              <Text>Home</Text>
-              <Text>No 46, Awolowo Road....</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => alert("pop edit address")}>
-              <Icon name="edit" size={26} strokeWidth={1.6} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Cart Items */}
-        <FlatList
-          data={cartItems}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.itemContainer}>
-              <Image source={{ uri: item.image }} style={styles.itemImage} />
-              <View style={styles.itemDetails}>
-                <Text>{item.title}</Text>
-                <Text> {item.price.toLocaleString()}</Text>
-              </View>
-              <View style={styles.itemQuantity}>
-                <Text>1</Text>
-              </View>
+    <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PK}>
+      <ScreenWrapper>
+        <View style={styles.container}>
+          {/*Header*/}
+          <Header title={"Check out"} showBackButton></Header>
+          {/* Shipping Address */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Shipping address</Text>
+            <View style={styles.addressContainer}>
+              <TouchableOpacity style={styles.addressEdit}>
+                <Text>Home</Text>
+                <Text>No 46, Awolowo Road....</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => alert("pop edit address")}>
+                <Icon name="edit" size={26} strokeWidth={1.6} />
+              </TouchableOpacity>
             </View>
-          )}
-        />
-
-        {/* Payment Method */}
-        <TouchableOpacity style={styles.section} onPress={() => alert("pop payment method")}>
-          <Text style={styles.sectionTitle}>Payment method</Text>
-          <Text>Cash</Text>
-        </TouchableOpacity>
-
-        {/* Order Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Payment details</Text>
-          <View style={styles.summaryRow}>
-            <Text>Total cost</Text>
-            <Text>{calculateTotalPrice().toLocaleString()}</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text>Total shipping cost</Text>
-            <Text>{shippingCost.toLocaleString()}</Text>
           </View>
 
-          <View style={styles.summaryRow}>
-            <Text style={styles.grandTotalText}>Total payment</Text>
-            <Text style={styles.grandTotalText}>{grandTotal.toLocaleString()}</Text>
-          </View>
-        </View>
+          {/* Cart Items */}
+          <FlatList
+            data={cartItems}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.itemContainer}>
+                <Image source={{ uri: item.image }} style={styles.itemImage} />
+                <View style={styles.itemDetails}>
+                  <Text>{item.title}</Text>
+                  <Text> {item.price.toLocaleString()}</Text>
+                </View>
+                <View style={styles.itemQuantity}>
+                  <Text>1</Text>
+                </View>
+              </View>
+            )}
+          />
 
-        {/* Checkout Button */}
-        <View style={styles.footer}>
-          <Text style={styles.footerTotalText}>Total payment: {grandTotal.toLocaleString()}</Text>
-          <TouchableOpacity style={styles.orderButton} onPress={() => alert("Order placed!")}>
-            <Text style={styles.orderButtonText}>Order</Text>
+          {/* Payment Method */}
+          <TouchableOpacity style={styles.section} onPress={() => alert("pop payment method")}>
+            <Text style={styles.sectionTitle}>Payment method</Text>
+            <Text>Cash</Text>
           </TouchableOpacity>
+
+          {/* Order Summary */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Payment details</Text>
+            <View style={styles.summaryRow}>
+              <Text>Total cost</Text>
+              <Text>{calculateTotalPrice().toLocaleString()}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text>Total shipping cost</Text>
+              <Text>{shippingCost.toLocaleString()}</Text>
+            </View>
+
+            <View style={styles.summaryRow}>
+              <Text style={styles.grandTotalText}>Total payment</Text>
+              <Text style={styles.grandTotalText}>{grandTotal.toLocaleString()}</Text>
+            </View>
+          </View>
+
+          {/* Checkout Button */}
+          <View style={styles.footer}>
+            <Text style={styles.footerTotalText}>Total payment: {grandTotal.toLocaleString()}</Text>
+            <Screen>
+              <Button variant="primary" title="Order" onPress={openPaymentSheet} />
+            </Screen>
+          </View>
         </View>
-      </View>
-    </ScreenWrapper>
+      </ScreenWrapper>
+    </StripeProvider>
   );
 };
 

@@ -1,69 +1,105 @@
 import ProductsModel from "../models/ProductsModel";
 
-import BaseService from "./init/BaseService";
+import { Product, validateProduct } from "../libs/zod/model/Product";
+import { Filter, validateFilter } from "../libs/zod/Filter";
 
-import { Product } from "../libs/zod/model/Product";
-import { Filter } from "../libs/zod/Filter";
+import { ObjectId } from "mongodb";
+import SessionService from "./init/BaseService";
+import { ProductDTO, validateProductDTO } from "../libs/zod/dto/ProductDTO";
 
-import {
-  SearchResultDTO,
-  validateSearchResultDTO,
-} from "../libs/zod/dto/SearchResultDTO";
-import { ClientSession } from "mongoose";
-import { keyValue } from "../libs/zod/keyValue";
+export default class ProductService extends SessionService {
+  private readonly productsModel: ProductsModel;
+  public constructor(productsModel: ProductsModel) {
+    super();
+    this.productsModel = productsModel;
+  }
+  async read(filter: Partial<Filter>): Promise<Product[] | null> {
+    const parsedFilter = validateFilter(filter);
+    return await this.productsModel.findProducts(parsedFilter);
+  }
 
-export default class ProductService extends BaseService<
-  ProductsModel,
-  Product
-> {
-  override async read(
-    field: keyof Product,
-    keyValue: keyValue,
-    filter: Filter,
-  ): Promise<Product[] | null> {
+  public async search(filter: Partial<Filter>): Promise<ProductDTO[] | null> {
+    const parsedFilter = validateFilter(filter);
+    const products = await this.productsModel.findSearchedProducts(parsedFilter);
+
+    if (!products) {
+      return null;
+    }
+
+    // const result = products.map(validateSearchResultDTO);
+
+    // console.log(result);
+
+    // return result;
+
+    return products.map(validateProductDTO);
+  }
+
+  public async createProduct(data: Partial<Product>): Promise<Product | null> {
+    await this.startSession();
+    this.startTransaction();
     try {
-      const products: Product[] | null =
-        await this.getModel().findWithFilter(filter);
+      const productData = validateProduct(data);
+      const result = await this.productsModel.insert(productData, this.getSession());
 
-      return products;
+      await this.commitTransaction();
+      return result;
     } catch (error) {
-      console.error("Error getting homepage data:", error);
+      this.abortTransaction();
       throw error;
+    } finally {
+      await this.endSession();
     }
   }
-  create(
-    data: Partial<Product>,
-    session: ClientSession,
-  ): Promise<Product | null> {
-    throw new Error("Method not implemented.");
-  }
-  update(
-    field: keyof Product,
-    keyValue: keyValue,
-    data: Partial<Product>,
-    session: ClientSession,
-  ): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-  delete(
-    field: keyof Product,
-    keyValue: keyValue,
-    session: ClientSession,
-  ): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-  public constructor() {
-    super("product");
+
+  public async updateProductById(id: string, data: Partial<Product>): Promise<boolean> {
+    await this.startSession();
+    this.startTransaction();
+    try {
+      // Validate input
+      if (!id || !data) {
+        await this.abortTransaction();
+        throw new Error("Invalid input");
+      }
+      const objectId = new ObjectId(id);
+      // Update the product
+      const result = await this.productsModel.updateProductByUnique("_id", objectId, data, this.getSession());
+      await this.commitTransaction();
+
+      return result;
+    } catch (error) {
+      await this.abortTransaction();
+      console.error(error);
+      return false;
+    } finally {
+      await this.endSession();
+    }
   }
 
-  public async search(filter: Filter): Promise<SearchResultDTO[] | null> {
-    const products: Product[] =
-      await this.getModel().findSearchedProducts(filter);
+  public async deleteProduct(id: string): Promise<boolean> {
+    await this.startSession();
+    this.startTransaction();
+    try {
+      if (!id) {
+        await this.abortTransaction();
+        throw new Error("Invalid input");
+      }
+      const objectId = new ObjectId(id);
+      // Delete the product
+      const result = await this.productsModel.deleteOne({ _id: objectId }, this.getSession());
+      await this.commitTransaction();
+      return result.deletedCount > 0;
+    } catch (error) {
+      await this.abortTransaction();
+      console.error(error);
+      // Return failure
+      return false;
+    } finally {
+      await this.endSession();
+    }
+  }
 
-    const result = products.map((product) => {
-      return validateSearchResultDTO(product);
-    });
-
-    return result;
+  public async readOne(id: string): Promise<Product | null> {
+    return await this.productsModel.findProductByUnique("_id", new ObjectId(id));
   }
 }

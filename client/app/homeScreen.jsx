@@ -1,18 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import Welcome from './welcome'
-import Splash from './splash'
+import React, { useEffect, useState } from "react";
+import Welcome from "./welcome";
+import Splash from "./splash";
 
 const homeScreen = () => {
-  const [isShowSplash, setIsShowSplash] = useState(true)
+  const [isShowSplash, setIsShowSplash] = useState(true);
   useEffect(() => {
     setTimeout(() => {
-      setIsShowSplash(false)
-    }, 6000)
-  })
-  return <>    {isShowSplash ? <Splash /> : <Welcome />}</>
+      setIsShowSplash(false);
+    }, 6000);
+  });
+  return <> {isShowSplash ? <Splash /> : <Welcome />}</>;
+};
 
-}
-
-export default homeScreen
-
+export default homeScreen;

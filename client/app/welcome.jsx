@@ -1,28 +1,38 @@
-import { Pressable, StatusBar, StyleSheet, Text, View, Image } from "react-native";
-import React from "react";
+import { Pressable, StatusBar, StyleSheet, Text, View, Alert } from "react-native";
+import React, { useEffect } from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { wp } from "../helpers/common";
 import { hp } from "../helpers/common";
 import { theme } from "../constants/theme";
 import Button from "../components/Button";
-//import { router } from 'expo-router'
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
+import { requestNewAccessToken } from "../utils/fetch";
 
 const welcome = () => {
   const router = useRouter();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await requestNewAccessToken();
+      token !== null ? router.push("homePage") : Alert.alert("Hi", "Please login or sign up to continue");
+    };
+    checkAuth();
+  }, []);
   return (
     <ScreenWrapper bg="white">
       <StatusBar style="dark" />
       <View style={styles.container}>
         {/* welcome animation*/}
-        <LottieView style={styles.conWelcomeAnimation} source={require('../assets/animation/animation_welcome.json')} autoPlay loop />
+        <LottieView
+          style={styles.conWelcomeAnimation}
+          source={require("../assets/animation/animation_welcome.json")}
+          autoPlay
+          loop
+        />
 
         {/* title*/}
         <View style={{ gap: 20 }}>
-          <Text style={styles.punchLine}>
-            Discover Deals, Anytime, Anywhere
-          </Text>
+          <Text style={styles.punchLine}>Discover Deals, Anytime, Anywhere</Text>
         </View>
         {/* footer*/}
         <View style={styles.footer}>
@@ -30,14 +40,14 @@ const welcome = () => {
             title="Getting Started"
             buttonStyle={{ marginHorizontal: wp(3) }}
             onPress={() => {
-              router.push("signUp");
+              router.push("SignUp");
             }}
           />
           <View style={styles.bottomTextContainer}>
             <Text style={styles.loginText}>Already have an account?</Text>
             <Pressable
               onPress={() => {
-                router.push("login");
+                router.push("SignIn");
               }}
             >
               <Text
@@ -49,7 +59,7 @@ const welcome = () => {
                   },
                 ]}
               >
-                Login
+                Sign In
               </Text>
             </Pressable>
           </View>

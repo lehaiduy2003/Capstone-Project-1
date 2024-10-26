@@ -4,17 +4,13 @@ import { Document, Types } from "mongoose";
 export const PaymentMethodSchema = z.enum(["cash", "card"]).default("cash");
 export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
 
-export const PaymentStatusSchema = z
-  .enum(["pending", "paid"])
-  .default("pending");
+export const PaymentStatusSchema = z.enum(["pending", "paid"]).default("pending");
 export type PaymentStatus = z.infer<typeof PaymentStatusSchema>;
 
-export const StatusSchema = z
-  .enum(["pending", "shipping", "completed", "refunded"])
-  .default("pending");
+export const StatusSchema = z.enum(["pending", "shipping", "completed", "refunded"]).default("pending");
 export type Status = z.infer<typeof StatusSchema>;
 
-export const TransactionSchema = z.object({
+const TransactionSchema = z.object({
   createdAt: z.date().default(new Date()),
   updatedAt: z.date().default(new Date()),
   buyer: z.object({
@@ -23,9 +19,7 @@ export const TransactionSchema = z.object({
       .refine((val) => Types.ObjectId.isValid(val.toString()), {
         message: "Invalid ObjectId",
       })
-      .transform((val) =>
-        typeof val === "string" ? new Types.ObjectId(val) : val,
-      ),
+      .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
     address: z.string(),
     phone: z.string(),
     name: z.string(),
@@ -36,9 +30,7 @@ export const TransactionSchema = z.object({
       .refine((val) => Types.ObjectId.isValid(val.toString()), {
         message: "Invalid ObjectId",
       })
-      .transform((val) =>
-        typeof val === "string" ? new Types.ObjectId(val) : val,
-      ),
+      .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
     address: z.string(),
     phone: z.string(),
     name: z.string(),
@@ -50,19 +42,23 @@ export const TransactionSchema = z.object({
         .refine((val) => Types.ObjectId.isValid(val.toString()), {
           message: "Invalid ObjectId",
         })
-        .transform((val) =>
-          typeof val === "string" ? new Types.ObjectId(val) : val,
-        ),
+        .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
       name: z.string(),
       img: z.string().url(),
       price: z.number(),
       quantity: z.number(),
-    }),
+    })
   ),
   paymentMethod: PaymentMethodSchema,
   paymentStatus: PaymentStatusSchema,
   shippingFee: z.number().default(30000),
   status: StatusSchema,
+  user_id: z
+    .union([z.string(), z.instanceof(Types.ObjectId)])
+    .refine((val) => Types.ObjectId.isValid(val.toString()), {
+      message: "Invalid ObjectId",
+    })
+    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
 });
 
 export const validateTransaction = (data: unknown) => {
@@ -74,4 +70,3 @@ export const validateTransaction = (data: unknown) => {
 };
 
 export type Transaction = z.infer<typeof TransactionSchema> & Document;
-export interface ITransaction extends Document, Transaction {}

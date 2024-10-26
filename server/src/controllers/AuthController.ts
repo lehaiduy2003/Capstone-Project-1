@@ -3,43 +3,25 @@ import { Request, Response } from "express";
 import BaseController from "./init/BaseController";
 import AuthService from "../services/AuthService";
 
-import getTokenFromHeaders from "../utils/getTokenFromHeader";
-import { validateAccount } from "../libs/zod/model/Account";
-import ServiceFactory from "../services/init/ServiceFactory";
-
 export default class AuthController extends BaseController {
-  private readonly authService: AuthService = ServiceFactory.createService(
-    "auth",
-  ) as AuthService;
-  public async delete(req: Request, res: Response): Promise<void> {
-    this.checkReqBody(req, res);
-    try {
-      const { id } = req.params;
-      const result = await this.authService.delete("_id", id);
-
-      if (result) {
-        res.status(200).send({ message: "User deleted" });
-      } else {
-        res.status(404).send({ message: "User not found" });
-      }
-    } catch (error) {
-      this.error(error, res);
-    }
+  private readonly authService: AuthService;
+  public constructor(authService: AuthService) {
+    super();
+    this.authService = authService;
   }
   /**
    * for creating a new user
    * @param req request body containing email, password, role
    * @param res response containing the created user
    */
-  public override async post(req: Request, res: Response): Promise<void> {
-    this.checkReqBody(req, res);
+  public async signUp(req: Request, res: Response): Promise<void> {
+    if (!this.checkReqBody(req, res)) return;
     try {
-      const account = req.body;
-      const result = await this.authService.create(account);
+      const result = await this.authService.signUp(req.body);
 
       if (!result || result === null) {
-        res.status(400).send({ error: "No user created" });
-      } else res.status(201).send(result);
+        this.respond(res, 502, "No user created");
+      } else this.respond(res, 201, "User created", result);
     } catch (error) {
       this.error(error, res);
     }
@@ -50,19 +32,10 @@ export default class AuthController extends BaseController {
    * @param req request header containing refresh token
    * @param res response containing the new access token
    */
-  async generateNewAccessToken(req: Request, res: Response): Promise<void> {
-    this.checkReqBody(req, res);
+  generateNewAccessToken(req: Request, res: Response): void {
     try {
-      const refreshToken = getTokenFromHeaders(req);
-
-      if (!refreshToken) {
-        res.status(403).send({ error: "No token provided" });
-      } else {
-        const newAccessToken = this.authService.getNewAccessToken(
-          String(refreshToken),
-        );
-        res.status(200).send({ accessToken: newAccessToken });
-      }
+      const newAccessToken = this.authService.getNewAccessToken(String(req.body.token));
+      this.respond(res, 201, "New access token generated", newAccessToken);
     } catch (error) {
       this.error(error, res);
     }
@@ -74,18 +47,11 @@ export default class AuthController extends BaseController {
    * @param res response containing the user info and tokens
    */
   async signIn(req: Request, res: Response): Promise<void> {
-    this.checkReqBody(req, res);
+    if (!this.checkReqBody(req, res)) return;
     try {
-      console.log(req.body);
+      const account = req.body;
 
-      const parsedAccount = validateAccount(req.body);
-
-      console.log(parsedAccount);
-
-      const result = await this.authService.signIn(
-        parsedAccount.email,
-        parsedAccount.password,
-      );
+      const result = await this.authService.signIn(account.email, account.password);
 
       if (!result || result === null) {
         res.status(502).send({ error: "Invalid credential" });

@@ -1,8 +1,6 @@
 import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
 import React from "react";
-import router from "expo-router";
 import ScreenWrapper from "../components/ScreenWrapper";
-import BackButton from "../components/BackButton";
 import { deleteValueFor } from "../utils/secureStore"; // Import deleteValueFor
 import { useRouter } from "expo-router";
 

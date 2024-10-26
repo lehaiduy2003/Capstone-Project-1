@@ -1,40 +1,44 @@
-import { Image, Pressable, StatusBar, StyleSheet, Text, View, TouchableOpacity, ScrollView, auto } from "react-native";
+import { Image, StatusBar, StyleSheet, Text, View, TouchableOpacity, ScrollView, auto } from "react-native";
 import React, { useEffect, useState } from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import Button from "../components/Button";
 import { wp } from "../helpers/common";
-import { hp } from "../helpers/common";
 import ArtDesign from "react-native-vector-icons/AntDesign";
-import Carousel from "../components/Carousel";
-import BackButton from "../components/BackButton";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import Loading from "../components/Loading";
-import { useRouter } from "expo-router";
-import { useParams } from "react-router-dom";
 import Header from "../components/Header";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { addToCart } from "../contexts/CartContext";
 
 const ProductDetails = () => {
   const route = useRoute();
   const [isLiked, setIsLiked] = React.useState(false);
-  const { product } = route.params;
+  const { productId } = route.params;
   const [quantity, setQuantity] = useState(1);
   const navigation = useNavigation();
+  const [product, setProduct] = useState({});
+  const [owner, setOwner] = useState({});
+
+  const fetchProductData = async () => {
+    const productData = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/products/${productId}`);
+    const productDataJSON = await productData.json();
+
+    setProduct(productDataJSON);
+
+    const ownerData = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${productDataJSON.owner}`);
+    const ownerDataJSON = await ownerData.json();
+    setOwner(ownerDataJSON);
+  };
+
+  console.log(owner);
+
+  useEffect(() => {
+    fetchProductData();
+  }, [productId]);
 
   const increaseQuantity = () => setQuantity(quantity + 1);
   const decreaseQuantity = () => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
-  // const renderStars = (rating) => {
-  //     const stars = [];
-  //     for (let i = 1; i <= 5; i++) {
-  //         // Add a full star if i is less than or equal to the rating, otherwise add an empty star
-  //         const iconName = i <= rating ? 'star' : 'star-o';
-  //         stars.push(<FontAwesome key={i} name={iconName} size={18} color="#FFD700" />); // Star size & color
-  //     }
-  //     return stars;
-  // };
+
   const handleAddToCart = () => {
     // Add product to cart
     addToCart(product);
@@ -47,10 +51,10 @@ const ProductDetails = () => {
       <ScrollView style={styles.container}>
         <Header title={"Product Detail"} showBackButton></Header>
         <View style={styles.carousel}>
-          <Image source={{ uri: product.image }} style={styles.productImage} />
+          <Image source={{ uri: product.img }} style={styles.productImage} />
         </View>
         <View>
-          <Text style={styles.nameProduct}>{product.title}</Text>
+          <Text style={styles.nameProduct}>{product.name}</Text>
         </View>
         <View style={styles.priceLikeContainer}>
           <Text style={styles.price}>{product.price} đ</Text>
@@ -67,15 +71,6 @@ const ProductDetails = () => {
             )}
           </TouchableOpacity>
         </View>
-        {/* Rating Section
-                <View style={styles.ratingContainer}>
-                    <View style={styles.starContainer}>
-                        {renderStars(Math.round(product.rating?.rate))}  {/* Render stars }
-                    </View>
-                    <Text style={styles.ratingText}>{product.rating?.rate} ({product.rating?.count} reviews)</Text>
-                </View>
-                */}
-
         <View style={styles.quantityContainer}>
           <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
             <Text style={styles.quantityButtonText}>-</Text>
@@ -87,20 +82,20 @@ const ProductDetails = () => {
         </View>
 
         <View style={styles.information}>
-          <Image source={require("../assets/images/iconshop.webp")} style={styles.convertImage} />
-          <Text style={styles.nameShop}>Hải Nam Computers</Text>
+          <Image source={{ uri: owner.avatar }} style={styles.convertImage} />
+          <Text style={styles.nameShop}>{owner.name}</Text>
           <Button
             style={styles.viewShop}
             title="follow"
             buttonStyle={{ marginHorizontal: wp(3) }}
             onPress={() => {
-              router.push("shop");
+              route.push("shop");
             }}
           />
         </View>
         <View>
           <Text style={styles.description}>Description:</Text>
-          <Text style={styles.contentDescription}>{product.description}</Text>
+          <Text style={styles.contentDescription}>{product.description_content}</Text>
         </View>
       </ScrollView>
       <Button title="Add to cart" onPress={() => (onPress = { handleAddToCart })}></Button>

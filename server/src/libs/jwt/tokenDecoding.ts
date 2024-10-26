@@ -1,9 +1,9 @@
-import jwt from "jsonwebtoken";
+import { decode } from "jsonwebtoken";
 import { Payload } from "../zod/Payload";
 
 export default function decodeToken(token: string): Payload {
   try {
-    const payload = jwt.decode(token);
+    const payload = decode(token);
     return payload as Payload;
   } catch (error) {
     console.error(error);

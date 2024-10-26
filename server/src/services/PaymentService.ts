@@ -1,69 +1,44 @@
 import dotenv from "dotenv";
 import Stripe from "stripe";
 
-import BaseService from "./init/BaseService";
+import SessionService from "./init/BaseService";
 
-import { CheckoutProductDTO } from "../libs/zod/dto/CheckoutProductDTO";
+import { CheckoutProductDTO, validateCheckoutProductDTO } from "../libs/zod/dto/CheckoutProductDTO";
 
 import { calculateOrderAmount } from "../utils/currency";
-import PaymentsModel from "../models/PaymentsModel";
-import { Payment } from "../libs/zod/model/Payment";
-import { ClientSession } from "mongoose";
-import { Filter } from "../libs/zod/Filter";
-import { keyValue } from "../libs/zod/keyValue";
+import { Product } from "../libs/zod/model/Product";
 
 dotenv.config();
-const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY));
 
-export default class PaymentService extends BaseService<
-  PaymentsModel,
-  Payment
-> {
-  read(
-    field: keyof Payment,
-    keyValue: keyValue,
-    filter: Filter,
-  ): Promise<Payment[] | null> {
-    throw new Error("Method not implemented.");
-  }
-  create(
-    data: Partial<Payment>,
-    session: ClientSession,
-  ): Promise<Payment | null> {
-    throw new Error("Method not implemented.");
-  }
-  update(
-    field: keyof Payment,
-    keyValue: keyValue,
-    data: Partial<Payment>,
-    session: ClientSession,
-  ): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-  delete(
-    field: keyof Payment,
-    keyValue: keyValue,
-    session: ClientSession,
-  ): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
+export default class PaymentService extends SessionService {
+  private stripeClient: Stripe | null = null;
   public constructor() {
-    super("payment");
+    super();
   }
 
+  private async getStripeClient(): Promise<Stripe> {
+    if (!this.stripeClient) {
+      const { default: Stripe } = await import("stripe");
+      this.stripeClient = new Stripe(String(process.env.STRIPE_SECRET_KEY));
+    }
+    return this.stripeClient;
+  }
   /**
    * create a payment intent with stripe, return the payment intent client secret
    * @param {[{id: ObjectId, name: string, img: string, price: number, quantity: number}]} items
    * @returns {Promise<string>}
    */
-  async createPaymentIntent(
-    products: CheckoutProductDTO[],
-  ): Promise<string | null> {
+  async createPaymentIntent(products: Partial<Product>[]): Promise<string | null> {
     await this.startSession();
     this.startTransaction();
     try {
+      const parsedProducts: CheckoutProductDTO[] = products
+        .map((product: Partial<Product>) => validateCheckoutProductDTO(product))
+        .filter((product: Partial<Product>): product is CheckoutProductDTO => product !== null);
+      const stripe = await this.getStripeClient();
+
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: calculateOrderAmount(products),
+        amount: calculateOrderAmount(parsedProducts),
         currency: "vnd",
       });
 
@@ -75,8 +50,7 @@ export default class PaymentService extends BaseService<
       return paymentIntent.client_secret;
     } catch (error) {
       await this.abortTransaction();
-      console.error(error);
-      throw new Error("error while creating payment intent");
+      throw error;
     } finally {
       await this.endSession();
     }

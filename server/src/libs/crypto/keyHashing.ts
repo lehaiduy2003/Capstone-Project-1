@@ -1,5 +1,5 @@
-import { createHash } from "crypto";
+// import { createHash } from "crypto";
 
-export const SECRET_ENCODED = createHash("sha256")
-  .update(`${process.env.SECRET_KEY}`)
-  .digest("base64");
+// export const SECRET_ENCODED = createHash("sha256")
+//   .update(`${process.env.SECRET_KEY}`)
+//   .digest("base64");

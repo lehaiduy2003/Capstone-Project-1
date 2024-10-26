@@ -1,35 +1,28 @@
 import { Request, Response } from "express";
 
-import IController from "./IController";
 import errorHandler from "../../middlewares/errorMiddleware";
 
-export default abstract class BaseController implements IController {
-  async patch(req: Request, res: Response): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  async get(req: Request, res: Response): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  async post(req: Request, res: Response): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  async put(req: Request, res: Response): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  async delete(req: Request, res: Response): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  public checkReqBody(req: Request, res: Response): void {
+export default class BaseController {
+  protected constructor() {}
+  protected checkReqBody(req: Request, res: Response): boolean {
     if (!req.body) {
       res.status(400).send({ error: "invalid body" });
+      return false;
     }
+    return true;
   }
-  public checkReqParams(req: Request, res: Response): void {
+  protected checkReqParams(req: Request, res: Response): boolean {
     if (!req.params) {
       res.status(400).send({ error: "invalid params" });
+      return false;
     }
+    return true;
   }
-  public error(error: any, res: Response) {
+  protected error(error: any, res: Response): void {
     errorHandler(error, res);
+  }
+
+  protected respond(res: Response, status: number, message: string, data?: unknown): void {
+    res.status(status).send({ message, data });
   }
 }

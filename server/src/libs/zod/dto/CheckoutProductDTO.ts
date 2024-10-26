@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CheckoutProductDTOSchema = z.object({
+const CheckoutProductDTOSchema = z.object({
   price: z.number(),
   quantity: z.number(),
 });

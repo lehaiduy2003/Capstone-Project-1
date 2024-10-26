@@ -1,7 +1,6 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ImageBackground, auto } from "react-native";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { router } from "expo-router";
 import { theme } from "../constants/theme";
 import ProductCard from "../components/ProductCard";
 import BackButton from "../components/BackButton";
@@ -22,6 +21,7 @@ const userProfile = () => {
       <Item item={item} onPress={() => setSelectedId(item.id)} backgroundColor={backgroundColor} textColor={color} />
     );
   };
+
   const Item = ({ item, onPress, backgroundColor, textColor }) => (
     <TouchableOpacity onPress={onPress} style={[styles.item, { backgroundColor }]}>
       <Text style={[styles.title, { color: textColor }]}>{item.title}</Text>

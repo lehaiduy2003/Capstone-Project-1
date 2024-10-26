@@ -1,25 +1,14 @@
-import mongoose, { ClientSession } from "mongoose";
-import IService from "./IService";
-import { Filter } from "../../libs/zod/Filter";
-import { keyValue } from "../../libs/zod/keyValue";
-import ModelFactory from "../../models/init/ModelFactory";
-import { validateServiceModelType } from "../../libs/zod/ServiceModelType";
+"use strict";
+import { ClientSession, startSession } from "mongoose";
 
 /**
  * for isolation of transaction
- * BaseService class provides common service operations for various models.
  * It handles session management and model instantiation.
- * @param T: Model instance
  */
-export default abstract class BaseService<T, K> implements IService<K> {
+export default class SessionService {
   private session: ClientSession | undefined;
-  private readonly model: T;
 
-  protected constructor(modelType?: string) {
-    this.model = ModelFactory.createModel(
-      validateServiceModelType(modelType),
-    ) as T;
-  }
+  protected constructor() {}
 
   public getSession(): ClientSession {
     if (!this.session) {
@@ -28,11 +17,8 @@ export default abstract class BaseService<T, K> implements IService<K> {
     return this.session;
   }
 
-  public getModel(): T {
-    return this.model;
-  }
   public async startSession(): Promise<void> {
-    this.session = await mongoose.startSession();
+    this.session = await startSession();
   }
 
   public startTransaction(): void {
@@ -63,22 +49,4 @@ export default abstract class BaseService<T, K> implements IService<K> {
     await this.session.endSession();
     this.session = undefined;
   }
-
-  abstract read(
-    field: keyof K,
-    keyValue: keyValue,
-    filter: Filter,
-  ): Promise<K[] | null>;
-  abstract create(data: Partial<K>, session?: ClientSession): Promise<K | null>;
-  abstract update(
-    field: keyof K,
-    keyValue: keyValue,
-    data: Partial<K>,
-    session?: ClientSession,
-  ): Promise<boolean>;
-  abstract delete(
-    field: keyof K,
-    keyValue: keyValue,
-    session?: ClientSession,
-  ): Promise<boolean>;
 }

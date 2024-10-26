@@ -2,15 +2,13 @@ import { z } from "zod";
 import generateRandomString from "../../crypto/randomString";
 import { Document, Types } from "mongoose";
 
-export const UserProfileSchema = z.object({
+const UserProfileSchema = z.object({
   name: z.string().default(generateRandomString()),
   phone: z.string().optional(),
   avatar: z
     .string()
     .url()
-    .default(
-      "https://static-00.iconduck.com/assets.00/avatar-default-icon-1975x2048-2mpk4u9k.png",
-    ),
+    .default("https://static-00.iconduck.com/assets.00/avatar-default-icon-1975x2048-2mpk4u9k.png"),
   dob: z.date().default(new Date()),
   bio: z.string().default(""),
   address: z.array(z.string()).default([]),
@@ -23,9 +21,7 @@ export const UserProfileSchema = z.object({
     .refine((val) => Types.ObjectId.isValid(val.toString()), {
       message: "Invalid ObjectId",
     })
-    .transform((val) =>
-      typeof val === "string" ? new Types.ObjectId(val) : val,
-    ),
+    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
   products: z
     .array(
       z
@@ -33,21 +29,7 @@ export const UserProfileSchema = z.object({
         .refine((val) => Types.ObjectId.isValid(val.toString()), {
           message: "Invalid ObjectId",
         })
-        .transform((val) =>
-          typeof val === "string" ? new Types.ObjectId(val) : val,
-        ),
-    )
-    .default([]),
-  payments: z
-    .array(
-      z
-        .union([z.string(), z.instanceof(Types.ObjectId)])
-        .refine((val) => Types.ObjectId.isValid(val.toString()), {
-          message: "Invalid ObjectId",
-        })
-        .transform((val) =>
-          typeof val === "string" ? new Types.ObjectId(val) : val,
-        ),
+        .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val))
     )
     .default([]),
   cart: z
@@ -58,14 +40,12 @@ export const UserProfileSchema = z.object({
           .refine((val) => Types.ObjectId.isValid(val.toString()), {
             message: "Invalid ObjectId",
           })
-          .transform((val) =>
-            typeof val === "string" ? new Types.ObjectId(val) : val,
-          ),
+          .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
         img: z.string().url(),
         name: z.string(),
         price: z.number(),
         quantity: z.number(),
-      }),
+      })
     )
     .default([]),
   likes: z
@@ -76,29 +56,11 @@ export const UserProfileSchema = z.object({
           .refine((val) => Types.ObjectId.isValid(val.toString()), {
             message: "Invalid ObjectId",
           })
-          .transform((val) =>
-            typeof val === "string" ? new Types.ObjectId(val) : val,
-          ),
+          .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
         img: z.string().url(),
         name: z.string(),
         price: z.number(),
-      }),
-    )
-    .default([]),
-  following: z
-    .array(
-      z.object({
-        _id: z
-          .union([z.string(), z.instanceof(Types.ObjectId)])
-          .refine((val) => Types.ObjectId.isValid(val.toString()), {
-            message: "Invalid ObjectId",
-          })
-          .transform((val) =>
-            typeof val === "string" ? new Types.ObjectId(val) : val,
-          ),
-        name: z.string(),
-        avatar: z.string().url(),
-      }),
+      })
     )
     .default([]),
 });
@@ -113,4 +75,3 @@ export const validateUserProfile = (data: unknown) => {
 };
 
 export type UserProfile = z.infer<typeof UserProfileSchema> & Document;
-export interface IUserProfile extends Document, UserProfile {}
