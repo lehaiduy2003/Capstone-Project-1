@@ -10,7 +10,6 @@ export default class ProductsModel {
   public constructor() {
     this.model = model<Product>("products", productsSchema);
   }
-<<<<<<< HEAD
 
   async insert(data: Partial<Product>, session: ClientSession): Promise<Product | null> {
     const modelInstance = new this.model(data);
@@ -19,10 +18,6 @@ export default class ProductsModel {
 
   public async findSearchedProducts(filter: Filter): Promise<Product[]> {
     return await this.model.aggregate([
-=======
-  public async findSearchedProducts(filter: Filter): Promise<Product[] | null> {
-    return await this.getModel().aggregate([
->>>>>>> 103e756 (get transaction history api)
       {
         $search: {
           index: "product_name",

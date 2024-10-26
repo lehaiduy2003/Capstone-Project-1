@@ -17,11 +17,7 @@ export default class TransactionsModel {
    * @returns A promise that resolves to the inserted document, or null if the insertion failed.
    */
   async insert(data: Partial<Transaction>, session: ClientSession): Promise<Transaction | null> {
-<<<<<<< HEAD
     const modelInstance = new this.model(data);
-=======
-    const modelInstance = new (this.getModel())(data);
->>>>>>> 103e756 (get transaction history api)
     return await modelInstance.save({ session });
   }
 

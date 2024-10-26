@@ -87,8 +87,13 @@ export default class ProductService extends SessionService {
       const objectId = new ObjectId(id);
       // Delete the product
       const result = await this.productsModel.deleteOne({ _id: objectId }, this.getSession());
+
+      if (result.deletedCount === 0) {
+        await this.abortTransaction();
+        return false;
+      }
       await this.commitTransaction();
-      return result.deletedCount > 0;
+      return true;
     } catch (error) {
       await this.abortTransaction();
       console.error(error);

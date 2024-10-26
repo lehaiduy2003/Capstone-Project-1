@@ -6,11 +6,7 @@ import userProfilesSchema from "./schemas/UserProfilesSchema";
 export default class UserProfilesModel {
   private readonly model: Model<UserProfile>;
   public constructor() {
-<<<<<<< HEAD
     this.model = model<UserProfile>("userprofiles", userProfilesSchema);
-=======
-    super("userprofiles", userProfilesSchema);
->>>>>>> 103e756 (get transaction history api)
   }
 
   /**
@@ -34,10 +30,6 @@ export default class UserProfilesModel {
     // console.log("field", field);
     // console.log("keyValue", keyValue);
 
-<<<<<<< HEAD
     return await this.model.findOne({ [field]: keyValue } as FilterQuery<UserProfile>);
-=======
-    return await this.getModel().findOne({ [field]: keyValue } as FilterQuery<UserProfile>);
->>>>>>> 103e756 (get transaction history api)
   }
 }
