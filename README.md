@@ -187,4 +187,4 @@ EXPO_PUBLIC_API_URL=<your_api_url>
 
 For more details, refer to the [GitHub Repository](https://github.com/lehaiduy2003/Capstone-Project-1).
 
-```
+<hr></hr>
