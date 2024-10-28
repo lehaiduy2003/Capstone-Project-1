@@ -1,7 +1,6 @@
 import ProductController from "../controllers/ProductController";
 import authenticateToken from "../middlewares/authMiddleware";
 import checkCache from "../middlewares/cacheMiddleware";
-import ProductsModel from "../models/ProductsModel";
 import ProductService from "../services/ProductService";
 import BaseRouter from "./init/BaseRouter";
 
@@ -27,8 +26,7 @@ class ProductRouter extends BaseRouter {
 }
 
 const createProductRouter = (): ProductRouter => {
-  const productsModel = new ProductsModel();
-  const productService = new ProductService(productsModel);
+  const productService = new ProductService();
   const productController = new ProductController(productService);
 
   return new ProductRouter(productController);

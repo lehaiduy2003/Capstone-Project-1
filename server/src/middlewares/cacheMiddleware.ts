@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 
 import errorHandler from "./errorMiddleware";
-import { generateCacheKey } from "../libs/redis/keyGenerating";
-import { getCache } from "../libs/redis/cacheGetting";
+import generateCacheKey from "../libs/redis/keyGenerating";
+import getCache from "../libs/redis/cacheGetting";
 
 export default async function checkCache(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {

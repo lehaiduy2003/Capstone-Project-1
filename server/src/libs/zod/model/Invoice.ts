@@ -1,61 +1,39 @@
-// import { z } from "zod";
-// import { Document, Types } from "mongoose";
+import {z} from "zod";
+import {Document} from "mongoose";
+import {TraderDTOSchema} from "../dto/TraderDTO";
+import {ProductDTOSchema} from "../dto/ProductDTO";
 
-// export const PaymentMethodSchema = z.enum(["cash", "card"]).default("cash");
-// export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
+const InvoiceSchema = z
+    .object({
+        products: ProductDTOSchema.array(),
+        paymentIntent: z.string().optional(), // paymentIntent is optional for cash payment
+        shipping_id: z.string().optional(), // will not be undefined (undefined for using test purpose)
+        createdAt: z.date().default(new Date()),
+        updatedAt: z.date().default(new Date()),
+        paymentStatus: z.enum(["unpaid", "paid"]).default("unpaid"),
+        paymentMethod: z.enum(["card", "cash"]).default("cash"),
+    })
+    .refine(
+        (data) => {
+            // if paymentMethod is card, paymentIntent must not be undefined
+            if (data.paymentMethod === "card") {
+                return data.paymentIntent !== undefined;
+            }
+            if (data.products.length === 0) {
+                return false;
+            }
+        },
+        {
+            message: "Invalid Invoice",
+        }
+    );
 
-// export const PaymentStatusSchema = z.enum(["pending", "paid"]).default("pending");
-// export type PaymentStatus = z.infer<typeof PaymentStatusSchema>;
+export const validateInvoice = (data: unknown) => {
+    const result = InvoiceSchema.safeParse(data);
+    if (!result.success) {
+        throw new Error(result.error.errors[0].message);
+    }
+    return result.data;
+};
 
-// const InvoiceSchema = z.object({
-//   createdAt: z.date().default(new Date()),
-//   updatedAt: z.date().default(new Date()),
-//   buyer: z.object({
-//     _id: z
-//       .union([z.string(), z.instanceof(Types.ObjectId)])
-//       .refine((val) => Types.ObjectId.isValid(val.toString()), {
-//         message: "Invalid ObjectId",
-//       })
-//       .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
-//     address: z.string(),
-//     phone: z.string(),
-//     name: z.string(),
-//   }),
-//   seller: z.object({
-//     _id: z
-//       .union([z.string(), z.instanceof(Types.ObjectId)])
-//       .refine((val) => Types.ObjectId.isValid(val.toString()), {
-//         message: "Invalid ObjectId",
-//       })
-//       .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
-//     address: z.string(),
-//     phone: z.string(),
-//     name: z.string(),
-//   }),
-//   products: z.array(
-//     z.object({
-//       _id: z
-//         .union([z.string(), z.instanceof(Types.ObjectId)])
-//         .refine((val) => Types.ObjectId.isValid(val.toString()), {
-//           message: "Invalid ObjectId",
-//         })
-//         .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
-//       name: z.string(),
-//       img: z.string().url(),
-//       price: z.number(),
-//       quantity: z.number(),
-//     })
-//   ),
-//   paymentMethod: PaymentMethodSchema,
-//   paymentStatus: PaymentStatusSchema,
-// });
-
-// export const validateInvoice = (data: unknown) => {
-//   const result = InvoiceSchema.safeParse(data);
-//   if (!result.success) {
-//     throw new Error(result.error.errors[0].message);
-//   }
-//   return result.data;
-// };
-
-// export interface Invoice extends z.infer<typeof InvoiceSchema>, Document {}
+export type Invoice = z.infer<typeof InvoiceSchema> & Document;

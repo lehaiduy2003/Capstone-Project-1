@@ -8,7 +8,7 @@ const keyValueSchema = z.union([z.object({}), z.string(), z.number(), z.boolean(
 export const validateKeyValue = (value: unknown) => {
   const result = keyValueSchema.safeParse(value);
   if (!result.success) {
-    throw new Error("Invalid keyValue");
+    throw result.error;
   }
   return result.data;
 };

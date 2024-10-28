@@ -11,14 +11,20 @@ export const ProductDTOSchema = z.object({
     .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
   name: z.string(),
   img: z.string().url(),
-  price: z.number(),
-  quantity: z.number(),
+  price: z.number().nonnegative(),
+  quantity: z.number().nonnegative().default(1),
+  owner: z
+    .union([z.string(), z.instanceof(Types.ObjectId)])
+    .refine((val) => Types.ObjectId.isValid(val.toString()), {
+      message: "Invalid ObjectId",
+    })
+    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
 });
 
 export const validateProductDTO = (data: unknown) => {
   const result = ProductDTOSchema.safeParse(data);
   if (!result.success) {
-    throw new Error(result.error.errors[0].message);
+    throw result.error;
   }
   return result.data;
 };

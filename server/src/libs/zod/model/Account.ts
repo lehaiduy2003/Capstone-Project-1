@@ -1,18 +1,7 @@
 import { Document } from "mongoose";
 import { z } from "zod";
-import { RecyclerFieldSchema } from "./RecyclerField";
-
-const passwordSchema = z.string().refine(
-  (password) => {
-    const hasNumber = /\d/.test(password);
-    const hasLetter = /[a-zA-Z]/.test(password);
-    const isLongEnough = password.length >= 6;
-    return hasNumber && hasLetter && isLongEnough;
-  },
-  {
-    message: "Password must contain both numbers and letters and be longer than 12 characters.",
-  }
-);
+import { RecyclerFieldSchema } from "../Properties/RecyclerField";
+import { passwordSchema } from "../Properties/Password";
 
 const AccountSchema = z
   .object({
@@ -21,13 +10,13 @@ const AccountSchema = z
     role: z
       .enum(["customer", "admin", "recycler"])
       .default("customer")
-      .optional()
       .transform((role) => role ?? "customer"),
     createdAt: z.date().default(new Date()),
     updatedAt: z.date().default(new Date()),
     isVerified: z.boolean().default(false),
     status: z.enum(["active", "inactive"]).default("active"),
     recyclerField: RecyclerFieldSchema.optional(),
+    joinedCampaigns: z.array(z.string()).default([]),
   })
   .refine(
     (data) => {
@@ -46,7 +35,7 @@ export const validateAccount = (data: unknown) => {
   const result = AccountSchema.safeParse(data);
 
   if (!result.success) {
-    throw new Error(result.error.errors[0].message);
+    throw result.error;
   }
   return result.data;
 };

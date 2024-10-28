@@ -3,7 +3,7 @@ import { Payload } from "../zod/Payload";
 import decodeToken from "./tokenDecoding";
 import { sign } from "jsonwebtoken";
 
-export default function refreshAccessToken(token: string): string {
+const refreshAccessToken = (token: string): string => {
   const payloadDecoded = decodeToken(token) as Payload;
 
   if (!payloadDecoded) {
@@ -16,4 +16,6 @@ export default function refreshAccessToken(token: string): string {
     role: String(payloadDecoded.role),
   };
   return sign(payload, SECRET_KEY, { ...commonOptions, expiresIn: "1d" });
-}
+};
+
+export default refreshAccessToken;

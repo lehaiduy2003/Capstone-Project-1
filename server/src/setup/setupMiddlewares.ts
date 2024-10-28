@@ -2,7 +2,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { Application, json, urlencoded } from "express";
 
-export default function setupMiddlewares(app: Application): void {
+const setupMiddlewares = (app: Application): void => {
   app.use(
     cors({
       origin: "*",
@@ -15,4 +15,6 @@ export default function setupMiddlewares(app: Application): void {
       extended: true,
     })
   );
-}
+};
+
+export default setupMiddlewares;

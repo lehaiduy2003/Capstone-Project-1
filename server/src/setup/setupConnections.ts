@@ -3,7 +3,7 @@ import { mongoDB } from "../configs/MongoDB";
 import { ngrokClient } from "../configs/Ngrok";
 import { redis } from "../configs/Redis";
 
-export default async function setupConnections(): Promise<void> {
+const setupConnections = async (): Promise<void> => {
   try {
     ConnectionManager.addConnection(mongoDB);
     ConnectionManager.addConnection(redis);
@@ -15,4 +15,6 @@ export default async function setupConnections(): Promise<void> {
     await ConnectionManager.close();
     throw error;
   }
-}
+};
+
+export default setupConnections;

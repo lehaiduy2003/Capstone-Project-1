@@ -17,7 +17,7 @@ export const TraderDTOSchema = z.object({
 export const validateTraderDTO = (data: unknown) => {
   const result = TraderDTOSchema.safeParse(data);
   if (!result.success) {
-    throw new Error(result.error.errors[0].message);
+    throw result.error;
   }
   return result.data;
 };

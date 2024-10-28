@@ -1,41 +1,45 @@
-import SessionService from "./init/BaseService";
+import SessionService from "./init/SessionService";
 
-import TransactionsModel from "../models/TransactionsModel";
-import { Transaction } from "../libs/zod/model/Transaction";
+import { Transaction, validateTransaction } from "../libs/zod/model/Transaction";
 
-import { validateFilter } from "../libs/zod/Filter";
+import { Filter, validateFilter } from "../libs/zod/Filter";
 
 import { ObjectId } from "mongodb";
-import { validateTransactionDTO } from "../libs/zod/dto/TransactionDTO";
+import transactionsModel from "../models/transactionsModel";
 
 export default class TransactionService extends SessionService {
-  private readonly transactionModel: TransactionsModel;
-  public constructor(transactionModel: TransactionsModel) {
+  public constructor() {
     super();
-    this.transactionModel = transactionModel;
   }
 
-  async getTransactionHistory(user_id: string): Promise<Partial<Transaction>[] | null> {
-    return await this.transactionModel.findTransactions(
-      validateFilter({ sort: "updatedAt", order: "desc" }),
-      "user_id",
-      new ObjectId(user_id)
-    );
+  async getTransactionHistory(
+    user_id: string,
+    filter: Partial<Filter>
+  ): Promise<Partial<Transaction>[] | null> {
+    const parsedFilter = validateFilter(filter);
+
+    const transactions = await transactionsModel
+      .find({ user_id: new ObjectId(user_id) })
+      .sort({ [parsedFilter.sort]: parsedFilter.order })
+      .skip(parsedFilter.skip)
+      .limit(parsedFilter.limit);
+
+    return transactions.map(validateTransaction);
   }
 
   /**
-   * @param {[products:{id: ObjectId, img: string, name: string, price: number, quantity: number}]} products
-   * @param {id: ObjectId, address: string, phone: string, name: string} buyer
-   * @param {id: ObjectId, address: string, phone: string, name: string} seller
-   * @returns {Promise<Document<TransactionsModel> | null>}
+   * @param {Partial<Transaction>} data
+   * @returns {Promise<Transaction | null>}
    */
   async create(data: Partial<Transaction>): Promise<Transaction | null> {
     await this.startSession();
     this.startTransaction();
     try {
-      const parsedData = validateTransactionDTO(data);
-      const transaction: Transaction | null = await this.transactionModel.insert(parsedData, this.getSession());
-      if (!transaction || transaction === null) {
+      const parsedData = validateTransaction(data);
+      const transaction: Transaction | null = new transactionsModel(parsedData);
+      await transaction.save({ session: this.getSession() });
+
+      if (!transaction) {
         await this.abortTransaction();
         return null;
       }
@@ -48,22 +52,22 @@ export default class TransactionService extends SessionService {
       await this.endSession();
     }
   }
+
   async updateTransactionById(id: string, data: Partial<Transaction>): Promise<boolean> {
     await this.startSession();
     this.startTransaction();
     try {
-      const isUpdatedTransaction = await this.transactionModel.updateTransactionByUnique(
-        "_id",
-        new ObjectId(id),
+      const updateStatus = await transactionsModel.findOneAndUpdate(
+        { _id: new ObjectId(id) },
         data,
         this.getSession()
       );
-      if (isUpdatedTransaction === false) {
+      if (!updateStatus?.isModified) {
         await this.abortTransaction();
         return false;
       }
       await this.commitTransaction();
-      return isUpdatedTransaction;
+      return true;
     } catch (error) {
       await this.abortTransaction();
       throw error;

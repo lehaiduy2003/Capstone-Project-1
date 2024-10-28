@@ -8,7 +8,7 @@ const CheckoutProductDTOSchema = z.object({
 export const validateCheckoutProductDTO = (data: unknown) => {
   const result = CheckoutProductDTOSchema.safeParse(data);
   if (!result.success) {
-    throw new Error(result.error.errors[0].message);
+    throw result.error;
   }
   return result.data;
 };

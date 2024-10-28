@@ -20,16 +20,14 @@ const ProductDetails = () => {
   const fetchProductData = async () => {
     const productData = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/products/${productId}`);
     const productDataJSON = await productData.json();
-
     setProduct(productDataJSON);
 
     const ownerData = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${productDataJSON.owner}`);
     const ownerDataJSON = await ownerData.json();
     setOwner(ownerDataJSON);
   };
-
-  console.log(owner);
-
+  // console.log(product);
+  // console.log(owner);
   useEffect(() => {
     fetchProductData();
   }, [productId]);

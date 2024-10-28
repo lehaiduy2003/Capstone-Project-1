@@ -1,4 +1,4 @@
-import SessionService from "./init/BaseService";
+import SessionService from "./init/SessionService";
 
 import generateTokens from "../libs/jwt/tokensGenerating";
 import refreshAccessToken from "../libs/jwt/tokenRefreshing";
@@ -13,7 +13,7 @@ import { validateUserProfile } from "../libs/zod/model/UserProfile";
 /**
  * Responsible for handling the authentication process.
  * ``It supported by the AccountService and UserProfileService``.
- * ``The main transaction is handled by the BaseService, which is extended by this class``.
+ *  The main transaction is handled by the SessionService, which is extended by this class.
  * @class AccountService
  * @class UserProfileService
  */
@@ -26,23 +26,28 @@ export default class AuthService extends SessionService {
     this.userProfileService = userProfileService;
   }
 
-  async signUp(data: Partial<Account>): Promise<unknown> {
+  async signUp(data: Partial<Account>): Promise<AuthDTO | null> {
     await this.startSession();
     this.startTransaction();
     try {
       const accountData = validateAccount(data);
+
       if (await this.accountService.isAccountExist(accountData.email)) {
         await this.abortTransaction();
         return null;
       }
-
       const newAccount = await this.accountService.create(accountData, this.getSession());
+
       if (!newAccount) {
         await this.abortTransaction();
         return null;
       }
-      const userData = validateUserProfile({ account_id: String(newAccount._id) });
+      const userData = validateUserProfile({
+        account_id: String(newAccount._id),
+      });
+
       const newUser = await this.userProfileService.create(userData, this.getSession());
+
       if (!newUser) {
         await this.abortTransaction();
         return null;
@@ -79,7 +84,9 @@ export default class AuthService extends SessionService {
 
     const isPasswordValid = this.accountService.verifyAccountPassword(account, password);
 
-    const userProfile = await this.userProfileService.findUserProfileByAccountId(String(account._id));
+    const userProfile = await this.userProfileService.findUserProfileByAccountId(
+      String(account._id)
+    );
 
     // console.log("userProfile", userProfile);
 
@@ -88,6 +95,10 @@ export default class AuthService extends SessionService {
     }
 
     const tokens = generateTokens(String(account._id), account.role);
-    return validateAuthDTO({ account_id: String(account._id), user_id: String(userProfile._id), ...tokens });
+    return validateAuthDTO({
+      account_id: String(account._id),
+      user_id: String(userProfile._id),
+      ...tokens,
+    });
   }
 }

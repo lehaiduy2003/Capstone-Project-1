@@ -23,9 +23,12 @@ const SignUp = () => {
 
   const router = useRouter();
 
-  const { loading, error, onSubmit } = useFormSubmit(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`, {
-    body: { email: email, password: confirmPassword },
-  });
+  const { loading, error, onSubmit } = useFormSubmit(
+    `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`,
+    {
+      body: { email: email, password: confirmPassword },
+    }
+  );
 
   const onChangeEmail = (value) => {
     setEmail(value);
@@ -36,13 +39,17 @@ const SignUp = () => {
   const onChangePassword = (value) => {
     setPassword(value);
     if (confirmPassword) {
-      passwordMatches(value, confirmPassword) ? setConfirmPasswordError(false) : setConfirmPasswordError(true);
+      passwordMatches(value, confirmPassword)
+        ? setConfirmPasswordError(false)
+        : setConfirmPasswordError(true);
     }
   };
 
   const onChangeConfirmPassword = (value) => {
     setConfirmPassword(value);
-    passwordMatches(password, value) ? setConfirmPasswordError(false) : setConfirmPasswordError(true);
+    passwordMatches(password, value)
+      ? setConfirmPasswordError(false)
+      : setConfirmPasswordError(true);
     console.log(confirmPasswordError);
   };
 

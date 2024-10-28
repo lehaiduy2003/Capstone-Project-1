@@ -1,6 +1,5 @@
 import TransactionController from "../controllers/TransactionController";
 import authenticateToken from "../middlewares/authMiddleware";
-import TransactionsModel from "../models/TransactionsModel";
 import TransactionService from "../services/TransactionService";
 import BaseRouter from "./init/BaseRouter";
 
@@ -15,17 +14,17 @@ class TransactionRouter extends BaseRouter {
 
   public initRoutes(): void {
     this.router.post(
-      "/transactions",
+      "/",
       authenticateToken,
       this.transactionController.createTransaction.bind(this.transactionController)
     );
     this.router.patch(
-      "/transactions/:id",
+      "/:id",
       authenticateToken,
       this.transactionController.updateTransaction.bind(this.transactionController)
     );
     this.router.get(
-      "/transactions",
+      "/",
       authenticateToken,
       this.transactionController.getUserTransactions.bind(this.transactionController)
     );
@@ -33,8 +32,7 @@ class TransactionRouter extends BaseRouter {
 }
 
 const createTransactionRouter = (): TransactionRouter => {
-  const transactionsModel = new TransactionsModel();
-  const transactionService = new TransactionService(transactionsModel);
+  const transactionService = new TransactionService();
   const transactionController = new TransactionController(transactionService);
 
   return new TransactionRouter(transactionController);

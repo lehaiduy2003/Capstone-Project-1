@@ -18,7 +18,7 @@ const FilterSchema = z.object({
 export const validateFilter = (data: unknown) => {
   const result = FilterSchema.safeParse(data);
   if (!result.success) {
-    throw new Error(result.error.errors[0].message);
+    throw result.error;
   }
   return result.data;
 };

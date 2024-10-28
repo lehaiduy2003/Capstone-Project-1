@@ -1,6 +1,4 @@
 import UserController from "../controllers/UserController";
-import authenticateToken from "../middlewares/authMiddleware";
-import UserProfilesModel from "../models/UserProfilesModel";
 import UserProfileService from "../services/UserProfileService";
 import BaseRouter from "./init/BaseRouter";
 
@@ -12,13 +10,12 @@ class UserRouter extends BaseRouter {
     this.initRoutes();
   }
   public initRoutes(): void {
-    this.router.get("/:id", authenticateToken, this.userController.getUserProfileById.bind(this.userController));
+    this.router.get("/:id", this.userController.getUserProfileById.bind(this.userController));
   }
 }
 
 const createUserRouter = (): UserRouter => {
-  const userProfilesModel = new UserProfilesModel();
-  const userService = new UserProfileService(userProfilesModel);
+  const userService = new UserProfileService();
   const userController = new UserController(userService);
 
   return new UserRouter(userController);

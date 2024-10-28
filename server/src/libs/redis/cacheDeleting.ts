@@ -1,6 +1,6 @@
 import redisClientPromise from "./config";
 
-export async function deleteCache(key: string): Promise<void> {
+const deleteCache = async (key: string): Promise<void> => {
   try {
     const redisClient = await redisClientPromise();
     if ((await redisClient.exists(key)) === 0) {
@@ -12,4 +12,6 @@ export async function deleteCache(key: string): Promise<void> {
   } catch (error) {
     console.error(`Error deleting cache with key ${key}:`, error);
   }
-}
+};
+
+export default deleteCache;

@@ -1,11 +1,11 @@
 import transporter from "../libs/nodemailer/transporter";
 import mailOptions from "../libs/nodemailer/mailOptions";
 
-import { saveToCache } from "../libs/redis/cacheSaving";
-import { deleteCache } from "../libs/redis/cacheDeleting";
-import { getCache } from "../libs/redis/cacheGetting";
 import generateOTP from "../utils/generateOTP";
 import IOtpService from "./init/IOtpService";
+import getCache from "../libs/redis/cacheGetting";
+import saveToCache from "../libs/redis/cacheSaving";
+import deleteCache from "../libs/redis/cacheDeleting";
 
 export default class EmailService implements IOtpService {
   public constructor() {}
@@ -13,7 +13,7 @@ export default class EmailService implements IOtpService {
     try {
       const otp = String(generateOTP()); // generate a 6 digit OTP code
 
-      if (await getCache(identifier)) return true;
+      if (await getCache(identifier)) return true; // return true if the cache is not empty
 
       await transporter.sendMail(mailOptions(identifier, otp));
       await saveToCache(identifier, 300, { otp }); // save the OTP to the cache

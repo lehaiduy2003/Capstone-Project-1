@@ -1,7 +1,5 @@
 import AuthController from "../controllers/AuthController";
 import authenticateToken from "../middlewares/authMiddleware";
-import AccountsModel from "../models/AccountsModel";
-import UserProfilesModel from "../models/UserProfilesModel";
 import AccountService from "../services/AccountService";
 import AuthService from "../services/AuthService";
 import UserProfileService from "../services/UserProfileService";
@@ -26,12 +24,8 @@ class AuthRouter extends BaseRouter {
 }
 
 const createAuthRouter = (): AuthRouter => {
-  const accountsModel = new AccountsModel();
-  const accountService = new AccountService(accountsModel);
-
-  const userProfilesModel = new UserProfilesModel();
-  const userProfileService = new UserProfileService(userProfilesModel);
-
+  const accountService = new AccountService();
+  const userProfileService = new UserProfileService();
   const authService = new AuthService(accountService, userProfileService);
   const authController = new AuthController(authService);
 

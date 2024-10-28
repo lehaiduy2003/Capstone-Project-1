@@ -1,6 +1,6 @@
-import { Schema } from "mongoose";
-import { Account } from "../../libs/zod/model/Account";
-import { RecyclerField } from "../../libs/zod/model/RecyclerField";
+import { model, Schema } from "mongoose";
+import { Account } from "../libs/zod/model/Account";
+import { RecyclerField } from "../libs/zod/Properties/RecyclerField";
 
 const accountsSchema: Schema<Account> = new Schema({
   email: { type: String, required: true, unique: true },
@@ -10,9 +10,9 @@ const accountsSchema: Schema<Account> = new Schema({
     enum: ["customer", "recycler", "admin"],
     default: "customer",
   },
-  createdAt: { type: Date, required: true, default: Date.now },
-  updatedAt: { type: Date, required: true, default: Date.now },
-  isVerified: { type: Boolean, required: true, default: false },
+  createdAt: { type: Date, required: true },
+  updatedAt: { type: Date, required: true },
+  isVerified: { type: Boolean, required: true },
   status: {
     type: String,
     enum: ["active", "inactive"],
@@ -38,11 +38,14 @@ accountsSchema.pre("save", function (next) {
 });
 
 function isValidRecyclerField(recyclerField: RecyclerField) {
-  return recyclerField?.recyclingLicenseNumber ?? (false && recyclerField?.recyclingCapacity) ?? false;
+  return !!recyclerField?.license;
 }
+
 // Create indexes
 accountsSchema.index({ email: 1 }, { unique: true });
 accountsSchema.index({ role: 1 });
 accountsSchema.index({ createAt: 1 });
 
-export default accountsSchema;
+const accountsModel = model<Account>("accounts", accountsSchema);
+
+export default accountsModel;

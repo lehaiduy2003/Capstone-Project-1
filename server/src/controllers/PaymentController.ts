@@ -5,10 +5,12 @@ import PaymentService from "../services/PaymentService";
 
 export default class PaymentController extends BaseController {
   private readonly paymentService: PaymentService;
+
   public constructor(paymentService: PaymentService) {
     super();
     this.paymentService = paymentService;
   }
+
   /**
    * create a payment intent for the transaction
    * @param req request containing transaction data
@@ -17,7 +19,10 @@ export default class PaymentController extends BaseController {
   public async createPaymentIntent(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const clientSecret = await this.paymentService.createPaymentIntent(req.body.products);
+      const clientSecret = await this.paymentService.createPaymentIntent(
+        req.body.id,
+        req.body.products
+      );
 
       if (!clientSecret) {
         res.status(502).send({ error: "no payment intent created" });

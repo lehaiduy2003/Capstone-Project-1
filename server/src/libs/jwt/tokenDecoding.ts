@@ -1,7 +1,7 @@
 import { decode } from "jsonwebtoken";
 import { Payload } from "../zod/Payload";
 
-export default function decodeToken(token: string): Payload {
+const decodeToken = (token: string): Payload => {
   try {
     const payload = decode(token);
     return payload as Payload;
@@ -9,4 +9,6 @@ export default function decodeToken(token: string): Payload {
     console.error(error);
     throw new Error("cannot decode token");
   }
-}
+};
+
+export default decodeToken;

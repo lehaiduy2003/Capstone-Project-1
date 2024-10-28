@@ -1,7 +1,7 @@
 import { sign } from "jsonwebtoken";
 import { commonOptions, SECRET_KEY } from "./keyAndOption";
 
-export default function generateTokens(id: string, role: string) {
+const generateTokens = (id: string, role: string) => {
   //console.log(user);
 
   const now = Date.now();
@@ -26,4 +26,6 @@ export default function generateTokens(id: string, role: string) {
   );
 
   return { refreshToken, accessToken };
-}
+};
+
+export default generateTokens;

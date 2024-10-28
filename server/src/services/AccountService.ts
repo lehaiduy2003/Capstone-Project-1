@@ -1,17 +1,14 @@
-import AccountsModel from "../models/AccountsModel";
-
 import { ClientSession } from "mongoose";
 
 import { Account, validateAccount } from "../libs/zod/model/Account";
 import verifyPassword from "../libs/crypto/passwordVerifying";
 import hashPassword from "../libs/crypto/passwordHashing";
 import { KeyValue } from "../libs/zod/KeyValue";
+import accountsModel from "../models/accountsModel";
 
 export default class AccountService {
-  private readonly accountsModel: AccountsModel;
-  public constructor(accountsModel: AccountsModel) {
-    this.accountsModel = accountsModel;
-  }
+  public constructor() {}
+
   /**
    * for creating a new account
    * @param data
@@ -25,11 +22,19 @@ export default class AccountService {
       password: hashedPassword,
       role: data.role,
     });
-    return await this.accountsModel.insert(accountData, session);
+
+    const account = new accountsModel(accountData);
+    const createStatus = await account.save({ session });
+
+    if (!createStatus) return null;
+
+    return createStatus;
   }
 
   async delete(field: keyof Account, keyValue: KeyValue, session: ClientSession): Promise<boolean> {
-    return this.accountsModel.deleteAccountByUnique(field, keyValue, session);
+    // return this.accountsModel.deleteAccountByUnique(field, keyValue, session);
+    const isSuccess = await accountsModel.deleteOne({ [field]: keyValue }, { session });
+    return isSuccess.deletedCount > 0;
   }
 
   // async deleteAccountById(account_id: string): Promise<boolean> {
@@ -42,17 +47,16 @@ export default class AccountService {
    * @returns
    */
   async getAccountByEmail(email: string): Promise<Account | null> {
-    return await this.accountsModel.findAccountByUnique("email", email);
+    return await accountsModel.findOne({ email: email });
   }
 
   /**
-   * Check if user profile exist, return true if exist, false otherwise
-   * @param accountId
+   * Check if user profile exist, return true if existed, false otherwise
+   * @param email
    * @returns
    */
   async isAccountExist(email: string): Promise<boolean> {
-    const account = await this.getAccountByEmail(email);
-    return account !== null;
+    return (await this.getAccountByEmail(email)) != null;
   }
 
   isAccountActive(account: Account | null): boolean {

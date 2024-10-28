@@ -1,36 +1,50 @@
-import ProductsModel from "../models/ProductsModel";
-
 import { Product, validateProduct } from "../libs/zod/model/Product";
 import { Filter, validateFilter } from "../libs/zod/Filter";
 
 import { ObjectId } from "mongodb";
-import SessionService from "./init/BaseService";
+import SessionService from "./init/SessionService";
 import { ProductDTO, validateProductDTO } from "../libs/zod/dto/ProductDTO";
+import productsModel from "../models/productsModel";
 
 export default class ProductService extends SessionService {
-  private readonly productsModel: ProductsModel;
-  public constructor(productsModel: ProductsModel) {
+  public constructor() {
     super();
-    this.productsModel = productsModel;
   }
-  async read(filter: Partial<Filter>): Promise<Product[] | null> {
+  async read(filter: Partial<Filter>): Promise<ProductDTO[] | null> {
     const parsedFilter = validateFilter(filter);
-    return await this.productsModel.findProducts(parsedFilter);
+    const products = await productsModel
+      .find()
+      .sort({ [parsedFilter.sort]: parsedFilter.order })
+      .skip(parsedFilter.skip)
+      .limit(parsedFilter.limit);
+
+    // console.log(products);
+
+    return products.map(validateProductDTO).filter((product) => product);
   }
 
   public async search(filter: Partial<Filter>): Promise<ProductDTO[] | null> {
     const parsedFilter = validateFilter(filter);
-    const products = await this.productsModel.findSearchedProducts(parsedFilter);
 
-    if (!products) {
-      return null;
-    }
+    const order = parsedFilter.order === "asc" || parsedFilter.order === "ascending" ? 1 : -1;
 
-    // const result = products.map(validateSearchResultDTO);
+    const products = await productsModel.aggregate([
+      {
+        $search: {
+          index: "product_name",
+          text: {
+            query: parsedFilter.query,
+            path: "name",
+            fuzzy: { maxEdits: 1 },
+          },
+        },
+      },
+      { $sort: { [parsedFilter.sort]: order } },
+      { $limit: parsedFilter.limit },
+      { $skip: parsedFilter.skip },
+    ]);
 
-    // console.log(result);
-
-    // return result;
+    // console.log(products);
 
     return products.map(validateProductDTO);
   }
@@ -40,10 +54,17 @@ export default class ProductService extends SessionService {
     this.startTransaction();
     try {
       const productData = validateProduct(data);
-      const result = await this.productsModel.insert(productData, this.getSession());
+      const product = new productsModel(productData);
+
+      await product.save({ session: this.getSession() });
+
+      if (!product) {
+        await this.abortTransaction();
+        return null;
+      }
 
       await this.commitTransaction();
-      return result;
+      return product;
     } catch (error) {
       this.abortTransaction();
       throw error;
@@ -52,25 +73,27 @@ export default class ProductService extends SessionService {
     }
   }
 
-  public async updateProductById(id: string, data: Partial<Product>): Promise<boolean> {
+  public async updateProductById(id: string, data: Partial<Product>): Promise<Product> {
     await this.startSession();
     this.startTransaction();
     try {
-      // Validate input
-      if (!id || !data) {
-        await this.abortTransaction();
-        throw new Error("Invalid input");
-      }
-      const objectId = new ObjectId(id);
       // Update the product
-      const result = await this.productsModel.updateProductByUnique("_id", objectId, data, this.getSession());
-      await this.commitTransaction();
+      const updateStatus = await productsModel.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        data,
+        this.getSession()
+      );
 
-      return result;
+      if (!updateStatus?.isModified) {
+        await this.abortTransaction();
+        throw new Error("Update failed");
+      }
+
+      await this.commitTransaction();
+      return updateStatus;
     } catch (error) {
       await this.abortTransaction();
-      console.error(error);
-      return false;
+      throw error;
     } finally {
       await this.endSession();
     }
@@ -80,15 +103,11 @@ export default class ProductService extends SessionService {
     await this.startSession();
     this.startTransaction();
     try {
-      if (!id) {
-        await this.abortTransaction();
-        throw new Error("Invalid input");
-      }
       const objectId = new ObjectId(id);
       // Delete the product
-      const result = await this.productsModel.deleteOne({ _id: objectId }, this.getSession());
+      const deleteStatus = await productsModel.deleteOne({ _id: objectId }, this.getSession());
 
-      if (result.deletedCount === 0) {
+      if (deleteStatus.deletedCount == 0) {
         await this.abortTransaction();
         return false;
       }
@@ -106,6 +125,6 @@ export default class ProductService extends SessionService {
   }
 
   public async readOne(id: string): Promise<Product | null> {
-    return await this.productsModel.findProductByUnique("_id", new ObjectId(id));
+    return await productsModel.findOne({ _id: new ObjectId(id) });
   }
 }

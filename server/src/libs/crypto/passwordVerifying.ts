@@ -6,7 +6,9 @@ import { pbkdf2Sync } from "crypto";
  * @param {string} hash - hash of the data (from the database)
  * @returns {boolean} - true if the data is correct, false otherwise
  */
-export default function verifyPassword(password: string, salt: string, hash: string) {
+const verifyPassword = (password: string, salt: string, hash: string): boolean => {
   const hashToVerify = pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
   return hashToVerify === hash;
-}
+};
+
+export default verifyPassword;

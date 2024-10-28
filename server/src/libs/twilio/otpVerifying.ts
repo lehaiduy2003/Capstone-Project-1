@@ -2,7 +2,7 @@ import twilioClient from "./config";
 import dotenv from "dotenv";
 dotenv.config();
 
-export default async function verifyTwilioOTP(otp: string, phone: string) {
+const verifyTwilioOTP = async (otp: string, phone: string) => {
   const verificationCheck = await twilioClient.verify.v2
     .services(process.env.SERVICE_SID as string)
     .verificationChecks.create({
@@ -11,4 +11,6 @@ export default async function verifyTwilioOTP(otp: string, phone: string) {
     });
 
   return verificationCheck.status === "approved" ? true : false;
-}
+};
+
+export default verifyTwilioOTP;
