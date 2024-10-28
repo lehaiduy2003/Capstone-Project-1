@@ -97,7 +97,7 @@ Ensure you have the following installed on your system:
 1. **Start the Express server:**
    ```sh
    cd server
-   npm run dev or npm run start
+   npm start
    ```
 
 ### Testing
