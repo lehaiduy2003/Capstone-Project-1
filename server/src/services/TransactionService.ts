@@ -1,43 +1,45 @@
-import BaseService from "./init/BaseService";
+import SessionService from "./init/SessionService";
 
-import TransactionsModel from "../models/TransactionsModel";
-import { Transaction } from "../libs/zod/model/Transaction";
+import { Transaction, validateTransaction } from "../libs/zod/model/Transaction";
 
-import { Filter } from "../libs/zod/Filter";
-import { keyValue } from "../libs/zod/keyValue";
+import { Filter, validateFilter } from "../libs/zod/Filter";
 
-export default class TransactionService extends BaseService<
-  TransactionsModel,
-  Transaction
-> {
+import { ObjectId } from "mongodb";
+import transactionsModel from "../models/transactionsModel";
+
+export default class TransactionService extends SessionService {
   public constructor() {
-    super("transaction");
+    super();
   }
 
-  read(
-    field: keyof Transaction,
-    keyValue: keyValue,
-    filter: Filter,
-  ): Promise<Transaction[] | null> {
-    throw new Error("Method not implemented.");
+  async getTransactionHistory(
+    user_id: string,
+    filter: Partial<Filter>
+  ): Promise<Partial<Transaction>[] | null> {
+    const parsedFilter = validateFilter(filter);
+
+    const transactions = await transactionsModel
+      .find({ user_id: new ObjectId(user_id) })
+      .sort({ [parsedFilter.sort]: parsedFilter.order })
+      .skip(parsedFilter.skip)
+      .limit(parsedFilter.limit);
+
+    return transactions.map(validateTransaction);
   }
+
   /**
-   * @param {[products:{id: ObjectId, img: string, name: string, price: number, quantity: number}]} products
-   * @param {id: ObjectId, address: string, phone: string, name: string} buyer
-   * @param {id: ObjectId, address: string, phone: string, name: string} seller
-   * @returns {Promise<Document<TransactionsModel> | null>}
+   * @param {Partial<Transaction>} data
+   * @returns {Promise<Transaction | null>}
    */
-  override async create(
-    data: Partial<Transaction>,
-  ): Promise<Transaction | null> {
+  async create(data: Partial<Transaction>): Promise<Transaction | null> {
     await this.startSession();
     this.startTransaction();
     try {
-      const transaction: Transaction | null = await this.getModel().insert(
-        data,
-        this.getSession(),
-      );
-      if (!transaction || transaction === null) {
+      const parsedData = validateTransaction(data);
+      const transaction: Transaction | null = new transactionsModel(parsedData);
+      await transaction.save({ session: this.getSession() });
+
+      if (!transaction) {
         await this.abortTransaction();
         return null;
       }
@@ -45,41 +47,32 @@ export default class TransactionService extends BaseService<
       return transaction;
     } catch (error) {
       await this.abortTransaction();
-      console.error("error while create transaction: ", error);
-      return null;
+      throw error;
     } finally {
       await this.endSession();
     }
   }
-  override async update(
-    field: keyof Transaction,
-    keyValue: keyValue,
-    data: Partial<Transaction>,
-  ): Promise<boolean> {
+
+  async updateTransactionById(id: string, data: Partial<Transaction>): Promise<boolean> {
     await this.startSession();
     this.startTransaction();
     try {
-      const isUpdatedTransaction = await this.getModel().updateByUnique(
-        field,
-        keyValue,
+      const updateStatus = await transactionsModel.findOneAndUpdate(
+        { _id: new ObjectId(id) },
         data,
-        this.getSession(),
+        this.getSession()
       );
-      if (isUpdatedTransaction === false) {
+      if (!updateStatus?.isModified) {
         await this.abortTransaction();
         return false;
       }
       await this.commitTransaction();
-      return isUpdatedTransaction;
+      return true;
     } catch (error) {
       await this.abortTransaction();
-      console.error("error while updating transaction: ", error);
-      return false;
+      throw error;
     } finally {
       await this.endSession();
     }
-  }
-  delete(field: keyof Transaction, keyValue: keyValue): Promise<boolean> {
-    throw new Error("Method not implemented.");
   }
 }

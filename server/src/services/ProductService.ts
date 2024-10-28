@@ -1,69 +1,130 @@
-import ProductsModel from "../models/ProductsModel";
+import { Product, validateProduct } from "../libs/zod/model/Product";
+import { Filter, validateFilter } from "../libs/zod/Filter";
 
-import BaseService from "./init/BaseService";
+import { ObjectId } from "mongodb";
+import SessionService from "./init/SessionService";
+import { ProductDTO, validateProductDTO } from "../libs/zod/dto/ProductDTO";
+import productsModel from "../models/productsModel";
 
-import { Product } from "../libs/zod/model/Product";
-import { Filter } from "../libs/zod/Filter";
+export default class ProductService extends SessionService {
+  public constructor() {
+    super();
+  }
+  async read(filter: Partial<Filter>): Promise<ProductDTO[] | null> {
+    const parsedFilter = validateFilter(filter);
+    const products = await productsModel
+      .find()
+      .sort({ [parsedFilter.sort]: parsedFilter.order })
+      .skip(parsedFilter.skip)
+      .limit(parsedFilter.limit);
 
-import {
-  SearchResultDTO,
-  validateSearchResultDTO,
-} from "../libs/zod/dto/SearchResultDTO";
-import { ClientSession } from "mongoose";
-import { keyValue } from "../libs/zod/keyValue";
+    // console.log(products);
 
-export default class ProductService extends BaseService<
-  ProductsModel,
-  Product
-> {
-  override async read(
-    field: keyof Product,
-    keyValue: keyValue,
-    filter: Filter,
-  ): Promise<Product[] | null> {
+    return products.map(validateProductDTO).filter((product) => product);
+  }
+
+  public async search(filter: Partial<Filter>): Promise<ProductDTO[] | null> {
+    const parsedFilter = validateFilter(filter);
+
+    const order = parsedFilter.order === "asc" || parsedFilter.order === "ascending" ? 1 : -1;
+
+    const products = await productsModel.aggregate([
+      {
+        $search: {
+          index: "product_name",
+          text: {
+            query: parsedFilter.query,
+            path: "name",
+            fuzzy: { maxEdits: 1 },
+          },
+        },
+      },
+      { $sort: { [parsedFilter.sort]: order } },
+      { $limit: parsedFilter.limit },
+      { $skip: parsedFilter.skip },
+    ]);
+
+    // console.log(products);
+
+    return products.map(validateProductDTO);
+  }
+
+  public async createProduct(data: Partial<Product>): Promise<Product | null> {
+    await this.startSession();
+    this.startTransaction();
     try {
-      const products: Product[] | null =
-        await this.getModel().findWithFilter(filter);
+      const productData = validateProduct(data);
+      const product = new productsModel(productData);
 
-      return products;
+      await product.save({ session: this.getSession() });
+
+      if (!product) {
+        await this.abortTransaction();
+        return null;
+      }
+
+      await this.commitTransaction();
+      return product;
     } catch (error) {
-      console.error("Error getting homepage data:", error);
+      this.abortTransaction();
       throw error;
+    } finally {
+      await this.endSession();
     }
   }
-  create(
-    data: Partial<Product>,
-    session: ClientSession,
-  ): Promise<Product | null> {
-    throw new Error("Method not implemented.");
-  }
-  update(
-    field: keyof Product,
-    keyValue: keyValue,
-    data: Partial<Product>,
-    session: ClientSession,
-  ): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-  delete(
-    field: keyof Product,
-    keyValue: keyValue,
-    session: ClientSession,
-  ): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-  public constructor() {
-    super("product");
+
+  public async updateProductById(id: string, data: Partial<Product>): Promise<Product> {
+    await this.startSession();
+    this.startTransaction();
+    try {
+      // Update the product
+      const updateStatus = await productsModel.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        data,
+        this.getSession()
+      );
+
+      if (!updateStatus?.isModified) {
+        await this.abortTransaction();
+        throw new Error("Update failed");
+      }
+
+      await this.commitTransaction();
+      return updateStatus;
+    } catch (error) {
+      await this.abortTransaction();
+      throw error;
+    } finally {
+      await this.endSession();
+    }
   }
 
-  public async search(filter: Filter): Promise<SearchResultDTO[] | null> {
-    const products: Product[] =
-      await this.getModel().findSearchedProducts(filter);
+  public async deleteProduct(id: string): Promise<boolean> {
+    await this.startSession();
+    this.startTransaction();
+    try {
+      const objectId = new ObjectId(id);
+      // Delete the product
+      const deleteStatus = await productsModel.deleteOne({ _id: objectId }, this.getSession());
 
-    const result = products.map((product) => {
-      return validateSearchResultDTO(product);
-    });
+      if (deleteStatus.deletedCount == 0) {
+        await this.abortTransaction();
+        return false;
+      }
 
-    return result;
+      await this.commitTransaction();
+      return true;
+    } catch (error) {
+      await this.abortTransaction();
+      console.error(error);
+      // Return failure
+      return false;
+    } finally {
+      await this.endSession();
+    }
+  }
+
+  public async readOne(id: string): Promise<Product | null> {
+    return await productsModel.findOne({ _id: new ObjectId(id) });
   }
 }

@@ -13,7 +13,7 @@ const PayloadSchema = z.object({
 export const validatePayload = (data: unknown) => {
   const result = PayloadSchema.safeParse(data);
   if (!result.success) {
-    throw new Error(result.error.errors[0].message);
+    throw result.error;
   }
   return result.data;
 };

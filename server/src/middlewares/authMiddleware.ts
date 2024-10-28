@@ -8,32 +8,29 @@ import verifyToken from "../libs/jwt/tokenVerifying";
 import decodeToken from "../libs/jwt/tokenDecoding";
 
 // Middleware to authenticate the token - check if the token is valid
-export default function authenticateToken(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void {
+export default function authenticateToken(req: Request, res: Response, next: NextFunction): void {
   const token = getTokenFromHeaders(req);
   try {
     if (!token) {
-      res.status(403).send({ message: "no token provided" });
+      res.status(401).send({ message: "no token provided" });
       return;
     }
 
     const checkToken = verifyToken(token);
 
     if (checkToken === 0) {
-      res.status(401).send({ message: "Token is expired" });
+      res.status(403).send({ message: "Token is expired" });
       return;
     }
 
     if (checkToken === -1) {
-      res.status(401).send({ message: "Invalid token" });
+      res.status(403).send({ message: "Invalid token" });
       return;
     }
 
     const payload = decodeToken(token);
     req.body.user = payload;
+    req.body.token = token;
     next();
   } catch (error) {
     errorHandler(error, res);

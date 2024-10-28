@@ -1,4 +1,4 @@
-import jwt, { JsonWebTokenError } from "jsonwebtoken";
+import { JsonWebTokenError, verify } from "jsonwebtoken";
 
 import { SECRET_KEY } from "./keyAndOption";
 /**
@@ -6,9 +6,9 @@ import { SECRET_KEY } from "./keyAndOption";
  * @param {string} token
  * @returns {-1 | 0 | 1}
  */
-export default function verifyToken(token: string): 1 | 0 | -1 {
+const verifyToken = (token: string): 1 | 0 | -1 => {
   try {
-    jwt.verify(token, SECRET_KEY);
+    verify(token, SECRET_KEY);
     return 1; // Token is valid
   } catch (error) {
     if (error instanceof JsonWebTokenError) {
@@ -19,4 +19,6 @@ export default function verifyToken(token: string): 1 | 0 | -1 {
     }
     throw error; // Re-throw unexpected errors
   }
-}
+};
+
+export default verifyToken;

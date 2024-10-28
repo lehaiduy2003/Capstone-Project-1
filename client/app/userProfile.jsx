@@ -1,7 +1,15 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ImageBackground, auto } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  ImageBackground,
+  auto,
+} from "react-native";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { router } from "expo-router";
 import { theme } from "../constants/theme";
 import ProductCard from "../components/ProductCard";
 import BackButton from "../components/BackButton";
@@ -19,9 +27,15 @@ const userProfile = () => {
     const backgroundColor = item.id === selectedId ? "#04FFB8" : "#F4F6F8";
     const color = item.id === selectedId ? "white" : theme.colors.text;
     return (
-      <Item item={item} onPress={() => setSelectedId(item.id)} backgroundColor={backgroundColor} textColor={color} />
+      <Item
+        item={item}
+        onPress={() => setSelectedId(item.id)}
+        backgroundColor={backgroundColor}
+        textColor={color}
+      />
     );
   };
+
   const Item = ({ item, onPress, backgroundColor, textColor }) => (
     <TouchableOpacity onPress={onPress} style={[styles.item, { backgroundColor }]}>
       <Text style={[styles.title, { color: textColor }]}>{item.title}</Text>
@@ -30,10 +44,13 @@ const userProfile = () => {
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={require("../assets/images/iconshop.webp")} style={styles.infomationshop}>
+      <ImageBackground
+        source={require("../assets/images/iconshop.webp")}
+        style={styles.infomationshop}
+      >
         {/* Lớp phủ để làm mờ hình nền */}
         <View style={styles.overlay} />
-        <View style={styles.backinconshop}>
+        <View style={styles.backIconShop}>
           <View>
             <BackButton router={router} />
           </View>
@@ -56,7 +73,11 @@ const userProfile = () => {
           }}
           style={styles.follow}
         >
-          {follow ? <Text style={styles.theodoi}>Theo dõi</Text> : <Text style={styles.theodoi}>Đang theo dõi</Text>}
+          {follow ? (
+            <Text style={styles.theodoi}>Theo dõi</Text>
+          ) : (
+            <Text style={styles.theodoi}>Đang theo dõi</Text>
+          )}
         </TouchableOpacity>
       </ImageBackground>
       <View style={styles.productContainer}>
@@ -120,7 +141,9 @@ const userProfile = () => {
           </>
         }
         data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]}
-        renderItem={({ item, index }) => <ProductCard item={item} isLiked={isLiked} setIsLiked={setIsLiked} />}
+        renderItem={({ item, index }) => (
+          <ProductCard item={item} isLiked={isLiked} setIsLiked={setIsLiked} />
+        )}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 300 }}
       />
@@ -156,7 +179,7 @@ const styles = StyleSheet.create({
     top: 50,
     left: 11,
   },
-  backinconshop: {
+  backIconShop: {
     flexDirection: "column",
     width: 60,
     height: 150,

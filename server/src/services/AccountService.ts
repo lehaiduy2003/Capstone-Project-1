@@ -1,27 +1,13 @@
-import AccountsModel from "../models/AccountsModel";
-import BaseService from "./init/BaseService";
+import { ClientSession } from "mongoose";
+
 import { Account, validateAccount } from "../libs/zod/model/Account";
 import verifyPassword from "../libs/crypto/passwordVerifying";
 import hashPassword from "../libs/crypto/passwordHashing";
-import { ClientSession } from "mongoose";
-import { Filter } from "../libs/zod/Filter";
-import { keyValue } from "../libs/zod/keyValue";
+import { KeyValue } from "../libs/zod/KeyValue";
+import accountsModel from "../models/accountsModel";
 
-export default class AccountService extends BaseService<
-  AccountsModel,
-  Account
-> {
-  public constructor() {
-    super("account");
-  }
-
-  read(
-    field: keyof Account,
-    keyValue: keyValue,
-    filter: Filter,
-  ): Promise<Account[]> {
-    throw new Error("Method not implemented.");
-  }
+export default class AccountService {
+  public constructor() {}
 
   /**
    * for creating a new account
@@ -29,34 +15,26 @@ export default class AccountService extends BaseService<
    * @param session
    * @returns
    */
-  override async create(
-    data: Partial<Account>,
-    session: ClientSession,
-  ): Promise<Account | null> {
+  async create(data: Partial<Account>, session: ClientSession): Promise<Account | null> {
     const hashedPassword = hashPassword(String(data.password));
     const accountData = validateAccount({
       email: String(data.email),
       password: hashedPassword,
       role: data.role,
     });
-    return await this.getModel().insert(accountData, session);
+
+    const account = new accountsModel(accountData);
+    const createStatus = await account.save({ session });
+
+    if (!createStatus) return null;
+
+    return createStatus;
   }
 
-  update(
-    field: keyof Account,
-    keyValue: keyValue,
-    data: Partial<Account>,
-    session: ClientSession,
-  ): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-
-  override async delete(
-    field: keyof Account,
-    keyValue: keyValue,
-    session: ClientSession,
-  ): Promise<boolean> {
-    return this.getModel().deleteByUnique(field, keyValue, session);
+  async delete(field: keyof Account, keyValue: KeyValue, session: ClientSession): Promise<boolean> {
+    // return this.accountsModel.deleteAccountByUnique(field, keyValue, session);
+    const isSuccess = await accountsModel.deleteOne({ [field]: keyValue }, { session });
+    return isSuccess.deletedCount > 0;
   }
 
   // async deleteAccountById(account_id: string): Promise<boolean> {
@@ -69,34 +47,23 @@ export default class AccountService extends BaseService<
    * @returns
    */
   async getAccountByEmail(email: string): Promise<Account | null> {
-    return await this.getModel().findAccountByEmail(email);
+    return await accountsModel.findOne({ email: email });
   }
 
-  // async createAccount(data: Partial<Account>, session: ClientSession): Promise<Account | null> {
-  //   const hashedPassword = hashPassword(String(data.password));
-  //   const accountData = validateAccount({
-  //     email: String(data.email),
-  //     password: hashedPassword,
-  //     role: data.role,
-  //   });
-  //   return await this.getModel().insert(accountData, session);
-  // }
-
   /**
-   * Check if user profile exist, return true if exist, false otherwise
-   * @param accountId
+   * Check if user profile exist, return true if existed, false otherwise
+   * @param email
    * @returns
    */
   async isAccountExist(email: string): Promise<boolean> {
-    const account = await this.getModel().findAccountByEmail(email);
-    return account !== null;
+    return (await this.getAccountByEmail(email)) != null;
   }
 
-  static isAccountActive(account: Account | null): boolean {
+  isAccountActive(account: Account | null): boolean {
     return account !== null && account.status !== "inactive";
   }
 
-  verifyAccountPassword(account: Account, password: string): boolean {
+  public verifyAccountPassword(account: Account, password: string): boolean {
     const [passwordSalt, passwordHash] = account.password.split(":");
     return verifyPassword(password, passwordSalt, passwordHash);
   }

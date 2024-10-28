@@ -1,5 +1,8 @@
-import crypto from "crypto";
+import { randomBytes } from "crypto";
+
 // for generate random default user name
-export default function generateRandomString() {
-  return crypto.randomBytes(8).toString("hex");
-}
+const generateRandomString = (): string => {
+  return randomBytes(8).toString("hex");
+};
+
+export default generateRandomString;

@@ -1,11 +1,13 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
-import React from "react";
+import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity } from "react-native";
+import React, { useEffect } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useRouter } from "expo-router";
-import Icon from "../../assets/icons";
 import { theme } from "../../constants/theme";
 import { hp } from "../../helpers/common";
-import BackButton from "../../components/BackButton";
+import { useState } from "react";
+import Loading from "../../components/Loading";
+import Header from "../../components/Header";
+import Button from "../../components/Button";
 
 const CartItem = ({ item, onIncrease, onDecrease }) => {
   const formattedPrice = new Intl.NumberFormat("vi-VI", {
@@ -195,29 +197,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-// import { StyleSheet, Text, View, StatusBar } from 'react-native'
-// import React from 'react'
-// import router from 'expo-router'
-// import ScreenWrapper from '../../components/ScreenWrapper'
-// import BackButton from '../../components/BackButton'
-
-// const cart = () => {
-//     return (
-//         <ScreenWrapper bg={"white"}>
-//             <StatusBar style="dark" />
-//             <View style={styles.container}>
-
-//                 {/* Header */}
-//                 <View>
-//                     <BackButton router={router} />
-//                     <Text style={styles.welcomeText}>Hey!</Text>
-//                     <Text style={styles.welcomeText}>Cart</Text>
-//                 </View>
-//             </View>
-//         </ScreenWrapper>
-//     )
-// }
-
-// export default cart
-
-// const styles = StyleSheet.create({})

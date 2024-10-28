@@ -1,29 +1,31 @@
-import jwt from "jsonwebtoken";
+import { sign } from "jsonwebtoken";
 import { commonOptions, SECRET_KEY } from "./keyAndOption";
 
-export default function generateTokens(id: string, role: string) {
+const generateTokens = (id: string, role: string) => {
   //console.log(user);
 
   const now = Date.now();
 
-  const refreshToken = jwt.sign(
+  const refreshToken = sign(
     {
       sub: id,
       iat: now,
     },
     SECRET_KEY,
-    { ...commonOptions, expiresIn: "7d" },
+    { ...commonOptions, expiresIn: "7d" }
   );
 
-  const accessToken = jwt.sign(
+  const accessToken = sign(
     {
       sub: id,
       iat: now,
       role: role,
     },
     SECRET_KEY,
-    { ...commonOptions, expiresIn: "1d" },
+    { ...commonOptions, expiresIn: "1d" }
   );
 
   return { refreshToken, accessToken };
-}
+};
+
+export default generateTokens;

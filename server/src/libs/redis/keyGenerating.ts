@@ -5,7 +5,7 @@ import { Request } from "express";
  * @param {Request} req
  * @returns {string} url|param1:value1|param2:value2|...
  */
-export function generateCacheKey(req: Request) {
+const generateCacheKey = (req: Request) => {
   const { originalUrl, params, query } = req;
   const keyParts = [originalUrl];
 
@@ -18,4 +18,6 @@ export function generateCacheKey(req: Request) {
   }
 
   return keyParts.join("|");
-}
+};
+
+export default generateCacheKey;
