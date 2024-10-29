@@ -16,7 +16,6 @@ const accountsSchema: Schema<Account> = new Schema({
   status: {
     type: String,
     enum: ["active", "inactive"],
-    default: "active",
   },
   recyclerField: {
     recyclingLicenseNumber: { type: String },

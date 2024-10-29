@@ -4,6 +4,7 @@ import errorHandler from "../../middlewares/errorMiddleware";
 
 export default class BaseController {
   protected constructor() {}
+
   protected checkReqBody(req: Request, res: Response): boolean {
     if (!req.body) {
       res.status(400).send({ error: "invalid body" });
@@ -11,6 +12,7 @@ export default class BaseController {
     }
     return true;
   }
+
   protected checkReqParams(req: Request, res: Response): boolean {
     if (!req.params) {
       res.status(400).send({ error: "invalid params" });
@@ -18,11 +20,8 @@ export default class BaseController {
     }
     return true;
   }
+
   protected error(error: any, res: Response): void {
     errorHandler(error, res);
-  }
-
-  protected respond(res: Response, status: number, message: string, data?: unknown): void {
-    res.status(status).send({ message, data });
   }
 }

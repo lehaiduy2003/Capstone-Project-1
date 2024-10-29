@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import UserProfileService from "../services/UserProfileService";
 import BaseController from "./init/BaseController";
 
+import { ObjectId } from "mongodb";
 export default class UserController extends BaseController {
   private readonly userProfileService: UserProfileService;
   public constructor(userProfileService: UserProfileService) {
@@ -12,7 +13,8 @@ export default class UserController extends BaseController {
   async getUserProfileById(req: Request, res: Response): Promise<void> {
     if (!this.checkReqParams) return;
     try {
-      const userProfile = await this.userProfileService.findUserProfileById(req.params.id);
+      const id = new ObjectId(String(req.params.id));
+      const userProfile = await this.userProfileService.findUserProfileById(id);
 
       if (!userProfile) {
         res.status(404).send({ message: "No user profile found" });

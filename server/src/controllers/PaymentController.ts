@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 
 import BaseController from "./init/BaseController";
 import PaymentService from "../services/PaymentService";
+import parseProducts from "../utils/parsedProducts";
 
 export default class PaymentController extends BaseController {
   private readonly paymentService: PaymentService;
@@ -19,9 +20,10 @@ export default class PaymentController extends BaseController {
   public async createPaymentIntent(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
+      const parsedProducts = parseProducts(req.body.products);
       const clientSecret = await this.paymentService.createPaymentIntent(
         req.body.id,
-        req.body.products
+        parsedProducts
       );
 
       if (!clientSecret) {

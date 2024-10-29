@@ -13,9 +13,9 @@ export const useFetch = (url, options) => {
       try {
         setLoading(true);
         let response = await fetchData(url, options);
-
         // If access token is expired, request a new one
         if (response.status === 401) {
+          let accessToken;
           try {
             accessToken = await requestNewAccessToken();
             if (!accessToken) {

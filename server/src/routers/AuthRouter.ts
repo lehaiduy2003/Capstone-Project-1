@@ -1,24 +1,38 @@
 import AuthController from "../controllers/AuthController";
-import authenticateToken from "../middlewares/authMiddleware";
+import authenticateToken from "../middlewares/tokenMiddleware";
 import AccountService from "../services/AccountService";
 import AuthService from "../services/AuthService";
 import UserProfileService from "../services/UserProfileService";
 import BaseRouter from "./init/BaseRouter";
+import { verifyEmailOtp } from "../middlewares/otpMiddleware";
 
 class AuthRouter extends BaseRouter {
-  private authController: AuthController;
+  private readonly authController: AuthController;
+
   constructor(authController: AuthController) {
     super();
     this.authController = authController;
     this.initRoutes();
   }
+
   public initRoutes(): void {
-    this.router.post("/sign-in", this.authController.signIn.bind(this.authController));
-    this.router.post("/sign-up", this.authController.signUp.bind(this.authController));
+    this.router.post(
+      "/sign-in",
+      this.authController.signIn.bind(this.authController),
+    );
+    this.router.post(
+      "/sign-up",
+      this.authController.signUp.bind(this.authController),
+    );
     this.router.post(
       "/refresh",
       authenticateToken,
-      this.authController.generateNewAccessToken.bind(this.authController)
+      this.authController.generateNewAccessToken.bind(this.authController),
+    );
+    this.router.post(
+      "/activate",
+      verifyEmailOtp,
+      this.authController.activateAccount.bind(this.authController),
     );
   }
 }

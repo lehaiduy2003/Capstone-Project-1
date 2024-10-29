@@ -1,4 +1,8 @@
-<hr></hr>
+![Node Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)
+![npm Version](https://img.shields.io/badge/npm-%3E%3D6.0.0-brightgreen)
+![Last Commit](https://img.shields.io/github/last-commit/lehaiduy2003/Capstone-Project-1)
+
+<hr/>
 ## Project Information
 
 ### Project Name
@@ -12,10 +16,11 @@ The application aims to connect users who are interested in trading eco-friendly
 
 ### Technologies Used
 
-- **Languages**: JavaScript, TypeScript
-- **Frameworks**: React Native, Express
-- **Database**: MongoDB
 - **Package Manager**: npm
+- **Languages**: JavaScript, TypeScript
+- **Frameworks**: React Native, Expo, Express
+- **Databases**: MongoDB, Redis
+- **Services**: Firebase, Twilio, Stripe, Shippo
 
 ### Repository
 
@@ -23,7 +28,7 @@ The application aims to connect users who are interested in trading eco-friendly
 - **Branch**: main
 - **Remote**: origin
 
-<hr></hr>
+<hr/>
 ## Team Information
 
 ### Team Name
@@ -38,34 +43,38 @@ C1SE.43
 - **Member 4**: Le Trung Hieu - [GitHub](https://github.com/trhieu2310)
 - **Member 5**: Nguyen Anh Vu - [GitHub](https://github.com/vunguyenDev92)
 
-<hr></hr>
+<hr/>
 This document provides an overview of the EcoTrade project and the C1SE.43 team.
 
 ## How to Use the Project
 
-```markdown
 ### Prerequisites
 
 Ensure you have the following installed on your system:
 
-- Node.js (v14.x or later)
-- npm (v6.x or later)
-- Expo CLI (`npm install -g expo-cli`)
+- **Node.js (v14.x or later)**
+- **npm (v6.x or later)**
+- **Expo CLI (`npm install -g expo-cli`)**
 
 ### Installation
 
 1. **Clone the repository:**
-   git clone https://github.com/lehaiduy2003/Capstone-Project-1.git
-   cd Capstone-Project-1
-   ```
+    ```sh
+    git clone https://github.com/lehaiduy2003/Capstone-Project-1.git
+    cd Capstone-Project-1
+    ```
 
 2. **Install dependencies for both client and server:**
-   ```sh
-   cd client
-   npm install
-   cd ../server
-   npm install
-   ```
+    ```sh
+      cd client
+      npm install
+      cd ../server
+      npm install
+    ```
+
+### Environment Variables
+
+Ensure you have a `.env` file in the root directory with the following of `.env.example` file
 
 ### Running the Project
 
@@ -120,43 +129,6 @@ cd server
 npm test
 ```
 
-### Linting
-
-#### Client
-
-To lint the client project, use the following command:
-
-```sh
-cd client
-npm run lint
-```
-
-#### Server
-
-To lint the server project, use the following command:
-
-```sh
-cd server
-npm run lint
-```
-
-### Resetting the Project
-
-To reset the project, use the following command:
-
-```sh
-cd client
-npm run reset-project
-```
-
-### Environment Variables
-
-Ensure you have a `.env` file in the root directory with the following variables:
-
-```
-EXPO_PUBLIC_API_URL=<your_api_url>
-```
-
 ### Directory Structure
 
 #### Client Directory Structure
@@ -179,12 +151,17 @@ EXPO_PUBLIC_API_URL=<your_api_url>
         - `controllers/`: Contains the controller functions for handling requests.
         - `models/`: Contains the database models.
         - `middlewares/`: Contains middleware functions.
-        - `config/`: Contains configuration files.
+        - `config/`: Contains configuration files and databases connection.
         - `utils/`: Utility functions and helpers.
+        - `services/`: Contains service layer functions.
+        - `setup/`: Contains setup scripts and initial configurations.
+        - `server.ts`: The main file to run the server application.
+    - `tests/`: Contains the test cases for the server application.
+    - `global.d.ts`: Contains global type definitions.
     - `package.json`: Contains the dependencies and scripts for the server application.
 
 ### Additional Information
 
 For more details, refer to the [GitHub Repository](https://github.com/lehaiduy2003/Capstone-Project-1).
 
-<hr></hr>
+<hr/>

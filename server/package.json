@@ -35,7 +35,6 @@
     "shippo": "2.7.0",
     "stripe": "17.1.0",
     "twilio": "5.3.3",
-    "xss": "1.0.15",
     "zod": "3.23.8"
   },
   "devDependencies": {

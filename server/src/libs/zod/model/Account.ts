@@ -1,12 +1,12 @@
 import { Document } from "mongoose";
 import { z } from "zod";
 import { RecyclerFieldSchema } from "../Properties/RecyclerField";
-import { passwordSchema } from "../Properties/Password";
+import { PasswordSchema } from "../Properties/Password";
 
 const AccountSchema = z
   .object({
     email: z.string().trim().email({ message: "Invalid email address" }),
-    password: passwordSchema,
+    password: PasswordSchema,
     role: z
       .enum(["customer", "admin", "recycler"])
       .default("customer")
@@ -14,7 +14,7 @@ const AccountSchema = z
     createdAt: z.date().default(new Date()),
     updatedAt: z.date().default(new Date()),
     isVerified: z.boolean().default(false),
-    status: z.enum(["active", "inactive"]).default("active"),
+    status: z.enum(["active", "inactive"]).default("inactive"),
     recyclerField: RecyclerFieldSchema.optional(),
     joinedCampaigns: z.array(z.string()).default([]),
   })

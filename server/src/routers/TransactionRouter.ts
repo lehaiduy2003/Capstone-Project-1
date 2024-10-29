@@ -1,5 +1,5 @@
 import TransactionController from "../controllers/TransactionController";
-import authenticateToken from "../middlewares/authMiddleware";
+import authenticateToken from "../middlewares/tokenMiddleware";
 import TransactionService from "../services/TransactionService";
 import BaseRouter from "./init/BaseRouter";
 
@@ -16,17 +16,23 @@ class TransactionRouter extends BaseRouter {
     this.router.post(
       "/",
       authenticateToken,
-      this.transactionController.createTransaction.bind(this.transactionController)
+      this.transactionController.createTransaction.bind(
+        this.transactionController,
+      ),
     );
     this.router.patch(
       "/:id",
       authenticateToken,
-      this.transactionController.updateTransaction.bind(this.transactionController)
+      this.transactionController.updateTransaction.bind(
+        this.transactionController,
+      ),
     );
     this.router.get(
       "/",
       authenticateToken,
-      this.transactionController.getUserTransactions.bind(this.transactionController)
+      this.transactionController.getUserTransactions.bind(
+        this.transactionController,
+      ),
     );
   }
 }

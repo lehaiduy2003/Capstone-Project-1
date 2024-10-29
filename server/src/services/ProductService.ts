@@ -1,5 +1,5 @@
-import { Product, validateProduct } from "../libs/zod/model/Product";
-import { Filter, validateFilter } from "../libs/zod/Filter";
+import { Product } from "../libs/zod/model/Product";
+import { Filter } from "../libs/zod/Filter";
 
 import { ObjectId } from "mongodb";
 import SessionService from "./init/SessionService";
@@ -10,38 +10,35 @@ export default class ProductService extends SessionService {
   public constructor() {
     super();
   }
-  async read(filter: Partial<Filter>): Promise<ProductDTO[] | null> {
-    const parsedFilter = validateFilter(filter);
+  async read(filter: Filter): Promise<ProductDTO[] | null> {
     const products = await productsModel
       .find()
-      .sort({ [parsedFilter.sort]: parsedFilter.order })
-      .skip(parsedFilter.skip)
-      .limit(parsedFilter.limit);
+      .sort({ [filter.sort]: filter.order })
+      .skip(filter.skip)
+      .limit(filter.limit);
 
     // console.log(products);
 
     return products.map(validateProductDTO).filter((product) => product);
   }
 
-  public async search(filter: Partial<Filter>): Promise<ProductDTO[] | null> {
-    const parsedFilter = validateFilter(filter);
-
-    const order = parsedFilter.order === "asc" || parsedFilter.order === "ascending" ? 1 : -1;
+  public async search(filter: Filter): Promise<ProductDTO[] | null> {
+    const order = filter.order === "asc" || filter.order === "ascending" ? 1 : -1;
 
     const products = await productsModel.aggregate([
       {
         $search: {
           index: "product_name",
           text: {
-            query: parsedFilter.query,
+            query: filter.query,
             path: "name",
             fuzzy: { maxEdits: 1 },
           },
         },
       },
-      { $sort: { [parsedFilter.sort]: order } },
-      { $limit: parsedFilter.limit },
-      { $skip: parsedFilter.skip },
+      { $sort: { [filter.sort]: order } },
+      { $limit: filter.limit },
+      { $skip: filter.skip },
     ]);
 
     // console.log(products);
@@ -53,8 +50,7 @@ export default class ProductService extends SessionService {
     await this.startSession();
     this.startTransaction();
     try {
-      const productData = validateProduct(data);
-      const product = new productsModel(productData);
+      const product = new productsModel(data);
 
       await product.save({ session: this.getSession() });
 
@@ -73,7 +69,7 @@ export default class ProductService extends SessionService {
     }
   }
 
-  public async updateProductById(id: string, data: Partial<Product>): Promise<Product> {
+  public async updateProductById(id: ObjectId, data: Partial<Product>): Promise<Product> {
     await this.startSession();
     this.startTransaction();
     try {
@@ -99,13 +95,12 @@ export default class ProductService extends SessionService {
     }
   }
 
-  public async deleteProduct(id: string): Promise<boolean> {
+  public async deleteProduct(id: ObjectId): Promise<boolean> {
     await this.startSession();
     this.startTransaction();
     try {
-      const objectId = new ObjectId(id);
       // Delete the product
-      const deleteStatus = await productsModel.deleteOne({ _id: objectId }, this.getSession());
+      const deleteStatus = await productsModel.deleteOne({ _id: id }, this.getSession());
 
       if (deleteStatus.deletedCount == 0) {
         await this.abortTransaction();
@@ -124,7 +119,7 @@ export default class ProductService extends SessionService {
     }
   }
 
-  public async readOne(id: string): Promise<Product | null> {
-    return await productsModel.findOne({ _id: new ObjectId(id) });
+  public async readOne(id: ObjectId): Promise<Product | null> {
+    return await productsModel.findOne({ _id: id });
   }
 }

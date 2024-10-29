@@ -1,5 +1,5 @@
 import { ClientSession } from "mongoose";
-
+import { ObjectId } from "mongodb";
 import { Account, validateAccount } from "../libs/zod/model/Account";
 import verifyPassword from "../libs/crypto/passwordVerifying";
 import hashPassword from "../libs/crypto/passwordHashing";
@@ -7,6 +7,17 @@ import { KeyValue } from "../libs/zod/KeyValue";
 import accountsModel from "../models/accountsModel";
 
 export default class AccountService {
+  async updatePassword(account: Account, password: string, session: ClientSession) {
+    const hashedPassword = hashPassword(password);
+
+    const updatedStatus = await accountsModel.findOneAndUpdate(
+      { email: account.email },
+      { password: hashedPassword },
+      { session }
+    );
+
+    return updatedStatus?.isModified;
+  }
   public constructor() {}
 
   /**
@@ -50,6 +61,9 @@ export default class AccountService {
     return await accountsModel.findOne({ email: email });
   }
 
+  async findAccountById(id: ObjectId): Promise<Account | null> {
+    return await accountsModel.findOne({ _id: id });
+  }
   /**
    * Check if user profile exist, return true if existed, false otherwise
    * @param email
@@ -66,5 +80,14 @@ export default class AccountService {
   public verifyAccountPassword(account: Account, password: string): boolean {
     const [passwordSalt, passwordHash] = account.password.split(":");
     return verifyPassword(password, passwordSalt, passwordHash);
+  }
+
+  async activateAccount(email: string, session: ClientSession) {
+    const updatedStatus = await accountsModel.findOneAndUpdate(
+      { email: email },
+      { status: "active" },
+      { session }
+    );
+    return updatedStatus?.isModified;
   }
 }

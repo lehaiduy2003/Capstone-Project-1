@@ -1,4 +1,7 @@
+import { OtpData } from "../../libs/zod/OtpData";
+
 export default interface IOtpService {
-  sendOtp(identifier: string): Promise<boolean>;
+  sendOtp(data: OtpData): Promise<boolean>;
+
   verifyOtp(identifier: string, otp: string): Promise<boolean>;
 }

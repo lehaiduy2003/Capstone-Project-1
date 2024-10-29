@@ -8,7 +8,7 @@ import verifyToken from "../libs/jwt/tokenVerifying";
 import decodeToken from "../libs/jwt/tokenDecoding";
 
 // Middleware to authenticate the token - check if the token is valid
-export default function authenticateToken(req: Request, res: Response, next: NextFunction): void {
+const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
   const token = getTokenFromHeaders(req);
   try {
     if (!token) {
@@ -28,11 +28,12 @@ export default function authenticateToken(req: Request, res: Response, next: Nex
       return;
     }
 
-    const payload = decodeToken(token);
-    req.body.user = payload;
+    req.body.user = decodeToken(token);
     req.body.token = token;
     next();
   } catch (error) {
     errorHandler(error, res);
   }
-}
+};
+
+export default authenticateToken;

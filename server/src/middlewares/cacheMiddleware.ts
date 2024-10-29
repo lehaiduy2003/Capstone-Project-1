@@ -4,7 +4,11 @@ import errorHandler from "./errorMiddleware";
 import generateCacheKey from "../libs/redis/keyGenerating";
 import getCache from "../libs/redis/cacheGetting";
 
-export default async function checkCache(req: Request, res: Response, next: NextFunction): Promise<void> {
+const checkCache = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     const cacheKey = generateCacheKey(req);
 
@@ -20,4 +24,6 @@ export default async function checkCache(req: Request, res: Response, next: Next
   } catch (error) {
     errorHandler(error, res);
   }
-}
+};
+
+export default checkCache;
