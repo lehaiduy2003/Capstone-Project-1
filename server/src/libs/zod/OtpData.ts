@@ -3,7 +3,6 @@ import { PasswordSchema } from "./Properties/Password";
 import { getCode } from "country-list";
 
 const OtpSchema = z.object({
-  otp: z.string().length(5).optional(), // for sending otp, it is optional, but for verifying otp, it is required
   identifier: z.union([
     z.string().email(),
     z
@@ -19,7 +18,6 @@ const OtpSchema = z.object({
         },
       ),
   ]),
-  password: PasswordSchema.optional(), // for forgot password, it is optional, but for signup, it is required
   type: z.enum(["forgot", "activate", "deactivate"]),
 });
 

@@ -22,10 +22,9 @@ export default class ProfileEditingService extends AuthService {
 
       const account = await this.accountService.findById(account_id);
       // console.log("account", account);
-
       if (!account) {
         await this.abortTransaction();
-        throw new Error("Account not found");
+        return false;
       }
 
       const isPasswordValid = this.accountService.verifyAccountPassword(
@@ -33,7 +32,8 @@ export default class ProfileEditingService extends AuthService {
         oldPassword,
       );
       if (!isPasswordValid) {
-        throw new Error("Password is incorrect");
+        await this.abortTransaction();
+        return false;
       }
 
       await this.accountService.updatePassword(
@@ -60,7 +60,7 @@ export default class ProfileEditingService extends AuthService {
       const account = await this.accountService.findByEmail(email);
       if (!account) {
         await this.abortTransaction();
-        throw new Error("Account not found");
+        return false;
       }
 
       await this.accountService.updatePassword(

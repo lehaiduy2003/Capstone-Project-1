@@ -15,8 +15,8 @@ export default class OtpController extends BaseController {
   public async sendOtp(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const validBody = validateOtp(req.body);
-      await this.otpService.send(validBody);
+      const validatedData = validateOtp(req.body);
+      await this.otpService.send(validatedData.identifier);
       res.status(200).send({ message: "Otp sent" });
     } catch (error) {
       this.error(error, res);
@@ -26,19 +26,17 @@ export default class OtpController extends BaseController {
   public async resendOtp(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const { type } = req.body;
-      const validBody = validateOtp(req.body);
-
-      const cache = await getCache(validBody.identifier);
+      const validatedData = validateOtp(req.body);
+      const cache = await getCache(validatedData.identifier);
       if (cache) {
         const cacheData = JSON.parse(cache);
-        if (cacheData.type === type) {
+        if (cacheData.type === validatedData.type) {
           res.status(200).send({ message: "Otp still valid" });
           return;
         }
       }
 
-      await this.otpService.resend(validBody);
+      await this.otpService.resend(req.body.identifier);
       res.status(200).send({ message: "Otp resent" });
     } catch (error) {
       this.error(error, res);
@@ -48,8 +46,12 @@ export default class OtpController extends BaseController {
   public async verifyOtp(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const { identifier, otp } = req.body;
-      const result = await this.otpService.verify(identifier, otp);
+      const { otp } = req.body;
+      const validatedData = validateOtp(req.body);
+      const result = await this.otpService.verify(
+        validatedData.identifier,
+        otp,
+      );
       if (result) {
         res.status(200).send({ message: "Otp verified" });
       } else {

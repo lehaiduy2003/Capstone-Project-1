@@ -3,8 +3,6 @@ import BaseController from "../../../Base/BaseController";
 import ProfileEditingService from "../Services/ProfileEditingService";
 
 import { ObjectId } from "mongodb";
-import axios from "axios";
-import saveToCache from "../../../libs/redis/cacheSaving";
 
 export default class ProfileEditingController extends BaseController {
   private readonly profileEditingService: ProfileEditingService;
@@ -17,23 +15,11 @@ export default class ProfileEditingController extends BaseController {
   async forgotPassword(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const { identifier, newPassword } = req.body;
-
-      const response = await axios.post(
-        `https://${process.env.NGROK_DOMAIN}/otp/send`,
-        {
-          identifier,
-          type: "forgot",
-        },
-      );
-      if (response.status !== 200) {
-        res.status(502).send({ message: "Failed to update password" });
+      const { identifier, newPassword, type } = req.body;
+      if (type !== "forgot") {
+        res.status(400).send({ message: "Invalid forgot request" });
         return;
       }
-
-      const data = await response.data;
-
-      await saveToCache(identifier, 60, data);
 
       const updatedStatus = await this.profileEditingService.forgotPassword(
         identifier,

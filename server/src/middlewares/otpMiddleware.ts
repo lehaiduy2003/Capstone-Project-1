@@ -8,21 +8,21 @@ export const verifyEmailOtp = async (
   next: NextFunction,
 ) => {
   try {
-    const { identifier, otp, type } = req.body;
+    const { identifier, otp } = req.body;
     // console.log(req.body);
     const data = await getCache(identifier);
-    if (data) {
-      // console.log("data", data);
-      const parsedData = JSON.parse(data);
-      if (parsedData.otp === otp && parsedData.type === type) {
-        delete req.body.otp; // delete the OTP from the request body after verification
-        req.body = { ...req.body, ...parsedData }; // add the parsed data to the request body
-        next();
-      }
+    if (data && isValidOtp(otp, data)) {
+      next();
     } else {
       res.status(401).send({ message: "Invalid OTP" });
     }
   } catch (error) {
     errorHandler(error, res);
   }
+};
+
+const isValidOtp = (otp: string, cache: string) => {
+  const cachedOtp = JSON.parse(cache).otp;
+  // console.log(cacheData);
+  return cachedOtp === otp;
 };
