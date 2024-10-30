@@ -20,6 +20,7 @@ const ProductDetails = () => {
   const fetchProductData = async () => {
     const productData = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/products/${productId}`);
     const productDataJSON = await productData.json();
+
     setProduct(productDataJSON);
 
     const ownerData = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${productDataJSON.owner}`);

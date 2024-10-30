@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import AuthController from "../src/controllers/AuthController";
-import AuthService from "../src/services/AuthService";
+import AuthController from "../src/Modules/Auth/Controllers/AuthController";
+import AuthService from "../src/Modules/Auth/Services/AuthService";
 import { validateAccount } from "../src/libs/zod/model/Account";
 
 import { ObjectId } from "mongodb";
 
-jest.mock("../src/services/AuthService");
+jest.mock("../src/Modules/Auth/Services/AuthService");
 jest.mock("../src/libs/zod/model/Account");
 
 describe("AuthController", () => {
@@ -37,11 +37,17 @@ describe("AuthController", () => {
       await authControllerMock.signUp(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ message: "User created" }));
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "User created" }),
+      );
     });
 
     it("should handle user creation failure", async () => {
-      const account = { email: "test@example.com", password: "password", role: "user" };
+      const account = {
+        email: "test@example.com",
+        password: "password",
+        role: "user",
+      };
       req.body = account;
       (validateAccount as jest.Mock).mockReturnValue(account);
       authServiceMock.signUp.mockResolvedValue(null);
@@ -49,7 +55,9 @@ describe("AuthController", () => {
       await authControllerMock.signUp(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(502);
-      expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ message: "No user created" }));
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "No user created" }),
+      );
     });
 
     it("should handle validation error", async () => {
@@ -61,7 +69,9 @@ describe("AuthController", () => {
       await authControllerMock.signUp(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ message: "Validation error" }));
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "Validation error" }),
+      );
     });
   });
 
@@ -70,10 +80,15 @@ describe("AuthController", () => {
       req.body = { token: "refreshToken" };
       authServiceMock.getNewAccessToken.mockReturnValue("newAccessToken");
 
-      await authControllerMock.generateNewAccessToken(req as Request, res as Response);
+      await authControllerMock.generateNewAccessToken(
+        req as Request,
+        res as Response,
+      );
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ message: "New access token generated" }));
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "New access token generated" }),
+      );
     });
 
     it("should handle token generation failure", async () => {
@@ -82,10 +97,15 @@ describe("AuthController", () => {
         throw new Error("Token generation error");
       });
 
-      await authControllerMock.generateNewAccessToken(req as Request, res as Response);
+      await authControllerMock.generateNewAccessToken(
+        req as Request,
+        res as Response,
+      );
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ message: "Token generation error" }));
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "Token generation error" }),
+      );
     });
   });
 
@@ -103,7 +123,9 @@ describe("AuthController", () => {
       await authControllerMock.signIn(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ user: account, token: "accessToken" }));
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ user: account, token: "accessToken" }),
+      );
     });
 
     it("should handle invalid credentials", async () => {
@@ -114,7 +136,9 @@ describe("AuthController", () => {
       await authControllerMock.signIn(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(502);
-      expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ error: "Invalid credential" }));
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ error: "Invalid credential" }),
+      );
     });
 
     it("should handle sign-in error", async () => {
@@ -127,7 +151,9 @@ describe("AuthController", () => {
       await authControllerMock.signIn(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledWith(expect.objectContaining({ message: "Sign-in error" }));
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({ message: "Sign-in error" }),
+      );
     });
   });
 });

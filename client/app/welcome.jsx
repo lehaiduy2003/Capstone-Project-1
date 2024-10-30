@@ -11,13 +11,13 @@ import { requestNewAccessToken } from "../utils/fetch";
 
 const welcome = () => {
   const router = useRouter();
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = await requestNewAccessToken();
-      token !== null ? router.push("homePage") : Alert.alert("Hi", "Please login or sign up to continue");
-    };
-    checkAuth();
-  }, []);
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     const token = await requestNewAccessToken();
+  //     token !== null ? router.push("homePage") : Alert.alert("Hi", "Please login or sign up to continue");
+  //   };
+  //   checkAuth();
+  // }, []);
   return (
     <ScreenWrapper bg="white">
       <StatusBar style="dark" />

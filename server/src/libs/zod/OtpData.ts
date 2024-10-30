@@ -16,11 +16,11 @@ const OtpSchema = z.object({
         },
         {
           message: "Invalid country code",
-        }
+        },
       ),
   ]),
   password: PasswordSchema.optional(), // for forgot password, it is optional, but for signup, it is required
-  type: z.enum(["forgot", "password", "activate"]),
+  type: z.enum(["forgot", "activate", "deactivate"]),
 });
 
 export const validateOtp = (data: unknown) => {

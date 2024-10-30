@@ -1,8 +1,8 @@
-import {StyleSheet, Text, View, StatusBar, Pressable} from "react-native";
+import { StyleSheet, Text, View, StatusBar, Pressable } from "react-native";
 import React from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
-import {deleteValueFor} from "../utils/secureStore"; // Import deleteValueFor
-import {useRouter} from "expo-router";
+import { deleteValueFor } from "../utils/secureStore"; // Import deleteValueFor
+import { useRouter } from "expo-router";
 
 const account = () => {
     const router = useRouter(); // Khởi tạo router ở đây
@@ -20,7 +20,7 @@ const account = () => {
 
     return (
         <ScreenWrapper bg={"white"}>
-            <StatusBar style="dark"/>
+            <StatusBar style="dark" />
             <View style={styles.container}>
                 {/* Header */}
                 <View style={styles.header}>
