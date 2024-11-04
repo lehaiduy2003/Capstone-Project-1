@@ -1,13 +1,9 @@
 import { Document, Types } from "mongoose";
 import { z } from "zod";
+import ObjectIdSchema from "../ObjectId";
 
 const PaymentSchema = z.object({
-  user_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  user_id: ObjectIdSchema,
   stripeId: z.string(),
   createdAt: z.date().default(new Date()),
 });

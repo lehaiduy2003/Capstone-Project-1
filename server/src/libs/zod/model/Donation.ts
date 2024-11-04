@@ -1,19 +1,10 @@
 import { z } from "zod";
 import { Types, Document } from "mongoose";
+import ObjectIdSchema from "../ObjectId";
 
 const DonationSchema = z.object({
-  user_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
-  campaign_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  user_id: ObjectIdSchema,
+  campaign_id: ObjectIdSchema,
   createdAt: z.date().default(new Date()),
   donated: z.object({
     name: z.string(),

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { PasswordSchema } from "./Properties/Password";
 import { getCode } from "country-list";
+import OtpEnum from "./enums/Otp";
 
 const OtpSchema = z.object({
   identifier: z.union([
@@ -18,7 +18,7 @@ const OtpSchema = z.object({
         },
       ),
   ]),
-  type: z.enum(["forgot", "activate", "deactivate"]),
+  type: OtpEnum,
 });
 
 export const validateOtp = (data: unknown) => {

@@ -8,6 +8,7 @@ const errorHandler = (err: any, res: Response): void => {
     success: false,
     message: err.message || "Internal Server Error",
   });
+  return;
 };
 
 export default errorHandler;

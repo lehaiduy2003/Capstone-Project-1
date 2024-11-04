@@ -12,30 +12,6 @@ export default class ProfileEditingController extends BaseController {
     this.profileEditingService = profileEditingService;
   }
 
-  async forgotPassword(req: Request, res: Response): Promise<void> {
-    if (!this.checkReqBody(req, res)) return;
-    try {
-      const { identifier, newPassword, type } = req.body;
-      if (type !== "forgot") {
-        res.status(400).send({ message: "Invalid forgot request" });
-        return;
-      }
-
-      const updatedStatus = await this.profileEditingService.forgotPassword(
-        identifier,
-        newPassword,
-      );
-      if (!updatedStatus) {
-        res.status(502).send({ message: "Failed to update password" });
-        return;
-      }
-
-      res.status(200).send({ message: "password updated successfully" });
-    } catch (error) {
-      this.error(error, res);
-    }
-  }
-
   async changePassword(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {

@@ -131,4 +131,29 @@ export default class AuthService extends SessionService {
       await this.endSession();
     }
   }
+
+  async resetPassword(email: string, newPassword: string) {
+    await this.startSession();
+    this.startTransaction();
+    try {
+      const account = await this.accountService.findByEmail(email);
+      if (!account) {
+        await this.abortTransaction();
+        return false;
+      }
+      await this.accountService.updatePassword(
+        account,
+        newPassword,
+        this.getSession(),
+      );
+
+      await this.commitTransaction();
+      return true;
+    } catch (e) {
+      await this.abortTransaction();
+      throw e;
+    } finally {
+      await this.endSession();
+    }
+  }
 }

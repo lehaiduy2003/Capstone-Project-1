@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import BaseController from "../../../Base/BaseController";
 import AuthService from "../Services/AuthService";
 import { validateSignUpDTO } from "../../../libs/zod/dto/SignUpDTO";
+import getCache from "../../../libs/redis/cacheGetting";
 
 export default class AuthController extends BaseController {
   private readonly authService: AuthService;
@@ -12,15 +13,22 @@ export default class AuthController extends BaseController {
     this.authService = authService;
   }
 
+  // NOTE: The cache will be deleted after the user has verified the OTP by calling the verifyOtp method
+  // So, Check if the user has verified the OTP, if it has verified, then the cache should be empty
+  async checkOtpCache(identifier: string, res: Response): Promise<boolean> {
+    const cache = await getCache(identifier);
+    return !!cache;
+  }
+
   public async activateAccount(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const { identifier, type } = req.body;
-      // console.log(type);
-      if (type !== "activate") {
-        res.status(400).send({ error: "Invalid activate account request" });
+      const { identifier } = req.body;
+      if (await this.checkOtpCache(identifier, res)) {
+        res.status(400).send({ error: "OTP has not been verified" });
         return;
       }
+
       const result = await this.authService.activateAccount(identifier);
       if (!result) {
         res.status(502).send({ error: "Cannot activate account status" });
@@ -33,16 +41,42 @@ export default class AuthController extends BaseController {
   public async deactivateAccount(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const { identifier, type } = req.body;
-      // console.log(type);
-      if (type !== "deactivate") {
-        res.status(400).send({ error: "Invalid deactivate account request" });
+      const { identifier } = req.body;
+
+      if (await this.checkOtpCache(identifier, res)) {
+        res.status(400).send({ error: "OTP has not been verified" });
         return;
       }
+
       const result = await this.authService.deactivateAccount(identifier);
       if (!result) {
         res.status(502).send({ error: "Cannot deactivate account status" });
       } else res.status(200).send(result);
+    } catch (error) {
+      this.error(error, res);
+    }
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    if (!this.checkReqBody(req, res)) return;
+    try {
+      const { identifier, newPassword } = req.body;
+
+      if (await this.checkOtpCache(identifier, res)) {
+        res.status(400).send({ error: "OTP has not been verified" });
+        return;
+      }
+
+      const updatedStatus = await this.authService.resetPassword(
+        identifier,
+        newPassword,
+      );
+      if (!updatedStatus) {
+        res.status(502).send({ message: "Failed to update password" });
+        return;
+      }
+
+      res.status(200).send({ message: "password updated successfully" });
     } catch (error) {
       this.error(error, res);
     }

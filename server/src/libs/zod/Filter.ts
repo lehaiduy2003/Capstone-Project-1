@@ -1,10 +1,12 @@
 import { FilterQuery } from "mongoose";
 import { z } from "zod";
+import SortOrderEnum from "./enums/SortOrderEnum";
+import SortEnum from "./enums/Sort";
 
 const FilterSchema = z.object({
   query: z.string().optional(),
-  sort: z.enum(["updatedAt", "price"]).optional().default("updatedAt"),
-  order: z.enum(["asc", "ascending", "desc", "descending"]).default("asc"),
+  sort: SortEnum,
+  order: SortOrderEnum,
   limit: z.preprocess((val) => {
     const num = Number(val);
     return isNaN(num) ? 10 : num > 100 ? 100 : num;

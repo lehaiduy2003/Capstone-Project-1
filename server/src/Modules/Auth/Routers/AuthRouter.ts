@@ -4,7 +4,6 @@ import AccountService from "../../Account/Services/AccountService";
 import AuthService from "../Services/AuthService";
 import UserProfileService from "../../UserProfile/Services/UserProfileService";
 import BaseRouter from "../../../Base/BaseRouter";
-import { verifyEmailOtp } from "../../../middlewares/otpMiddleware";
 
 class AuthRouter extends BaseRouter {
   private readonly authController: AuthController;
@@ -29,14 +28,18 @@ class AuthRouter extends BaseRouter {
       authenticateToken,
       this.authController.generateNewAccessToken.bind(this.authController),
     );
-    this.router.post(
+    this.router.patch(
       "/activate",
-      verifyEmailOtp,
       this.authController.activateAccount.bind(this.authController),
     );
-    this.router.post(
+    this.router.patch(
       "/deactivate",
+      authenticateToken,
       this.authController.deactivateAccount.bind(this.authController),
+    );
+    this.router.patch(
+      "/reset-password",
+      this.authController.resetPassword.bind(this.authController),
     );
   }
 }

@@ -42,7 +42,7 @@ export default class UserProfileService {
   }
 
   async findById(id: ObjectId): Promise<UserProfileDTO | null> {
-    const userProfile = await userProfilesModel.findOne({ _id: id });
+    const userProfile = await userProfilesModel.findOne({ _id: id }).lean();
     // console.log("userProfile", userProfile);
     if (!userProfile) return null;
     return validateUserProfileDTO(userProfile);

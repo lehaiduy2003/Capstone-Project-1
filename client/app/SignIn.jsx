@@ -26,14 +26,12 @@ const SignIn = () => {
     const data = await onSubmit({
       body: { email: email.current, password: password.current },
     });
+
     if (error) {
       console.error(error);
       return;
     }
-    if (!data) {
-      console.error("Data is empty");
-      return;
-    }
+
     await save("accessToken", String(data.accessToken));
     await save("refreshToken", String(data.refreshToken));
     await save("user_id", String(data.user_id));

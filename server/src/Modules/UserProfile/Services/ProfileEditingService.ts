@@ -52,30 +52,4 @@ export default class ProfileEditingService extends AuthService {
       await this.endSession();
     }
   }
-
-  async forgotPassword(email: string, password: string) {
-    await this.startSession();
-    this.startTransaction();
-    try {
-      const account = await this.accountService.findByEmail(email);
-      if (!account) {
-        await this.abortTransaction();
-        return false;
-      }
-
-      await this.accountService.updatePassword(
-        account,
-        password,
-        this.getSession(),
-      );
-      await deleteCache(email); // delete the cache after password update
-      await this.commitTransaction();
-      return true;
-    } catch (error) {
-      await this.abortTransaction();
-      throw error;
-    } finally {
-      await this.endSession();
-    }
-  }
 }

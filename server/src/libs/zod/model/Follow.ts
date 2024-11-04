@@ -1,20 +1,11 @@
 import { z } from "zod";
 import { Types, Document } from "mongoose";
+import ObjectIdSchema from "../ObjectId";
 
 const FollowSchema = z.object({
-  user_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  user_id: ObjectIdSchema,
   following: z.object({
-    _id: z
-      .union([z.string(), z.instanceof(Types.ObjectId)])
-      .refine((val) => Types.ObjectId.isValid(val.toString()), {
-        message: "Invalid ObjectId",
-      })
-      .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+    _id: ObjectIdSchema,
     name: z.string(),
     avatar: z.string().url(),
     followedAt: z.date().default(new Date()),

@@ -28,11 +28,16 @@ const homePage = () => {
           <Text style={styles.logoText}>Eco Trade</Text>
           <View style={styles.icons}>
             <Pressable onPress={() => router.push("cart")}>
-              <Icon name={"cart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
+              <Icon
+                name={"cart"}
+                size={hp(3.2)}
+                strokeWidth={2}
+                color={theme.colors.text}
+              />
             </Pressable>
-            <Pressable onPress={router.push('/Screens/otpScreen')}>
-              <Icon name={"heart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
-            </Pressable>
+            {/*<Pressable onPress={router.push('/Screens/otpScreen')}>*/}
+            {/*  <Icon name={"heart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />*/}
+            {/*</Pressable>*/}
           </View>
         </View>
         {/* Search */}
@@ -43,11 +48,20 @@ const homePage = () => {
             onChangeText={(value) => (nameRef.current = value)}
           />
 
-          <Icon name="filter" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
+          <Icon
+            name="filter"
+            size={hp(3.2)}
+            strokeWidth={2}
+            color={theme.colors.text}
+          />
         </View>
         {/**product list */}
         <SafeAreaView>
-          <ProductList products={products} onEndReached={onEndReached} isLoading={isLoading} />
+          <ProductList
+            products={products}
+            onEndReached={onEndReached}
+            isLoading={isLoading}
+          />
         </SafeAreaView>
       </View>
     </ScreenWrapper>

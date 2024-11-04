@@ -1,20 +1,11 @@
 import { z } from "zod";
 import { Document, Types } from "mongoose";
+import ObjectIdSchema from "../ObjectId";
 
 // Schema cho Reply (được nhúng trong Review)
 const ReplySchema = z.object({
-  _id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
-  reviewer_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  _id: ObjectIdSchema,
+  reviewer_id: ObjectIdSchema,
   name: z.string(),
   avatar: z.string().url(),
   comment: z.string(),
@@ -22,19 +13,9 @@ const ReplySchema = z.object({
 
 // Schema cho Review
 export const ReviewSchema = z.object({
-  reviewer_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  reviewer_id: ObjectIdSchema,
   reviewerAvatar: z.string().url(),
-  reviewered_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  reviewered_id: ObjectIdSchema,
   rate: z.number().min(1).max(5),
   comment: z.string(),
   reviewedAt: z.date().default(new Date()),

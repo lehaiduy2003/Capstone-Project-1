@@ -1,24 +1,15 @@
 import { Types } from "mongoose";
 import { z } from "zod";
+import ObjectIdSchema from "../ObjectId";
 
 // for using transaction DTO
 export const ProductDTOSchema = z.object({
-  _id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  _id: ObjectIdSchema,
   name: z.string(),
   img: z.string().url(),
   price: z.number().nonnegative(),
-  quantity: z.number().nonnegative().default(1),
-  owner: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  quantity: z.number().int().nonnegative().default(1).optional(),
+  owner: ObjectIdSchema,
 });
 
 export const validateProductDTO = (data: unknown) => {

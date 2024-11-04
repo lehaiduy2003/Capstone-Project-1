@@ -1,20 +1,11 @@
 import { z } from "zod";
 import { Document, Types } from "mongoose";
+import ObjectIdSchema from "../ObjectId";
 
 const TransactionSchema = z.object({
-  user_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  user_id: ObjectIdSchema,
   total: z.number().positive(),
-  invoice_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  invoice_id: ObjectIdSchema,
 });
 
 export const validateTransaction = (data: unknown) => {

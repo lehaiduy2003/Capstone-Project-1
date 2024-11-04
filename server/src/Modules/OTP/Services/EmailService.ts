@@ -14,43 +14,53 @@ export default class EmailService implements IOtpService {
 
   async resend(identifier: string): Promise<boolean> {
     try {
-      await deleteCache(identifier); // delete the cache
-      return this.send(identifier); // send a new OTP
+      const cache = await getCache(identifier);
+      if (!cache) return false; // return false if the cache is empty
+      const type = JSON.parse(cache).type;
+      await deleteCache(identifier);
+      return this.send(identifier, type); // send a new OTP
     } catch (error) {
-      console.error("Error resetting OTP:", error);
-      await deleteCache(identifier); // delete the cache if an error occurs
-      return false;
+      await deleteCache(identifier);
+      throw error;
     }
   }
 
-  async send(identifier: string): Promise<boolean> {
+  async send(identifier: string, type: string): Promise<boolean> {
     try {
-      const otp = String(generateOTP()); // generate a 5 digit OTP otp
+      const otp = String(generateOTP()); // generate a 6 digit OTP otp
 
-      if (await getCache(identifier)) return true; // return true if the cache is not empty
+      if (await getCache(identifier)) return true; // return true if the cache is not empty (OTP already sent)
 
       await transporter.sendMail(mailOptions(identifier, otp));
-      await saveToCache(identifier, 300, { otp }); // save the OTP to the cache
-      return true; // after sending the identifier, return the OTP for verification
+      await saveToCache(identifier, 300, { type, otp });
+      return true;
     } catch (error) {
-      console.error("Error sending OTP:", error);
       await deleteCache(identifier); // delete the cache if an error occurs
-      return false;
+      throw error;
     }
   }
 
-  async verify(identifier: string, otp: string): Promise<boolean> {
+  async verify(
+    identifier: string,
+    type: string,
+    otp: string,
+  ): Promise<boolean> {
     try {
-      const cacheOtp = await getCache(identifier); // get the OTP from the cache
+      const cacheOtp = await getCache(identifier);
       // console.log("cacheOtp", cacheOtp);
       if (!cacheOtp) return false; // return false if the cache is empty
 
       const parsedOtp: string = JSON.parse(cacheOtp).otp; // parse the OTP from the cache
+      const parsedType: string = JSON.parse(cacheOtp).type; // parse the type from the cache
       // console.log("parsedOtp", parsedOtp);
-      return otp === parsedOtp;
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
+      const isVerified = otp === parsedOtp && type === parsedType;
+      if (isVerified) {
+        await deleteCache(identifier);
+        return true;
+      }
       return false;
+    } catch (error) {
+      throw error;
     }
   }
 }

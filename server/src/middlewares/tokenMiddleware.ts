@@ -8,7 +8,11 @@ import verifyToken from "../libs/jwt/tokenVerifying";
 import decodeToken from "../libs/jwt/tokenDecoding";
 
 // Middleware to authenticate the token - check if the token is valid
-const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
+const authenticateToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   const token = getTokenFromHeaders(req);
   try {
     if (!token) {
@@ -29,6 +33,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction): voi
     }
 
     req.body.user = decodeToken(token);
+    // console.log("req.body.user", req.body.user);
     req.body.token = token;
     next();
   } catch (error) {

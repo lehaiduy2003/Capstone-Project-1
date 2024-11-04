@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { PasswordSchema } from "../Properties/Password";
-import { RecyclerFieldSchema } from "../Properties/RecyclerField";
+import { PasswordSchema } from "../Password";
+import { RecyclerFieldSchema } from "../RecyclerField";
 
 const SignUpDTOSchema = z
   .object({
@@ -19,7 +19,7 @@ const SignUpDTOSchema = z
     {
       message: "recyclerField is required when role is recycler",
       path: ["recyclerField"],
-    }
+    },
   );
 
 export const validateSignUpDTO = (data: unknown) => {

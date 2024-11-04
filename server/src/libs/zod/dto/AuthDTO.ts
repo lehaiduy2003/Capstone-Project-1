@@ -1,19 +1,10 @@
 import { Types } from "mongoose";
 import { z } from "zod";
+import ObjectIdSchema from "../ObjectId";
 
 const AuthDTOSchema = z.object({
-  account_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
-  user_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  account_id: ObjectIdSchema,
+  user_id: ObjectIdSchema,
   refreshToken: z.string(),
   accessToken: z.string(),
 });

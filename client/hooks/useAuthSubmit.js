@@ -23,7 +23,6 @@ const useAuthSubmit = (apiUrl) => {
       }
       return await response.json();
     } catch (error) {
-      Alert.alert("Form Submitting", "An error occurred. Please try again.");
       setError(error);
     } finally {
       setLoading(false);

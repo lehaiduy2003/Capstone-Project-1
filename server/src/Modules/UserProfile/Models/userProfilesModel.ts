@@ -22,6 +22,7 @@ const userProfilesSchema: Schema<UserProfile> = new Schema({
       name: { type: String },
       price: { type: Number },
       quantity: { type: Number },
+      owner: { type: Schema.Types.ObjectId, ref: "UserProfiles" },
     },
   ],
   likes: [
@@ -30,6 +31,7 @@ const userProfilesSchema: Schema<UserProfile> = new Schema({
       img: { type: String },
       name: { type: String },
       price: { type: Number },
+      owner: { type: Schema.Types.ObjectId, ref: "UserProfiles" },
     },
   ],
   joinedCampaigns: [{ type: Schema.Types.ObjectId, ref: "RecycleCampaigns" }],

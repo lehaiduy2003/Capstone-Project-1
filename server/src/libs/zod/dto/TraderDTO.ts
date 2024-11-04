@@ -1,14 +1,10 @@
 import { Types } from "mongoose";
 import { z } from "zod";
+import ObjectIdSchema from "../ObjectId";
 
 // for using transaction DTO
 export const TraderDTOSchema = z.object({
-  _id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  _id: ObjectIdSchema,
   name: z.string(),
   address: z.string(),
   phone: z.string(),

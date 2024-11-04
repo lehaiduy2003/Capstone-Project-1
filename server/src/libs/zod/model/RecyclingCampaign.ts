@@ -1,5 +1,6 @@
 import { Document, Types } from "mongoose";
 import { z } from "zod";
+import ObjectIdSchema from "../ObjectId";
 
 const RecycleCampaignSchema = z.object({
   name: z.string(),
@@ -13,12 +14,7 @@ const RecycleCampaignSchema = z.object({
   location: z.array(z.string()).default([]),
   createdAt: z.date().default(new Date()),
   updatedAt: z.date().default(new Date()),
-  owner: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  owner: ObjectIdSchema,
   status: z.boolean().default(true),
 });
 

@@ -1,20 +1,19 @@
 import { Document } from "mongoose";
 import { z } from "zod";
-import { RecyclerFieldSchema } from "../Properties/RecyclerField";
-import { PasswordSchema } from "../Properties/Password";
+import { RecyclerFieldSchema } from "../RecyclerField";
+import { PasswordSchema } from "../Password";
+import RoleEnum from "../enums/Role";
+import AccountStatusEnum from "../enums/AccountStatus";
 
 const AccountSchema = z
   .object({
     email: z.string().trim().email({ message: "Invalid email address" }),
     password: PasswordSchema,
-    role: z
-      .enum(["customer", "admin", "recycler"])
-      .default("customer")
-      .transform((role) => role ?? "customer"),
+    role: RoleEnum,
     createdAt: z.date().default(new Date()),
     updatedAt: z.date().default(new Date()),
     isVerified: z.boolean().default(false),
-    status: z.enum(["active", "inactive"]).default("inactive"),
+    status: AccountStatusEnum,
     recyclerField: RecyclerFieldSchema.optional(),
     joinedCampaigns: z.array(z.string()).default([]),
   })
@@ -28,7 +27,7 @@ const AccountSchema = z
     {
       message: "recyclerField is required when role is recycler",
       path: ["recyclerField"],
-    }
+    },
   );
 
 export const validateAccount = (data: unknown) => {

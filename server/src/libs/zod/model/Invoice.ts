@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { Document } from "mongoose";
 import { ProductDTOSchema } from "../dto/ProductDTO";
+import PaymentMethodEnum from "../enums/PaymentMethod";
+import PaymentStatusEnum from "../enums/PaymentStatus";
 
 const InvoiceSchema = z
   .object({
@@ -9,8 +11,8 @@ const InvoiceSchema = z
     shipping_id: z.string().optional(), // will not be undefined (undefined for using test purpose)
     createdAt: z.date().default(new Date()),
     updatedAt: z.date().default(new Date()),
-    paymentStatus: z.enum(["unpaid", "paid"]).default("unpaid"),
-    paymentMethod: z.enum(["card", "cash"]).default("cash"),
+    paymentStatus: PaymentStatusEnum,
+    paymentMethod: PaymentMethodEnum,
   })
   .refine(
     (data) => {
@@ -24,7 +26,7 @@ const InvoiceSchema = z
     },
     {
       message: "Invalid Invoice",
-    }
+    },
   );
 
 export const validateInvoice = (data: unknown) => {

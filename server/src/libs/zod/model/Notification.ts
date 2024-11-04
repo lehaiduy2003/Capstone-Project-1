@@ -1,13 +1,9 @@
 import { z } from "zod";
 import { Types, Document } from "mongoose";
+import ObjectIdSchema from "../ObjectId";
 
 export const NotificationSchema = z.object({
-  account_id: z
-    .union([z.string(), z.instanceof(Types.ObjectId)])
-    .refine((val) => Types.ObjectId.isValid(val.toString()), {
-      message: "Invalid ObjectId",
-    })
-    .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val)),
+  account_id: ObjectIdSchema,
   title: z.string(),
   date: z.date(),
   content: z.string(),

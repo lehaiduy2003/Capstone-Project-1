@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import { Account } from "../../../libs/zod/model/Account";
-import { RecyclerField } from "../../../libs/zod/Properties/RecyclerField";
+import { RecyclerField } from "../../../libs/zod/RecyclerField";
 
 const accountsSchema: Schema<Account> = new Schema({
   email: { type: String, required: true, unique: true },
