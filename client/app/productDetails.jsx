@@ -1,4 +1,13 @@
-import { Image, StatusBar, StyleSheet, Text, View, TouchableOpacity, ScrollView, auto } from "react-native";
+import {
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  auto,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import Button from "../components/Button";
@@ -6,29 +15,38 @@ import { wp } from "../helpers/common";
 import ArtDesign from "react-native-vector-icons/AntDesign";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
-import { addToCart } from "../contexts/CartContext";
+import { useRouter } from "expo-router";
+import useCartStore from "../store/useCartStore";
 
 const ProductDetails = () => {
   const route = useRoute();
+  const router = useRouter();
   const [isLiked, setIsLiked] = React.useState(false);
   const { productId } = route.params;
   const [quantity, setQuantity] = useState(1);
   const navigation = useNavigation();
   const [product, setProduct] = useState({});
   const [owner, setOwner] = useState({});
+  const { addProduct } = useCartStore();
 
   const fetchProductData = async () => {
-    const productData = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/products/${productId}`);
-    const productDataJSON = await productData.json();
+    try {
+      const productResponse = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/products/${productId}`
+      );
+      const productData = await productResponse.json();
 
-    setProduct(productDataJSON);
+      const ownerResponse = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/users/${productData.owner}`
+      );
+      const ownerData = await ownerResponse.json();
 
-    const ownerData = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${productDataJSON.owner}`);
-    const ownerDataJSON = await ownerData.json();
-    setOwner(ownerDataJSON);
+      setProduct(productData);
+      setOwner(ownerData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
-  // console.log(product);
-  // console.log(owner);
   useEffect(() => {
     fetchProductData();
   }, [productId]);
@@ -39,10 +57,14 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    // Add product to cart
-    addToCart(product);
-    // Optionally navigate to the Cart screen
-    navigation.navigate("Cart");
+    const productToAdd = {
+      ...product,
+      id: product._id, // Rename _id to id
+      quantity,
+    };
+
+    useCartStore.getState().addProduct(productToAdd);
+    router.push("/Screens/cartScreen"); // Optionally navigate to the Cart scree
   };
   return (
     <ScreenWrapper bg={"white"}>
@@ -168,12 +190,11 @@ const styles = StyleSheet.create({
     top: -10,
   },
 
-  viewShop: {
+  follow: {
     backgroundColor: "white",
     justifyContent: "center",
     height: 34,
-    width: 100,
-    alignItems: "center",
+    width: 150,
     borderRadius: 2,
     marginRight: 10,
   },

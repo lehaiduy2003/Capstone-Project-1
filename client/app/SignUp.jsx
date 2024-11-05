@@ -10,26 +10,21 @@ import { hp, wp } from "../helpers/common";
 import { useState } from "react";
 import InputPass from "../components/InputPass";
 import { emailIsValid, passwordMatches } from "../utils/inputValidation";
-import useFormSubmit from "../hooks/useFormSubmit";
+import useAuthSubmit from "../hooks/useAuthSubmit";
 import { save } from "../utils/secureStore";
 import { useRouter } from "expo-router";
-import useSendOtp from "../utils/otp";
-import useAuthSubmit from "../hooks/useAuthSubmit";
-// import 'dotenv/config';
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
-  const [password, setPassword] = useState("");
+  const [password, setpassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
-  const { sendOtp } = useSendOtp();
-  // const [setIsLoading] = useState(false);
 
   const router = useRouter();
 
   const { loading, error, onSubmit } = useAuthSubmit(
-    `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`,
+    `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`
   );
 
   const onChangeEmail = (value) => {
@@ -39,7 +34,7 @@ const SignUp = () => {
   };
 
   const onChangePassword = (value) => {
-    setPassword(value);
+    setpassword(value);
     if (confirmPassword) {
       passwordMatches(value, confirmPassword)
         ? setConfirmPasswordError(false)
@@ -56,17 +51,25 @@ const SignUp = () => {
   };
 
   const handleSignUp = async () => {
-    const data = await onSubmit();
+    const data = await onSubmit({
+      method: "POST",
+      body: { email: email, password: confirmPassword },
+    });
     if (error) {
       console.error(error);
       return;
     }
-    // await save("accessToken", String(data.accessToken));
-    // await save("refreshToken", String(data.refreshToken));
-    // await save("user_id", String(data.user_id));
-    //
-    // console.log("Tokens saved successfully");
-    // router.push("Screens/otpScreen");
+    if (!data) {
+      console.error("Data is empty");
+      return;
+    }
+    await save("accessToken", String(data.accessToken));
+    await save("refreshToken", String(data.refreshToken));
+    await save("user_id", String(data.user_id));
+    await save("isLoggedIn", "true");
+
+    console.log("Tokens saved successfully");
+    router.push("(tabs)/homePage");
   };
 
   return (
@@ -106,10 +109,7 @@ const SignUp = () => {
           <Button title="Sign Up" onPress={handleSignUp} loading={loading} />
           <Text style={styles.footerText}>Or using other method</Text>
           {/* Google Button */}
-          <ButtonGoogle
-            icon={<Icon name="google" />}
-            title={"   Sign up with Google"}
-          />
+          <ButtonGoogle icon={<Icon name="google" />} title={"   Sign up with Google"} />
         </View>
         {/* Footer */}
         <View style={styles.footer}>

@@ -67,10 +67,7 @@ export default class AuthController extends BaseController {
         return;
       }
 
-      const updatedStatus = await this.authService.resetPassword(
-        identifier,
-        newPassword,
-      );
+      const updatedStatus = await this.authService.resetPassword(identifier, newPassword);
       if (!updatedStatus) {
         res.status(502).send({ message: "Failed to update password" });
         return;
@@ -109,9 +106,7 @@ export default class AuthController extends BaseController {
    */
   generateNewAccessToken(req: Request, res: Response): void {
     try {
-      const newAccessToken = this.authService.getNewAccessToken(
-        String(req.body.token),
-      );
+      const newAccessToken = this.authService.getNewAccessToken(String(req.body.token));
       res.status(201).send({ accessToken: newAccessToken });
       return;
     } catch (error) {
@@ -131,10 +126,7 @@ export default class AuthController extends BaseController {
 
       // console.log("account", account);
 
-      const result = await this.authService.signIn(
-        account.email,
-        account.password,
-      );
+      const result = await this.authService.signIn(account.email, account.password);
       // console.log("result", result);
       if (!result) {
         res.status(502).send({ error: "Invalid credential" });

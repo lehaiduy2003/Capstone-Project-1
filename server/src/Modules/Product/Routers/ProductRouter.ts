@@ -3,6 +3,7 @@ import authenticateToken from "../../../middlewares/tokenMiddleware";
 import checkCache from "../../../middlewares/cacheMiddleware";
 import ProductService from "../Services/ProductService";
 import BaseRouter from "../../../Base/BaseRouter";
+import { authorizeCustomer } from "../../../middlewares/authorizeMiddleware";
 
 class ProductRouter extends BaseRouter {
   private readonly productController: ProductController;
@@ -14,35 +15,34 @@ class ProductRouter extends BaseRouter {
   }
 
   public initRoutes(): void {
-    this.router.get(
-      "/",
-      checkCache,
-      this.productController.findMany.bind(this.productController),
-    );
+    this.router.get("/", checkCache, this.productController.findMany.bind(this.productController));
     this.router.get(
       "/search",
       checkCache,
-      this.productController.search.bind(this.productController),
+      this.productController.search.bind(this.productController)
     );
     this.router.get(
       "/:id",
       checkCache,
-      this.productController.findById.bind(this.productController),
+      this.productController.findById.bind(this.productController)
     );
     this.router.post(
       "/",
       authenticateToken,
-      this.productController.create.bind(this.productController),
+      authorizeCustomer.compareEqualRole,
+      this.productController.create.bind(this.productController)
     );
     this.router.patch(
       "/:id",
       authenticateToken,
-      this.productController.updateById.bind(this.productController),
+      authorizeCustomer.compareEqualRole,
+      this.productController.updateById.bind(this.productController)
     );
     this.router.delete(
       "/:id",
       authenticateToken,
-      this.productController.deleteById.bind(this.productController),
+      authorizeCustomer.compareEqualRole,
+      this.productController.deleteById.bind(this.productController)
     );
   }
 }

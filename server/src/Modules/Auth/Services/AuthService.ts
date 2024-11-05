@@ -26,10 +26,7 @@ export default class AuthService extends SessionService {
   protected readonly accountService: AccountService;
   protected readonly userProfileService: UserProfileService;
 
-  public constructor(
-    accountService: AccountService,
-    userProfileService: UserProfileService,
-  ) {
+  public constructor(accountService: AccountService, userProfileService: UserProfileService) {
     super();
     this.accountService = accountService;
     this.userProfileService = userProfileService;
@@ -45,10 +42,7 @@ export default class AuthService extends SessionService {
         await this.abortTransaction();
         return null;
       }
-      const newAccount = await this.accountService.create(
-        accountData,
-        this.getSession(),
-      );
+      const newAccount = await this.accountService.create(accountData, this.getSession());
 
       const userData = validateUserProfile({
         account_id: String(newAccount._id),
@@ -72,18 +66,14 @@ export default class AuthService extends SessionService {
 
   async signIn(email: string, password: string): Promise<AuthDTO | null> {
     const account = await this.accountService.findByEmail(email);
-
     if (!account || account.status === "inactive") {
       throw new Error("Account not found or inactive");
     }
     //console.log("account", account);
-    const isPasswordValid = this.accountService.verifyAccountPassword(
-      account,
-      password,
-    );
+    const isPasswordValid = this.accountService.verifyAccountPassword(account, password);
 
     const userProfile = await this.userProfileService.findByAccountId(
-      new ObjectId(String(account._id)),
+      new ObjectId(String(account._id))
     );
     // console.log("userProfile", userProfile);
     if (!isPasswordValid || !userProfile) {
@@ -141,11 +131,7 @@ export default class AuthService extends SessionService {
         await this.abortTransaction();
         return false;
       }
-      await this.accountService.updatePassword(
-        account,
-        newPassword,
-        this.getSession(),
-      );
+      await this.accountService.updatePassword(account, newPassword, this.getSession());
 
       await this.commitTransaction();
       return true;

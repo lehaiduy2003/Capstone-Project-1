@@ -6,6 +6,8 @@ const usePagination = () => {
   const { isLoading, setLoading } = useLoadingStore();
   const [limit, setLimit] = useState(30); // Start with 30 products
   const [skip, setSkip] = useState(0); // Start with 0
+  const [sort, setSort] = useState("updatedAt");
+  const [order, setOrder] = useState("desc");
 
   const fetchProducts = async () => {
     if (isLoading) return;
@@ -13,7 +15,7 @@ const usePagination = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/products?limit=${limit}&skip=${skip}`
+        `${process.env.EXPO_PUBLIC_API_URL}/products?limit=${limit}&skip=${skip}&sort=${sort}&order=${order}`,
       );
       const newProducts = await response.json();
 
@@ -33,7 +35,22 @@ const usePagination = () => {
     await fetchProducts();
   };
 
-  return { products, isLoading, fetchProducts, onEndReached };
+  const sortOption = (sort) => {
+    setSort(sort);
+  };
+
+  const orderOption = (order) => {
+    setOrder(order);
+  };
+
+  return {
+    products,
+    isLoading,
+    sortOption,
+    orderOption,
+    fetchProducts,
+    onEndReached,
+  };
 };
 
 export default usePagination;

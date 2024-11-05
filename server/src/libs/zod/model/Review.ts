@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Document, Types } from "mongoose";
+import { Document } from "mongoose";
 import ObjectIdSchema from "../ObjectId";
 
 // Schema cho Reply (được nhúng trong Review)

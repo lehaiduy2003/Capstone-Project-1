@@ -1,5 +1,5 @@
 // cartItemsStore.js
-import create from "zustand";
+import { create } from 'zustand';
 
 // Store quản lý giỏ hàng
 const useCartStore = create((set, get) => ({
@@ -16,31 +16,88 @@ const useCartStore = create((set, get) => ({
   },
 
   addProduct: (product) => {
-    const { cartItems, totalPrice } = get();
-    const updatedCart = [...cartItems, product];
-    const newTotalPrice = totalPrice + product.price;
+    // if (!product.id) {
+    //   console.error("Product is missing an id:", product);
+    //   return; // Skip adding products without an id
+    // }
+    // const { cartItems, totalPrice } = get();
+    // const updatedCart = [...cartItems, product];
+    // const newTotalPrice = totalPrice + product.price;
 
-    set({
-      cartItems: updatedCart,
-      totalPrice: newTotalPrice,
+    // set({
+    //   cartItems: updatedCart,
+    //   totalPrice: newTotalPrice,
+    // });
+
+    set((state) => {
+      // Add product to cartItems or update quantity if it already exists
+      const existingProduct = state.cartItems.find((item) => item._id === product._id);
+      let updatedCartItems;
+
+      if (existingProduct) {
+        updatedCartItems = state.cartItems.map((item) =>
+          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      } else {
+        updatedCartItems = [...state.cartItems, { ...product, quantity: 1 }];
+      }
+
+      // Calculate the new total price
+      const newTotalPrice = updatedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      saveCartToDB(get().userId, updatedCartItems, newTotalPrice);
+
+      return { cartItems: updatedCartItems, totalPrice: newTotalPrice };
     });
-
     // Lưu giỏ hàng vào cơ sở dữ liệu hoặc localStorage
-    saveCartToDB(get().userId, updatedCart, newTotalPrice);
+  },
+  increaseProductQuantity: (productId) => {
+    set((state) => {
+      const updatedCartItems = state.cartItems.map((item) =>
+        item._id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      );
+
+      const newTotalPrice = updatedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      return { cartItems: updatedCartItems, totalPrice: newTotalPrice };
+    });
   },
 
-  removeProduct: (productId) => {
-    const { cartItems, totalPrice } = get();
-    const updatedCart = cartItems.filter((item) => item.id !== productId);
-    const newTotalPrice = cartItems.reduce((total, item) => (item.id !== productId ? total + item.price : total), 0);
+  decreaseProductQuantity: (productId) => {
+    set((state) => {
+      const updatedCartItems = state.cartItems
+        .map((item) =>
+          item._id === productId ? { ...item, quantity: item.quantity - 1 } : item
+        )
+        .filter((item) => item.quantity > 0); // Remove items with quantity 0
 
-    set({
-      cartItems: updatedCart,
-      totalPrice: newTotalPrice,
+      const newTotalPrice = updatedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      return { cartItems: updatedCartItems, totalPrice: newTotalPrice };
     });
+  },
 
+
+
+  removeProduct: (productId) => {
+    // const { cartItems, totalPrice } = get();
+    // const updatedCart = cartItems.filter((item) => item.id !== productId);
+    // const newTotalPrice = cartItems.reduce((total, item) => (item.id !== productId ? total + item.price : total), 0);
+
+    // set({
+    //   cartItems: updatedCart,
+    //   totalPrice: newTotalPrice,
+    // });
+    set((state) => {
+      // Remove product or decrease quantity
+      const updatedCartItems = state.cartItems
+        .map((item) => (item._id === productId ? { ...item, quantity: item.quantity - 1 } : item))
+        .filter((item) => item.quantity > 0);
+
+      // Calculate the new total price
+      const newTotalPrice = updatedCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      saveCartToDB(get().userId, updatedCartItems, newTotalPrice);
+
+      return { cartItems: updatedCartItems, totalPrice: newTotalPrice };
+    });
     // Lưu giỏ hàng cập nhật vào cơ sở dữ liệu
-    saveCartToDB(get().userId, updatedCart, newTotalPrice);
   },
 }));
 
@@ -59,3 +116,4 @@ const saveCartToDB = (userId, cartItems, totalPrice) => {
 };
 
 export default useCartStore;
+

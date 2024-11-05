@@ -1,113 +1,73 @@
-import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity } from "react-native";
-import React, { useEffect } from "react";
+import { StyleSheet, View, FlatList, Text, Image } from "react-native";
+import React from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useRouter } from "expo-router";
-import { theme } from "../../constants/theme";
-import { hp } from "../../helpers/common";
-import { useState } from "react";
-import Loading from "../../components/Loading";
+import useCartStore from "../../store/useCartStore";
 import Header from "../../components/Header";
-import Button from "../../components/Button";
+import CartItem from "../../components/CartItem";
+import CartFooter from "../../components/Cart/CartFooter";
+import LottieView from "lottie-react-native";
 
-const CartItem = ({ item, onIncrease, onDecrease }) => {
-  const formattedPrice = new Intl.NumberFormat("vi-VI", {
-    style: "currency",
-    currency: "VND",
-  }).format(item.price * 1000);
-  return (
-    <View style={styles.cartItem}>
-      <Image source={{ uri: item.image }} style={styles.itemImage} />
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemName}>{item.title}</Text>
-        <Text style={styles.itemPrice}>{formattedPrice}</Text>
-      </View>
-      <View style={styles.quantityContainer}>
-        <TouchableOpacity onPress={onDecrease}>
-          <Text style={styles.quantityButton}>-</Text>
-        </TouchableOpacity>
-        <Text style={styles.quantityText}>{item.quantity}</Text>
-        <TouchableOpacity onPress={onIncrease}>
-          <Text style={styles.quantityButton}>+</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
 const Cart = () => {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { cartItems, totalPrice, addProduct, removeProduct } = useCartStore();
 
-  useEffect(() => {
-    // Fetch data from the API
-    fetch("https://fakestoreapi.com/products")
-      .then((response) => response.json())
-      .then((data) => {
-        // Add quantity field to each product for state management
-        const updatedData = data.map((item) => ({
-          ...item,
-          quantity: 1, // Start with a default quantity of 1 for each item
-        }));
-        setCartItems(updatedData);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-        setLoading(false);
-      });
-  }, []);
-
-  const increaseQuantity = (id) => {
-    const updatedCart = cartItems.map((item) => (item.id === id ? { ...item, quantity: item.quantity + 1 } : item));
-    setCartItems(updatedCart);
+  const increaseQuantity = (productId) => {
+    const product = cartItems.find((item) => item.id === productId);
+    if (product) {
+      addProduct({ ...product, quantity: product.quantity + 1 });
+    }
   };
 
-  const decreaseQuantity = (id) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
-    );
-    setCartItems(updatedCart);
+  const decreaseQuantity = (productId) => {
+    const product = cartItems.find((item) => item.id === productId);
+    if (product && product.quantity > 1) {
+      addProduct({ ...product, quantity: product.quantity - 1 });
+    } else {
+      removeProduct(productId);
+    }
   };
-
-  const calculateTotalPrice = () => {
-    // const formattedPrice = new Intl.NumberFormat('vi-VI', {
-    //     style: 'currency',
-    //     currency: 'VND'
-    // }).format(item.price * 1000);
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
-
-  if (loading) {
-    return <Loading />;
-  }
 
   return (
     <ScreenWrapper>
-      {/*Header*/}
-      <Header title={"My cart"} showBackButton />
-
-      {/*Cart items*/}
+      <Header title={"My Cart"} showBackButton />
       <View style={styles.container}>
-        <FlatList
-          data={cartItems}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <CartItem
-              item={item}
-              onIncrease={() => increaseQuantity(item.id)}
-              onDecrease={() => decreaseQuantity(item.id)}
+        {cartItems.length === 0 ? (
+          // Display Empty Cart UI
+          <View style={styles.emptyCartContainer}>
+            {/* <Image
+              source={{ uri: "https://example.com/empty-cart-icon.png" }} // replace with a local image if you prefer
+              style={styles.emptyCartIcon}
+            /> */}
+            <LottieView
+              style={styles.emptyCartIcon}
+              source={require("../../assets/animation/animation_cart_empty.json")}
+              autoPlay
+              loop
             />
-          )}
-          contentContainerStyle={styles.cartList}
-          showsVerticalScrollIndicator={false}
-        />
+            <Text style={styles.emptyCartText}>Your Cart Is Empty!</Text>
+            <Text style={styles.emptyCartSubText}>When you add products, they’ll appear here.</Text>
+          </View>
+        ) : (
+          // Display Cart Items List
+          <FlatList
+            data={cartItems}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <CartItem
+                item={item}
+                onIncrease={() => increaseQuantity(item.id)}
+                onDecrease={() => decreaseQuantity(item.id)}
+              />
+            )}
+            contentContainerStyle={styles.cartList}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </View>
-
-      {/*Footer*/}
-      <View style={styles.footer}>
-        <Text style={styles.totalPrice}>Total price: {calculateTotalPrice().toFixed(2)} đ</Text>
-        <Button title="Checkout" onPress={() => router.push("checkOut")} />
-      </View>
+      {cartItems.length > 0 && (
+        <CartFooter totalPrice={totalPrice} onCheckout={() => router.push("checkOut")} />
+      )}
     </ScreenWrapper>
   );
 };
@@ -115,85 +75,33 @@ const Cart = () => {
 export default Cart;
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: hp(3),
-    fontWeight: theme.fonts.semibold,
-    color: theme.colors.textDark,
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 200
   },
-  loaderContainer: {
+  emptyCartContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  cartList: {
-    paddingBottom: 300,
+  emptyCartIcon: {
+    width: 150,
+    height: 150,
+    marginBottom: 16,
   },
-  cartItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFF",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 8,
-    elevation: 2,
-  },
-  itemImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 10,
-  },
-  itemDetails: {
-    flex: 1,
-  },
-  itemName: {
-    fontSize: 16,
+  emptyCartText: {
+    fontSize: 18,
     fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
   },
-  itemPrice: {
+  emptyCartSubText: {
     fontSize: 14,
     color: "#888",
+    textAlign: "center",
   },
-  quantityContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  quantityButton: {
-    fontSize: 18,
-    fontWeight: "bold",
-    paddingHorizontal: 10,
-  },
-  quantityText: {
-    fontSize: 16,
-    marginHorizontal: 8,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#FFF",
-    padding: 16,
-    borderTopWidth: 1,
-    borderColor: "#DDD",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 65,
-  },
-  totalPrice: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  checkoutButton: {
-    backgroundColor: "#000",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  checkoutText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
+  cartList: {
+    paddingBottom: 300,
   },
 });

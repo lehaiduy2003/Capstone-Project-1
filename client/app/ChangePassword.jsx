@@ -44,6 +44,7 @@ const ChangePassword = () => {
 
     try {
       await onSubmit({
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -63,6 +64,34 @@ const ChangePassword = () => {
     }
   };
 
+  //   try {
+  //     const response = await onSubmit({
+  //       headers: {
+  //         Authorization: `Bearer ${accessToken}`,
+  //       },
+  //       body: {
+  //         oldPassword,
+  //         newPassword,
+  //       },
+  //     });
+
+  //     console.log("API response:", response);
+
+  //     if (error) {
+  //       Alert.alert("Error", error.message);
+  //       return;
+  //     }
+  //     if (response && response.message === "password updated successfully") {
+  //       Alert.alert("Success", "Password changed successfully.");
+  //       router.back(); // Navigate back after success
+  //     } else {
+  //       Alert.alert("Error", "Failed to change password.");
+  //     }
+  //   } catch (err) {
+  //     Alert.alert("Error", err.message);
+  //   }
+  // };
+
   return (
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
@@ -76,22 +105,25 @@ const ChangePassword = () => {
           <InputPass
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
             placeholder="Old Password"
-            password={oldPassword}
-            setPassword={setOldPassword}
+            // password={oldPassword}
+            // setPassword={setOldPassword}
+            onChangeText={setOldPassword}
           />
           <Text style={styles.passText}>New Password</Text>
           <InputPass
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
             placeholder="New Password"
-            password={newPassword}
-            setPassword={setNewPassword}
+            // password={newPassword}
+            // setPassword={setNewPassword}
+            onChangeText={setNewPassword}
           />
           <Text style={styles.passText}>Confirm New Password</Text>
           <InputPass
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
             placeholder="Confirm New Password"
-            password={confirmPassword}
-            setPassword={setConfirmPassword}
+            // password={confirmPassword}
+            // setPassword={setConfirmPassword}
+            onChangeText={setConfirmPassword}
           />
           <View style={styles.footer}>
             <Text style={styles.footerText}>Forgot your password? </Text>

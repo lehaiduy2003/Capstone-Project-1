@@ -16,13 +16,20 @@ enum Role {
   ADMIN = "admin",
 }
 
-class AuthorizeCustomer implements IInExactAuthorize {
+class AuthorizeCustomer implements IInExactAuthorize, IExactAuthorize {
   compareInEqualRole(req: Request, res: Response, next: NextFunction): void {
     if (req.body.user.role >= Role.CUSTOMER) {
       next();
       return;
     }
     res.status(403).send("No permission to access this route");
+  }
+  compareEqualRole(req: Request, res: Response, next: NextFunction): void {
+    if (req.body.user.role !== Role.CUSTOMER) {
+      res.status(403).send("No permission to access this route");
+      return;
+    }
+    next();
   }
 }
 

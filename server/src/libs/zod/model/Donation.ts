@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Types, Document } from "mongoose";
+import { Document } from "mongoose";
 import ObjectIdSchema from "../ObjectId";
 
 const DonationSchema = z.object({

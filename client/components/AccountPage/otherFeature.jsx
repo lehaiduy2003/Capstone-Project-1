@@ -62,10 +62,10 @@ const OtherFeature = () => {
         {/* Thêm một TouchableOpacity */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => handlePress("Test")}
+          onPress={() => router.push("test")}
         >
-          <FontAwesome name="share" size={hp(2)} style={styles.icon} />
-          <Text style={styles.buttonText}>.......</Text>
+          <FontAwesome name="lock" size={hp(2)} style={styles.icon} />
+          <Text style={styles.buttonText}>...</Text>
         </TouchableOpacity>
       </View>
 

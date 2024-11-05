@@ -16,8 +16,12 @@ const ForgotPassword = () => {
 
   const router = useRouter();
 
+  // const { loading, error, onSubmit } = useAuthSubmit(
+  //   `${process.env.EXPO_PUBLIC_API_URL}/profile/forgot-password`
+  // );
+
   const { loading, error, onSubmit } = useAuthSubmit(
-    `${process.env.EXPO_PUBLIC_API_URL}/profile/forgot-password`
+    `${process.env.EXPO_PUBLIC_API_URL}/otp/send`
   );
 
   const handleSubmit = async () => {
@@ -26,41 +30,48 @@ const ForgotPassword = () => {
       return;
     }
 
+    const accessToken = await getValueFor("accessToken");
+
     try {
-      await onSubmit({
+      const response = await onSubmit({
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: {
-          email,
+          identifier: email,
+          type: "forgot",
         },
       });
+
+      console.log("API response:", response);
+
       if (error) {
         Alert.alert("Error", error.message);
         return;
       }
 
-      const accessToken = await getValueFor("accessToken");
+      if (!response) {
+        Alert.alert("Error", "No response from server. Please try again.");
+        return;
+      }
 
-      // Fetch to /otp/send
-      const otpResponse = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/otp/send`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        }
-      );
-
-      if (!otpResponse.ok) {
+      if (response.message !== "Otp sent") {
         Alert.alert("Error", "Failed to send OTP. Please try again.");
         return;
       }
 
-      Alert.alert("Success", "Verification code sent to your email.");
-      router.push("VerifyCode"); // Navigate to VerifyCode screen after success
+      if (response.message === "Otp sent") {
+        Alert.alert("Success", "Verification code sent to your email.");
+        // Navigate to OtpScreen, passing email as a URL parameter.
+        router.push({
+          pathname: "Screens/otpScreen", // Note the correct path.
+          params: { email },
+        });
+      } else {
+        // Handle other server responses that are not error but not equal to "Otp sent".
+        Alert.alert("Server Response:", response.message);
+      }
     } catch (err) {
       Alert.alert("Error", err.message);
     }
@@ -74,7 +85,7 @@ const ForgotPassword = () => {
         <BackButton router={router} />
         <Text style={styles.title}>Forgot Password</Text>
         <Text style={styles.subtitle}>
-          Enter your email for the verification process. {"\n"}We will send 4
+          Enter your email for the verification process. {"\n"}We will send 6
           digits code to your email.
         </Text>
         <View style={styles.form}>

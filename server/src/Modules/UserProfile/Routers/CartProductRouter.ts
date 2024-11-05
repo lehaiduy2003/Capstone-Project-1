@@ -1,9 +1,8 @@
 import BaseRouter from "../../../Base/BaseRouter";
 import CartProductController from "../Controllers/CartProductController";
 import CartProductService from "../Services/CartProductService";
-import UserProfileService from "../Services/UserProfileService";
-import ProductService from "../../Product/Services/ProductService";
 import { authorizeCustomer } from "../../../middlewares/authorizeMiddleware";
+import authenticateToken from "../../../middlewares/tokenMiddleware";
 
 class CartProductRouter extends BaseRouter {
   private readonly cartProductController: CartProductController;
@@ -15,32 +14,35 @@ class CartProductRouter extends BaseRouter {
   }
 
   public initRoutes(): void {
-    this.router.post(
-      "/:productId",
-      authorizeCustomer.compareInEqualRole,
-      this.cartProductController.addProduct,
-    );
-    this.router.delete(
-      "/:productId",
-      authorizeCustomer.compareInEqualRole,
-      this.cartProductController.removeProduct,
-    );
-    this.router.delete(
+    this.router.get(
       "/",
+      authenticateToken,
       authorizeCustomer.compareInEqualRole,
-      this.cartProductController.clearCart,
+      this.cartProductController.getCart.bind(this.cartProductController)
+    );
+    this.router.patch(
+      "/:userId/add",
+      authenticateToken,
+      authorizeCustomer.compareInEqualRole,
+      this.cartProductController.addProduct.bind(this.cartProductController)
+    );
+    this.router.delete(
+      "/:userId/remove",
+      authenticateToken,
+      authorizeCustomer.compareInEqualRole,
+      this.cartProductController.removeProduct.bind(this.cartProductController)
+    );
+    this.router.delete(
+      "/:userId/clear",
+      authenticateToken,
+      authorizeCustomer.compareInEqualRole,
+      this.cartProductController.clearCart.bind(this.cartProductController)
     );
   }
 }
 
 const createCartProductRouter = (): CartProductRouter => {
-  const userProfileService = new UserProfileService();
-  const productService = new ProductService();
-
-  const cartProductService = new CartProductService(
-    userProfileService,
-    productService,
-  );
+  const cartProductService = new CartProductService();
   const cartProductController = new CartProductController(cartProductService);
   return new CartProductRouter(cartProductController);
 };

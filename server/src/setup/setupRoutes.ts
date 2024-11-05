@@ -6,6 +6,7 @@ import createUserRouter from "../Modules/UserProfile/Routers/UserProfileRouter";
 import createProductRouter from "../Modules/Product/Routers/ProductRouter";
 import createProfileEditingRouter from "../Modules/UserProfile/Routers/ProfileEditingRouter";
 import createStripeRouter from "../Modules/Stripe/Routers/StripeRouter";
+import createCartProductRouter from "../Modules/UserProfile/Routers/CartProductRouter";
 
 const setupRouters = (app: Application): void => {
   createAuthRouter().register("/auth", app);
@@ -15,6 +16,7 @@ const setupRouters = (app: Application): void => {
   createTransactionRouter().register("/transactions", app);
   createProductRouter().register("/products", app);
   createProfileEditingRouter().register("/profile", app);
+  createCartProductRouter().register("/cart", app);
   console.log("Routers initialized");
 };
 

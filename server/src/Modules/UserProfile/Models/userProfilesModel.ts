@@ -10,6 +10,7 @@ const userProfilesSchema: Schema<UserProfile> = new Schema({
   address: { type: [String] },
   reputationScore: { type: Number, required: true },
   followers: { type: Number, required: true },
+  following: { type: Number, required: true },
   account_id: {
     type: Schema.Types.ObjectId,
     ref: "Accounts",

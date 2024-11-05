@@ -24,22 +24,36 @@ const OTPVerificationScreen = () => {
     setOtp(value);
   };
 
-  // const handleSubmit = () => {
-  //   // Open the popup after submitting OTP
-  //   // const response = await verifyOtp(email, otp);
-  //   // if (response) {
-  //     setIsPopupVisible(true);
-  //     console.log('Submitted OTP:', otp);
-  //   }
 
   const handleSubmit = async () => {
     setLoading(true);
-    //    const response = await verifyOtp(email, otp);
-    // if (response) {
-    setIsPopupVisible(true);
-    //   }
-    setLoading(false);
+    try {
+      const response = await onSubmit({
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: {
+          identifier: email,
+          otp: otp,
+          type: "forgot", // Add type for verification
+        },
+      });
 
+      if (response && response.message === "Otp verified") {
+        // OTP verified, navigate to ResetPassword, passing email
+        router.push({
+          pathname: "ResetPassword",
+          params: { email },
+        });
+      } else {
+        Alert.alert("Error", "Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClosePopup = () => {

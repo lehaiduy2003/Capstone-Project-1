@@ -10,7 +10,7 @@ import usePagination from "../../hooks/usePagination";
 import ProductList from "../../components/ProductList";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const homePage = () => {
+const HomePage = () => {
   const nameRef = React.useRef("");
 
   const { products, isLoading, fetchProducts, onEndReached } = usePagination();
@@ -28,16 +28,11 @@ const homePage = () => {
           <Text style={styles.logoText}>Eco Trade</Text>
           <View style={styles.icons}>
             <Pressable onPress={() => router.push("cart")}>
-              <Icon
-                name={"cart"}
-                size={hp(3.2)}
-                strokeWidth={2}
-                color={theme.colors.text}
-              />
+              <Icon name={"cart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
             </Pressable>
-            {/*<Pressable onPress={router.push('/Screens/otpScreen')}>*/}
-            {/*  <Icon name={"heart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />*/}
-            {/*</Pressable>*/}
+            <Pressable>
+              <Icon name={"heart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
+            </Pressable>
           </View>
         </View>
         {/* Search */}
@@ -68,7 +63,7 @@ const homePage = () => {
   );
 };
 
-export default homePage;
+export default HomePage;
 
 const styles = StyleSheet.create({
   container: {

@@ -2,8 +2,10 @@ import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { theme } from "../constants/theme";
 import ArtDesign from "react-native-vector-icons/AntDesign";
 import { router } from "expo-router";
+import { useState } from "react";
+
 const ProductCard = () => {
-  const [isLiked, setIsLiked] = React.useState(false);
+  const [isLiked, setIsLiked] = useState(false);
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -11,7 +13,10 @@ const ProductCard = () => {
           router.push("ProductDetails");
         }}
       >
-        <Image source={require("../assets/images/products/laptop2.jpg")} style={styles.convertImage} />
+        <Image
+          source={require("../assets/images/products/laptop2.jpg")}
+          style={styles.convertImage}
+        />
         <View style={styles.content}>
           <Text style={styles.title}>Product name</Text>
           <Text style={styles.price}>10$</Text>

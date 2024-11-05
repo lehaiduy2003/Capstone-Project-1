@@ -17,28 +17,32 @@ const SignIn = () => {
   const email = useRef("");
   const password = useRef("");
   const router = useRouter();
+
   const { loading, error, onSubmit } = useAuthSubmit(
-    `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-in`,
-    {},
+    `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-in`
   );
 
   const handleSignIn = async () => {
     const data = await onSubmit({
+      method: "POST",
       body: { email: email.current, password: password.current },
     });
 
+    // console.log("SignIn API response:", data);
     if (error) {
       console.error(error);
       return;
     }
-
+    if (!data) {
+      console.error("Data is empty");
+      return;
+    }
     await save("accessToken", String(data.accessToken));
     await save("refreshToken", String(data.refreshToken));
     await save("user_id", String(data.user_id));
     await save("isLoggedIn", "true");
 
-    console.log("Tokens saved successfully");
-    router.push("(tabs)/homePage");
+    router.push("(tabs)/HomePage");
   };
 
   return (
@@ -65,7 +69,6 @@ const SignIn = () => {
           <InputPass
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
             placeholder="Enter your password"
-            password={password.current}
             onChangeText={(value) => {
               password.current = value;
             }}
@@ -74,14 +77,9 @@ const SignIn = () => {
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
           {/* Button */}
           <Button title={"Sign In"} loading={loading} onPress={handleSignIn} />
-          {/* <Button title={"Sign In"} loading={loading} onPress={router.push('(tabs)/homePage')} /> */}
-
           <Text style={styles.footerText}>Or using other method</Text>
           {/* Google Button */}
-          <ButtonGoogle
-            icon={<Icon name="google" />}
-            title={"   Sign in with Google"}
-          />
+          <ButtonGoogle icon={<Icon name="google" />} title={"   Sign in with Google"} />
         </View>
         {/* Footer */}
         <View style={styles.footer}>

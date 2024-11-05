@@ -11,9 +11,10 @@ const useAuthSubmit = (apiUrl) => {
       setLoading(true);
       console.log(options.body);
       const response = await fetch(apiUrl, {
-        method: "POST",
+        method: options.method || "POST", // Lấy method từ options, mặc định là POST
         headers: {
           "Content-Type": "application/json",
+          ...options.headers,
         },
         body: JSON.stringify(options.body),
       });
@@ -21,8 +22,10 @@ const useAuthSubmit = (apiUrl) => {
         setError({ code: response.status, message: response.body });
         return null;
       }
-      return await response.json();
+      const jsonData = await response.json();
+      return jsonData;
     } catch (error) {
+      Alert.alert("Form Submitting", "An error occurred. Please try again.");
       setError(error);
     } finally {
       setLoading(false);

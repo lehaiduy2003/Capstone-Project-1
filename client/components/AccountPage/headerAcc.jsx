@@ -5,6 +5,7 @@ import { hp, wp } from "../../helpers/common";
 import Icon from "../../assets/icons";
 import { deleteValueFor } from "../../utils/secureStore";
 import { useRouter } from "expo-router";
+
 const HeaderAcc = () => {
   const router = useRouter();
   const handleClick = (label) => {
@@ -15,7 +16,7 @@ const HeaderAcc = () => {
     try {
       await deleteValueFor("accessToken");
       await deleteValueFor("refreshToken");
-      console.log("Signed out successfully!");
+      // console.log("Signed out successfully!");
       router.push("welcome");
     } catch (error) {
       console.error("Error signing out:", error);
@@ -23,19 +24,19 @@ const HeaderAcc = () => {
   };
   const confirmLogout = () => {
     Alert.alert(
-      "Xác nhận đăng xuất",
-      "Bạn có chắc chắn muốn đăng xuất không?",
+      "Confirm sign out",
+      "Are you sure you want to sign out?",
       [
         {
-          text: "Hủy",
+          text: "cancel",
           style: "cancel",
         },
         {
-          text: "Đăng xuất",
+          text: "sign out",
           onPress: () => handleSignOut(), // Gọi hàm đăng xuất khi người dùng chọn "Đăng xuất"
         },
       ],
-      { cancelable: false } // Không cho phép đóng hộp thoại bằng cách chạm ra ngoài
+      { cancelable: false }, // Không cho phép đóng hộp thoại bằng cách chạm ra ngoài
     );
   };
 
@@ -44,7 +45,13 @@ const HeaderAcc = () => {
       {/* Phần trái header */}
       <View style={styles.leftHeader}>
         <TouchableOpacity onPress={() => handleClick("Change Avatar")}>
-          <Icon style={{ marginLeft: wp(1) }} name="user" size={hp(6)} strokeWidth={2} color="white" />
+          <Icon
+            style={{ marginLeft: wp(1) }}
+            name="user"
+            size={hp(6)}
+            strokeWidth={2}
+            color="white"
+          />
         </TouchableOpacity>
         <View>
           <Text style={styles.userName}>User Name</Text>
