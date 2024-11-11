@@ -1,9 +1,10 @@
 import AuthController from "../Controllers/AuthController";
-import authenticateToken from "../../../middlewares/tokenMiddleware";
+import validateToken from "../../../middlewares/tokenMiddleware";
 import AccountService from "../../Account/Services/AccountService";
 import AuthService from "../Services/AuthService";
 import UserProfileService from "../../UserProfile/Services/UserProfileService";
 import BaseRouter from "../../../Base/BaseRouter";
+import authorizeUser from "../../../middlewares/authorizationMiddleware";
 
 class AuthRouter extends BaseRouter {
   private readonly authController: AuthController;
@@ -15,31 +16,23 @@ class AuthRouter extends BaseRouter {
   }
 
   public initRoutes(): void {
-    this.router.post(
-      "/sign-in",
-      this.authController.signIn.bind(this.authController),
-    );
-    this.router.post(
-      "/sign-up",
-      this.authController.signUp.bind(this.authController),
-    );
+    this.router.post("/sign-in", this.authController.signIn.bind(this.authController));
+    this.router.post("/sign-up", this.authController.signUp.bind(this.authController));
     this.router.post(
       "/refresh",
-      authenticateToken,
-      this.authController.generateNewAccessToken.bind(this.authController),
+      validateToken,
+      this.authController.generateNewAccessToken.bind(this.authController)
     );
-    this.router.patch(
-      "/activate",
-      this.authController.activateAccount.bind(this.authController),
-    );
+    this.router.patch("/activate", this.authController.activateAccount.bind(this.authController));
     this.router.patch(
       "/deactivate",
-      authenticateToken,
-      this.authController.deactivateAccount.bind(this.authController),
+      validateToken,
+      authorizeUser.isCustomerOrRecycler,
+      this.authController.deactivateAccount.bind(this.authController)
     );
     this.router.patch(
       "/reset-password",
-      this.authController.resetPassword.bind(this.authController),
+      this.authController.resetPassword.bind(this.authController)
     );
   }
 }

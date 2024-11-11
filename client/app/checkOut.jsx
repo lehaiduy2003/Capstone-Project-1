@@ -12,10 +12,12 @@ import { theme } from "../constants/theme";
 import { initPaymentSheet, presentPaymentSheet, StripeProvider } from "@stripe/stripe-react-native";
 import { getValueFor } from "../utils/secureStore";
 import { Screen } from "react-native-screens";
+import useCartStore from "../store/useCartStore";
 
 const checkOut = () => {
   const [loading, setLoading] = useState(true);
-  const [cartItems, setCartItems] = useState([]);
+  const { cartItems, totalPrice } = useCartStore();
+  // console.log(cartItems);
 
   const checkout = async () => {
     const token = await getValueFor("accessToken");
@@ -24,26 +26,14 @@ const checkOut = () => {
     // The backend server would then call the Stripe API to create a session
     // The client would then redirect to the Stripe hosted checkout page
     // The client would then be redirected back to the success_url or cancel_url specified in the session
-    const products = [
-      {
-        price: 50000,
-        quantity: 1,
-      },
-      {
-        price: 50000,
-        quantity: 2,
-      },
-    ];
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}checkout`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/payments/checkout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        products,
-        shippingCost,
-        grandTotal,
+        cartItems,
       }),
     });
     const data = await response.json();
@@ -77,30 +67,15 @@ const checkOut = () => {
   };
 
   useEffect(() => {
-    // Fetch data from fakestoreapi.com
     const fetchProducts = async () => {
-      try {
-        const response = await fetch("https://fakestoreapi.com/products");
-        const data = await response.json();
-        // Assuming we only want to display the first few products in the cart
-        setCartItems(data.slice(0, 2)); // Just showing the first 2 items for example
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
       await initializePaymentSheet();
     };
 
     fetchProducts();
   }, []);
 
-  const calculateTotalPrice = () => {
-    return cartItems.reduce((acc, item) => acc + item.price * 1, 0); // Assuming quantity of 1 for simplicity
-  };
-
   const shippingCost = 42700;
-  const grandTotal = calculateTotalPrice() + shippingCost;
+  const grandTotal = totalPrice + shippingCost;
 
   if (loading) {
     return <Loading />;
@@ -129,16 +104,16 @@ const checkOut = () => {
           {/* Cart Items */}
           <FlatList
             data={cartItems}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item._id.toString()}
             renderItem={({ item }) => (
               <View style={styles.itemContainer}>
-                <Image source={{ uri: item.image }} style={styles.itemImage} />
+                <Image source={{ uri: item.img }} style={styles.itemImage} />
                 <View style={styles.itemDetails}>
-                  <Text>{item.title}</Text>
+                  <Text>{item.name}</Text>
                   <Text> {item.price.toLocaleString()}</Text>
                 </View>
                 <View style={styles.itemQuantity}>
-                  <Text>1</Text>
+                  <Text>item.quantity</Text>
                 </View>
               </View>
             )}

@@ -25,11 +25,11 @@ export default class StripeController extends BaseController {
       const parsedProducts = parseProducts(req.body.products);
       const clientSecret = await this.stripeService.createPaymentIntent(
         new ObjectId(String(req.body.id)), // id of the user
-        parsedProducts,
+        parsedProducts
       );
 
       if (!clientSecret) {
-        res.status(502).send({ error: "no payment intent created" });
+        res.status(502).send({ message: "no payment intent created" });
       } else res.status(201).send({ clientSecret: clientSecret });
     } catch (error) {
       this.error(error, res);

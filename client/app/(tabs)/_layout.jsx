@@ -5,26 +5,10 @@ import TabBar from "../../components/TabBar";
 const _layoutNavigation = () => {
   return (
     <Tabs tabBar={(props) => <TabBar {...props} />}>
-      <Tabs.Screen
-        name="cart"
-        options={{ headerShown: false, title: "Cart" }}
-      />
-      <Tabs.Screen
-        name="RecycleCampaign"
-        options={{ headerShown: false, title: "Campaign" }}
-      />
-      <Tabs.Screen
-        name="HomePage"
-        options={{ headerShown: false, title: "Home" }}
-      />
-      <Tabs.Screen
-        name="wallet"
-        options={{ headerShown: false, title: "Wallet" }}
-      />
-      <Tabs.Screen
-        name="account"
-        options={{ headerShown: false, title: "Account" }}
-      />
+      <Tabs.Screen name="RecycleCampaign" options={{ headerShown: false, title: "Campaign" }} />
+      <Tabs.Screen name="HomePage" options={{ headerShown: false, title: "Home" }} />
+      <Tabs.Screen name="wallet" options={{ headerShown: false, title: "Wallet" }} />
+      <Tabs.Screen name="account" options={{ headerShown: false, title: "Account" }} />
     </Tabs>
   );
 };

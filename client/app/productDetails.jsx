@@ -13,7 +13,7 @@ import ScreenWrapper from "../components/ScreenWrapper";
 import Button from "../components/Button";
 import { wp } from "../helpers/common";
 import ArtDesign from "react-native-vector-icons/AntDesign";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import Header from "../components/Header";
 import { useRouter } from "expo-router";
 import useCartStore from "../store/useCartStore";
@@ -24,10 +24,8 @@ const ProductDetails = () => {
   const [isLiked, setIsLiked] = React.useState(false);
   const { productId } = route.params;
   const [quantity, setQuantity] = useState(1);
-  const navigation = useNavigation();
   const [product, setProduct] = useState({});
   const [owner, setOwner] = useState({});
-  const { addProduct } = useCartStore();
 
   const fetchProductData = async () => {
     try {
@@ -64,7 +62,7 @@ const ProductDetails = () => {
     };
 
     useCartStore.getState().addProduct(productToAdd);
-    router.push("/Screens/cartScreen"); // Optionally navigate to the Cart scree
+    // router.push("/Screens/cartScreen"); // Optionally navigate to the Cart scree
   };
   return (
     <ScreenWrapper bg={"white"}>
@@ -105,21 +103,21 @@ const ProductDetails = () => {
         <View style={styles.information}>
           <Image source={{ uri: owner.avatar }} style={styles.convertImage} />
           <Text style={styles.nameShop}>{owner.name}</Text>
-          <Button
-            style={styles.viewShop}
-            title="follow"
-            buttonStyle={{ marginHorizontal: wp(3) }}
-            onPress={() => {
-              route.push("shop");
-            }}
-          />
+          <View style={styles.follow}>
+            <Button
+              title="Follow"
+              onPress={() => {
+                router.push(`/Screens/shopScreen/${owner.id}`);
+              }}
+            />
+          </View>
         </View>
         <View>
           <Text style={styles.description}>Description:</Text>
           <Text style={styles.contentDescription}>{product.description_content}</Text>
         </View>
       </ScrollView>
-      <Button title="Add to cart" onPress={() => (onPress = { handleAddToCart })}></Button>
+      <Button title="Add to cart" onPress={handleAddToCart}></Button>
     </ScreenWrapper>
   );
 };

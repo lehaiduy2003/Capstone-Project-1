@@ -7,13 +7,10 @@ import errorHandler from "./errorMiddleware";
 import verifyToken from "../libs/jwt/tokenVerifying";
 import decodeToken from "../libs/jwt/tokenDecoding";
 
-// Middleware to authenticate the token - check if the token is valid
-const authenticateToken = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
+// Middleware to validate the token - check if the token is valid
+const validateToken = (req: Request, res: Response, next: NextFunction): void => {
   const token = getTokenFromHeaders(req);
+
   try {
     if (!token) {
       res.status(401).send({ message: "no token provided" });
@@ -41,4 +38,4 @@ const authenticateToken = (
   }
 };
 
-export default authenticateToken;
+export default validateToken;

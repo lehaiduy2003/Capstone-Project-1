@@ -1,9 +1,9 @@
 import ProductController from "../Controllers/ProductController";
-import authenticateToken from "../../../middlewares/tokenMiddleware";
+import validateToken from "../../../middlewares/tokenMiddleware";
 import checkCache from "../../../middlewares/cacheMiddleware";
 import ProductService from "../Services/ProductService";
 import BaseRouter from "../../../Base/BaseRouter";
-import { authorizeCustomer } from "../../../middlewares/authorizeMiddleware";
+import authorizeUser from "../../../middlewares/authorizationMiddleware";
 
 class ProductRouter extends BaseRouter {
   private readonly productController: ProductController;
@@ -28,20 +28,20 @@ class ProductRouter extends BaseRouter {
     );
     this.router.post(
       "/",
-      authenticateToken,
-      authorizeCustomer.compareEqualRole,
+      validateToken,
+      authorizeUser.isCustomerOrRecycler,
       this.productController.create.bind(this.productController)
     );
     this.router.patch(
       "/:id",
-      authenticateToken,
-      authorizeCustomer.compareEqualRole,
+      validateToken,
+      authorizeUser.isCustomerOrRecycler,
       this.productController.updateById.bind(this.productController)
     );
     this.router.delete(
       "/:id",
-      authenticateToken,
-      authorizeCustomer.compareEqualRole,
+      validateToken,
+      authorizeUser.isCustomerOrRecycler,
       this.productController.deleteById.bind(this.productController)
     );
   }

@@ -8,19 +8,19 @@ const productsSchema: Schema<Product> = new Schema({
   img: { type: String, required: true },
   description_content: { type: String, required: true },
   description_imgs: { type: [String], default: [] },
-  createdAt: { type: Date },
-  updatedAt: { type: Date },
+  created_at: { type: Date },
+  updated_at: { type: Date },
   type: { type: String, required: true },
   status: {
     type: Boolean,
     required: true,
     default: true,
   },
-  owner: { type: Schema.Types.ObjectId, ref: "UserProfiles" },
+  owner: { type: Schema.Types.ObjectId, ref: "user_profiles" },
 });
 
 productsSchema.index({ status: 1 });
-productsSchema.index({ type: 1, price: 1, updatedAt: -1 });
+productsSchema.index({ type: 1, price: 1, updated_at: -1 });
 
 const productsModel = model<Product>("products", productsSchema);
 

@@ -1,21 +1,22 @@
-import { StyleSheet, View, FlatList, Text, Image } from "react-native";
+import { StyleSheet, View, FlatList, Text } from "react-native";
 import React from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useRouter } from "expo-router";
 import useCartStore from "../../store/useCartStore";
 import Header from "../../components/Header";
-import CartItem from "../../components/CartItem";
 import CartFooter from "../../components/Cart/CartFooter";
 import LottieView from "lottie-react-native";
+import CartItem from "../../components/Cart/CartItem";
 
 const Cart = () => {
   const router = useRouter();
-  const { totalPrice, removeProduct, increaseProductQuantity, decreaseProductQuantity } = useCartStore();
+  const { totalPrice, removeProduct, increaseProductQuantity, decreaseProductQuantity } =
+    useCartStore();
   const cartItems = useCartStore((state) => state.cartItems);
   // Filter out duplicates based on `_id` if any are present
-  const uniqueCartItems = Array.from(new Set(cartItems.map(item => item._id)))
-    .map(id => cartItems.find(item => item._id === id));
-
+  const uniqueCartItems = Array.from(new Set(cartItems.map((item) => item._id))).map((id) =>
+    cartItems.find((item) => item._id === id)
+  );
 
   // const increaseQuantity = (productId) => {
   //   const product = uniqueCartItems.find((item) => item.id === productId);
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingBottom: 200
+    paddingBottom: 200,
   },
   emptyCartContainer: {
     flex: 1,

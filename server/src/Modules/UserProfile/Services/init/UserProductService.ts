@@ -12,8 +12,13 @@ export default abstract class UserProductService implements IInteractUserProduct
     this.productService = productService;
   }
 
+  getProductService() {
+    return this.productService;
+  }
+
   async findUser(userId: ObjectId): Promise<UserProfile> {
     const user = await userProfilesModel.findOne({ _id: userId }).lean();
+    // console.log(user);
 
     if (!user) {
       throw new Error("User not found");
@@ -26,14 +31,33 @@ export default abstract class UserProductService implements IInteractUserProduct
     const product = await this.productService.findById(productId);
     // console.log(product);
 
-    if (!product || !product.status) {
-      throw new Error("Product not found or inactive");
+    if (!product) {
+      throw new Error("Product not found");
     }
     return validateProductDTO(product);
   }
 
+  async checkAction(userId: ObjectId, productId: ObjectId) {
+    const user = await this.findUser(userId);
+    const product = await this.findProduct(productId);
+
+    if (String(user._id) === String(product.owner)) {
+      throw new Error("Cannot interact with your own product");
+    } else return { user, product };
+  }
+
   // Get the list of products that user interacted with
-  abstract getProducts(userId: ObjectId): Promise<ProductDTO[]>;
-  abstract addProduct(userId: ObjectId, productId: ObjectId, quantity: number): Promise<boolean>;
+  abstract getProducts(userId: ObjectId): Promise<Partial<ProductDTO>[]>; // It can be cart, wishlist, etc.
+  /**
+   * @param userId - The user id
+   * @param productId - The product id
+   * @param quantity - The quantity of the product (optional for wishlist, favorite, etc.)
+   * @returns {Promise<boolean>} The result of modified ```the user's product list``` (cart, wishlist, etc.)
+   */
+  abstract updateProduct(
+    userId: ObjectId,
+    productId: ObjectId,
+    quantity?: number
+  ): Promise<boolean>;
   abstract removeProduct(userId: ObjectId, productId: ObjectId): Promise<boolean>;
 }

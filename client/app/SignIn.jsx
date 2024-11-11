@@ -24,11 +24,9 @@ const SignIn = () => {
 
   const handleSignIn = async () => {
     const data = await onSubmit({
-      method: "POST",
       body: { email: email.current, password: password.current },
     });
 
-    // console.log("SignIn API response:", data);
     if (error) {
       console.error(error);
       return;
@@ -39,7 +37,7 @@ const SignIn = () => {
     }
     await save("accessToken", String(data.accessToken));
     await save("refreshToken", String(data.refreshToken));
-    await save("user_id", String(data.user_id));
+    await save("userId", String(data.user_id));
     await save("isLoggedIn", "true");
 
     router.push("(tabs)/HomePage");

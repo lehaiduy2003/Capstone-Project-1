@@ -9,7 +9,7 @@ const useAuthSubmit = (apiUrl) => {
   const onSubmit = async (options) => {
     try {
       setLoading(true);
-      console.log(options.body);
+      // console.log(options.body);
       const response = await fetch(apiUrl, {
         method: options.method || "POST", // Lấy method từ options, mặc định là POST
         headers: {

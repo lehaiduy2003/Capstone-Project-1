@@ -5,7 +5,7 @@ import ObjectIdSchema from "../ObjectId";
 const DonationSchema = z.object({
   user_id: ObjectIdSchema,
   campaign_id: ObjectIdSchema,
-  createdAt: z.date().default(new Date()),
+  created_at: z.date().default(new Date()),
   donated: z.object({
     name: z.string(),
     img: z.string().url().optional(),

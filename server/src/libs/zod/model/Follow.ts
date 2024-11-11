@@ -6,9 +6,7 @@ const FollowSchema = z.object({
   user_id: ObjectIdSchema,
   following: z.object({
     _id: ObjectIdSchema,
-    name: z.string(),
-    avatar: z.string().url(),
-    followedAt: z.date().default(new Date()),
+    followed_at: z.date().default(new Date()),
   }),
 });
 

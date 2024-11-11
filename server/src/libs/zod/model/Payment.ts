@@ -4,8 +4,8 @@ import ObjectIdSchema from "../ObjectId";
 
 const PaymentSchema = z.object({
   user_id: ObjectIdSchema,
-  stripeId: z.string(),
-  createdAt: z.date().default(new Date()),
+  stripe_id: z.string(),
+  created_at: z.date().default(new Date()),
 });
 
 export const validatePayment = (data: unknown) => {

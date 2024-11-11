@@ -1,10 +1,8 @@
 import { View, Text, Image, StyleSheet } from "react-native";
-import QuantitySelector from "../components/QuantitySelector";
-import currency from "../utils/currency";
+import QuantitySelector from "../QuantitySelector";
+import currency from "../../utils/currency";
 
 const CartItem = ({ item, onIncrease, onDecrease }) => {
-  currency;
-
   return (
     <View style={styles.cartItem}>
       <Image source={{ uri: item.img }} style={styles.itemImage} />
@@ -12,11 +10,7 @@ const CartItem = ({ item, onIncrease, onDecrease }) => {
         <Text style={styles.itemName}>{item.name}</Text>
         <Text style={styles.itemPrice}>{currency}</Text>
       </View>
-      <QuantitySelector
-        quantity={item.quantity}
-        onIncrease={onIncrease}
-        onDecrease={onDecrease}
-      />
+      <QuantitySelector quantity={item.quantity} onIncrease={onIncrease} onDecrease={onDecrease} />
     </View>
   );
 };

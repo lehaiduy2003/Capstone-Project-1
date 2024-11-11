@@ -30,20 +30,16 @@ export default class StripeService extends SessionService {
 
   async getCustomer(
     user_id: ObjectId,
-    stripe: Stripe,
+    stripe: Stripe
   ): Promise<Stripe.Response<Stripe.Customer | Stripe.DeletedCustomer>> {
     let customer: Stripe.Response<Stripe.Customer | Stripe.DeletedCustomer>;
     const user = await this.paymentsService.findByUserId(user_id);
     // console.log("user", user);
     if (!user) {
       customer = await stripe.customers.create();
-      await this.paymentsService.create(
-        user_id,
-        customer.id,
-        this.getSession(),
-      );
+      await this.paymentsService.create(user_id, customer.id, this.getSession());
     } else {
-      customer = await stripe.customers.retrieve(user.stripeId);
+      customer = await stripe.customers.retrieve(user.stripe_id);
     }
     return customer;
   }
@@ -56,7 +52,7 @@ export default class StripeService extends SessionService {
    */
   async createPaymentIntent(
     user_id: ObjectId,
-    products: CheckoutProductDTO[],
+    products: CheckoutProductDTO[]
   ): Promise<string | null> {
     await this.startSession();
     this.startTransaction();

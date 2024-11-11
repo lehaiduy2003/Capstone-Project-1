@@ -1,12 +1,12 @@
 import { z } from "zod";
 import ObjectIdSchema from "../ObjectId";
-import transactionStatusEnum from "../enums/TransactionStatusEnum";
+import transactionStatusEnum from "../enums/TransactionStatus";
 
 const TransactionUpdateDTOSchema = z.object({
   // transaction id
   _id: ObjectIdSchema,
   user_id: ObjectIdSchema,
-  status: transactionStatusEnum,
+  transaction_status: transactionStatusEnum,
 });
 
 export const validateTransactionUpdateDTO = (data: unknown) => {

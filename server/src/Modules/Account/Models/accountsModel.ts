@@ -8,16 +8,15 @@ const accountsSchema: Schema<Account> = new Schema({
   role: {
     type: String,
     enum: ["customer", "recycler", "admin"],
-    default: "customer",
   },
-  createdAt: { type: Date, required: true },
-  updatedAt: { type: Date, required: true },
-  isVerified: { type: Boolean, required: true },
+  created_at: { type: Date, required: true },
+  updated_at: { type: Date, required: true },
+  is_verified: { type: Boolean, required: true },
   status: {
     type: String,
     enum: ["active", "inactive"],
   },
-  recyclerField: {
+  recycler_field: {
     recyclingLicenseNumber: { type: String },
     recyclingCapacity: { type: Number },
   },
@@ -29,7 +28,7 @@ accountsSchema.pre("save", function (next) {
     return next();
   }
 
-  if (!isValidRecyclerField(this.recyclerField as RecyclerField)) {
+  if (!isValidRecyclerField(this.recycler_field as RecyclerField)) {
     return next(new Error("recyclerField is required when role is recycler"));
   }
 
@@ -43,7 +42,7 @@ function isValidRecyclerField(recyclerField: RecyclerField) {
 // Create indexes
 accountsSchema.index({ email: 1 }, { unique: true });
 accountsSchema.index({ role: 1 });
-accountsSchema.index({ createAt: 1 });
+accountsSchema.index({ create_at: 1 });
 
 const accountsModel = model<Account>("accounts", accountsSchema);
 

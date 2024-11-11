@@ -9,14 +9,16 @@ import { router } from "expo-router";
 import usePagination from "../../hooks/usePagination";
 import ProductList from "../../components/ProductList";
 import { SafeAreaView } from "react-native-safe-area-context";
+import useCartStore from "../../store/useCartStore";
 
 const HomePage = () => {
   const nameRef = React.useRef("");
 
   const { products, isLoading, fetchProducts, onEndReached } = usePagination();
-
+  const { initializeCart } = useCartStore();
   useEffect(() => {
     fetchProducts(); // fetch initial products
+    initializeCart(); // initialize cart
   }, []);
 
   return (
@@ -27,7 +29,7 @@ const HomePage = () => {
         <View style={styles.header}>
           <Text style={styles.logoText}>Eco Trade</Text>
           <View style={styles.icons}>
-            <Pressable onPress={() => router.push("cart")}>
+            <Pressable onPress={() => router.push("Screens/cartScreen")}>
               <Icon name={"cart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
             </Pressable>
             <Pressable>
@@ -43,20 +45,11 @@ const HomePage = () => {
             onChangeText={(value) => (nameRef.current = value)}
           />
 
-          <Icon
-            name="filter"
-            size={hp(3.2)}
-            strokeWidth={2}
-            color={theme.colors.text}
-          />
+          <Icon name="filter" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
         </View>
         {/**product list */}
         <SafeAreaView>
-          <ProductList
-            products={products}
-            onEndReached={onEndReached}
-            isLoading={isLoading}
-          />
+          <ProductList products={products} onEndReached={onEndReached} isLoading={isLoading} />
         </SafeAreaView>
       </View>
     </ScreenWrapper>

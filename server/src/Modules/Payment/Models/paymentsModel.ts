@@ -3,13 +3,12 @@ import { Payment } from "../../../libs/zod/model/Payment";
 
 const paymentsSchema: Schema<Payment> = new Schema({
   user_id: { type: Schema.Types.ObjectId, required: true },
-  stripeId: { type: String, required: true },
-  createdAt: { type: Date },
+  stripe_id: { type: String, required: true },
+  created_at: { type: Date },
 });
 
-paymentsSchema.index({ type: 1 });
-paymentsSchema.index({ account: 1 });
-paymentsSchema.index({ date: 1 });
+paymentsSchema.index({ user_id: 1 });
+paymentsSchema.index({ stripe_id: 1 });
 
 const paymentsModel = model<Payment>("payments", paymentsSchema);
 

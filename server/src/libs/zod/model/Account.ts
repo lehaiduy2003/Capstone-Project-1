@@ -10,24 +10,24 @@ const AccountSchema = z
     email: z.string().trim().email({ message: "Invalid email address" }),
     password: PasswordSchema,
     role: RoleEnum,
-    createdAt: z.date().default(new Date()),
-    updatedAt: z.date().default(new Date()),
-    isVerified: z.boolean().default(false),
+    created_at: z.date().default(new Date()),
+    updated_at: z.date().default(new Date()),
+    is_verified: z.boolean().default(false),
     status: AccountStatusEnum,
-    recyclerField: RecyclerFieldSchema.optional(),
-    joinedCampaigns: z.array(z.string()).default([]),
+    recycler_field: RecyclerFieldSchema.optional(),
+    joined_campaigns: z.array(z.string()).default([]),
   })
   .refine(
     (data) => {
       if (data.role === "recycler") {
-        return data.recyclerField !== undefined && data.recyclerField !== null;
+        return data.recycler_field !== undefined && data.recycler_field !== null;
       }
       return true;
     },
     {
       message: "recyclerField is required when role is recycler",
       path: ["recyclerField"],
-    },
+    }
   );
 
 export const validateAccount = (data: unknown) => {

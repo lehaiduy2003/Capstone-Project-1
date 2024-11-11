@@ -4,7 +4,7 @@ import { Notification } from "../../../libs/zod/model/Notification";
 const notificationsSchema: Schema<Notification> = new Schema({
   account_id: {
     type: Schema.Types.ObjectId,
-    ref: "UserProfiles",
+    ref: "user_profiles",
     required: true,
   },
   title: { type: String, required: true },
@@ -12,9 +12,6 @@ const notificationsSchema: Schema<Notification> = new Schema({
   content: { type: String, required: true },
 });
 
-const notificationsModel = model<Notification>(
-  "notifications",
-  notificationsSchema,
-);
+const notificationsModel = model<Notification>("notifications", notificationsSchema);
 
 export default notificationsModel;

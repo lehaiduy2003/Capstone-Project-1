@@ -51,10 +51,7 @@ const SignUp = () => {
   };
 
   const handleSignUp = async () => {
-    const data = await onSubmit({
-      method: "POST",
-      body: { email: email, password: confirmPassword },
-    });
+    const data = await onSubmit({ body: { email: email, password: password } });
     if (error) {
       console.error(error);
       return;

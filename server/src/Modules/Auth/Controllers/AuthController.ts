@@ -15,7 +15,7 @@ export default class AuthController extends BaseController {
 
   // NOTE: The cache will be deleted after the user has verified the OTP by calling the verifyOtp method
   // So, Check if the user has verified the OTP, if it has verified, then the cache should be empty
-  async checkOtpCache(identifier: string, res: Response): Promise<boolean> {
+  async checkOtpCache(identifier: string): Promise<boolean> {
     const cache = await getCache(identifier);
     return !!cache;
   }
@@ -24,8 +24,8 @@ export default class AuthController extends BaseController {
     if (!this.checkReqBody(req, res)) return;
     try {
       const { identifier } = req.body;
-      if (await this.checkOtpCache(identifier, res)) {
-        res.status(400).send({ error: "OTP has not been verified" });
+      if (await this.checkOtpCache(identifier)) {
+        res.status(400).send({ message: "OTP has not been verified" });
         return;
       }
 
@@ -43,14 +43,14 @@ export default class AuthController extends BaseController {
     try {
       const { identifier } = req.body;
 
-      if (await this.checkOtpCache(identifier, res)) {
-        res.status(400).send({ error: "OTP has not been verified" });
+      if (await this.checkOtpCache(identifier)) {
+        res.status(400).send({ message: "OTP has not been verified" });
         return;
       }
 
       const result = await this.authService.deactivateAccount(identifier);
       if (!result) {
-        res.status(502).send({ error: "Cannot deactivate account status" });
+        res.status(502).send({ message: "Cannot deactivate account status" });
       } else res.status(200).send(result);
     } catch (error) {
       this.error(error, res);
@@ -62,8 +62,8 @@ export default class AuthController extends BaseController {
     try {
       const { identifier, newPassword } = req.body;
 
-      if (await this.checkOtpCache(identifier, res)) {
-        res.status(400).send({ error: "OTP has not been verified" });
+      if (await this.checkOtpCache(identifier)) {
+        res.status(400).send({ message: "OTP has not been verified" });
         return;
       }
 
@@ -92,7 +92,7 @@ export default class AuthController extends BaseController {
       const result = await this.authService.signUp(accountData);
       // console.log("result", result);
       if (!result) {
-        res.status(502).send({ error: "User already exists" });
+        res.status(502).send({ message: "User already exists" });
       } else res.status(201).send(result);
     } catch (error) {
       this.error(error, res);
@@ -104,9 +104,9 @@ export default class AuthController extends BaseController {
    * @param req request header containing refresh token
    * @param res response containing the new access token
    */
-  generateNewAccessToken(req: Request, res: Response): void {
+  async generateNewAccessToken(req: Request, res: Response): Promise<void> {
     try {
-      const newAccessToken = this.authService.getNewAccessToken(String(req.body.token));
+      const newAccessToken = await this.authService.getNewAccessToken(String(req.body.token));
       res.status(201).send({ accessToken: newAccessToken });
       return;
     } catch (error) {
@@ -129,7 +129,7 @@ export default class AuthController extends BaseController {
       const result = await this.authService.signIn(account.email, account.password);
       // console.log("result", result);
       if (!result) {
-        res.status(502).send({ error: "Invalid credential" });
+        res.status(502).send({ message: "Invalid credential" });
       } else res.status(200).send(result);
     } catch (error) {
       this.error(error, res);

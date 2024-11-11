@@ -15,8 +15,8 @@ const ProductSchema = z.object({
   description_imgs: z.array(z.string().url()).optional(),
   type: z.string(),
   status: z.boolean().default(true),
-  createdAt: z.date().default(new Date()),
-  updatedAt: z.date().default(new Date()),
+  created_at: z.date().default(new Date()),
+  updated_at: z.date().default(new Date()),
   owner: ObjectIdSchema,
 });
 

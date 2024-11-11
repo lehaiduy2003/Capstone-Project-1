@@ -6,24 +6,21 @@ const invoicesSchema: Schema<Invoice> = new Schema({
     {
       _id: {
         type: Schema.Types.ObjectId,
-        ref: "Products",
+        ref: "products",
         required: true,
       },
-      name: { type: String, required: true },
-      img: { type: String, required: true },
-      price: { type: Number, required: true },
       quantity: { type: Number, required: true },
     },
   ],
-  paymentMethod: { type: String, enum: ["cash", "card"], required: true },
-  paymentStatus: { type: String, enum: ["unpaid", "paid"], required: true },
-  paymentIntent: { type: String },
-  shipping_id: { type: String },
+  from: { type: String },
+  to: { type: String },
+  payment_method: { type: String, enum: ["cash", "card"], required: true },
+  payment_status: { type: String, enum: ["unpaid", "paid"], required: true },
+  payment_intent: { type: String },
 });
 
 invoicesSchema.index({ "products._id": 1 });
 invoicesSchema.index({ status: 1 });
-invoicesSchema.index({ createdAt: -1 });
 
 const invoicesModel = model<Invoice>("invoices", invoicesSchema);
 

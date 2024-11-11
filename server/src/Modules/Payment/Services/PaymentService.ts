@@ -13,12 +13,8 @@ export default class PaymentService {
     return paymentsModel.findOne({ user_id: user_id }).lean();
   }
 
-  async create(
-    user_id: ObjectId,
-    stripeId: string,
-    session: ClientSession,
-  ): Promise<Payment> {
-    const payment = new paymentsModel({ user_id: user_id, stripeId: stripeId });
+  async create(user_id: ObjectId, stripeId: string, session: ClientSession): Promise<Payment> {
+    const payment = new paymentsModel({ user_id: user_id, stripe_id: stripeId });
     const createdStatus = await payment.save({ session });
 
     if (!createdStatus) {

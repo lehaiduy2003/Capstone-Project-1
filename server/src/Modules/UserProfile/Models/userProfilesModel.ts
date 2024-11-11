@@ -8,43 +8,28 @@ const userProfilesSchema: Schema<UserProfile> = new Schema({
   dob: { type: Date },
   bio: { type: String },
   address: { type: [String] },
-  reputationScore: { type: Number, required: true },
+  reputation_score: { type: Number, required: true },
   followers: { type: Number, required: true },
   following: { type: Number, required: true },
   account_id: {
     type: Schema.Types.ObjectId,
-    ref: "Accounts",
+    ref: "accounts",
     required: true,
   },
   cart: [
     {
-      _id: { type: Schema.Types.ObjectId, ref: "Products" },
-      img: { type: String },
-      name: { type: String },
-      price: { type: Number },
+      _id: { type: Schema.Types.ObjectId, ref: "products", unique: true },
       quantity: { type: Number },
-      owner: { type: Schema.Types.ObjectId, ref: "UserProfiles" },
     },
   ],
-  likes: [
-    {
-      _id: { type: Schema.Types.ObjectId, ref: "Products" },
-      img: { type: String },
-      name: { type: String },
-      price: { type: Number },
-      owner: { type: Schema.Types.ObjectId, ref: "UserProfiles" },
-    },
-  ],
-  joinedCampaigns: [{ type: Schema.Types.ObjectId, ref: "RecycleCampaigns" }],
+  wish_list: [{ type: Schema.Types.ObjectId, ref: "products", unique: true }],
+  joined_campaigns: [{ type: Schema.Types.ObjectId, ref: "recycle_campaigns" }],
 });
 
 userProfilesSchema.index({ phone: 1 }, { unique: true, sparse: true });
 userProfilesSchema.index({ account_id: 1 }, { unique: true });
-userProfilesSchema.index({ reputationScore: 1 });
+userProfilesSchema.index({ reputation_score: 1 });
 
-const userProfilesModel = model<UserProfile>(
-  "user_profiles",
-  userProfilesSchema,
-);
+const userProfilesModel = model<UserProfile>("user_profiles", userProfilesSchema);
 
 export default userProfilesModel;

@@ -13,6 +13,8 @@ import { validateUserProfile } from "../../../libs/zod/model/UserProfile";
 import deleteCache from "../../../libs/redis/cacheDeleting";
 import { validateSignUpDTO } from "../../../libs/zod/dto/SignUpDTO";
 import { ObjectId } from "mongodb";
+import decodeToken from "../../../libs/jwt/tokenDecoding";
+import { Payload } from "../../../libs/zod/Payload";
 
 /**
  * Responsible for handling the authentication process.
@@ -60,8 +62,18 @@ export default class AuthService extends SessionService {
     }
   }
 
-  getNewAccessToken(token: string) {
-    return refreshAccessToken(token);
+  async getNewAccessToken(token: string) {
+    const payloadDecoded = decodeToken(token) as Payload;
+    if (!payloadDecoded) {
+      throw new Error("Invalid token");
+    }
+
+    const account = await this.accountService.findById(new ObjectId(payloadDecoded.sub));
+    if (!account) {
+      throw new Error("Account not found");
+    }
+
+    return refreshAccessToken(String(account._id), account.role);
   }
 
   async signIn(email: string, password: string): Promise<AuthDTO | null> {

@@ -2,15 +2,15 @@ import { Schema, model } from "mongoose";
 import { Donation } from "../../../libs/zod/model/Donation";
 
 const donationsSchema: Schema<Donation> = new Schema({
-  user_id: { type: Schema.Types.ObjectId, ref: "UserProfiles", required: true },
+  user_id: { type: Schema.Types.ObjectId, ref: "user_profiles", required: true },
   campaign_id: {
     type: Schema.Types.ObjectId,
-    ref: "RecycleCampaigns",
+    ref: "recycle_campaigns",
     required: true,
   },
-  createdAt: { type: Date, required: true },
+  created_at: { type: Date, required: true },
   donated: {
-    name: { type: String, required: true },
+    name: { type: String, required: true }, // name of the donation item
     img: { type: String, required: true },
     content: { type: String, required: true },
     weight: { type: Number, required: true },

@@ -1,6 +1,6 @@
 import { FilterQuery } from "mongoose";
 import { z } from "zod";
-import SortOrderEnum from "./enums/SortOrderEnum";
+import SortOrderEnum from "./enums/SortOrder";
 import SortEnum from "./enums/Sort";
 
 const FilterSchema = z.object({

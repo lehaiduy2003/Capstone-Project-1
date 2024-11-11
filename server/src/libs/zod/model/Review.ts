@@ -14,14 +14,14 @@ const ReplySchema = z.object({
 // Schema cho Review
 export const ReviewSchema = z.object({
   reviewer_id: ObjectIdSchema,
-  reviewerAvatar: z.string().url(),
+  reviewer_avatar: z.string().url(),
   reviewered_id: ObjectIdSchema,
   rate: z.number().min(1).max(5),
   comment: z.string(),
-  reviewedAt: z.date().default(new Date()),
-  updatedAt: z.date().default(new Date()),
+  reviewed_at: z.date().default(new Date()),
+  updated_at: z.date().default(new Date()),
   reply: z.array(ReplySchema).default([]),
-  onModel: z.enum(["UserProfiles", "Products"]),
+  on_model: z.enum(["UserProfiles", "Products"]),
 });
 
 export const validateReview = (data: unknown) => {

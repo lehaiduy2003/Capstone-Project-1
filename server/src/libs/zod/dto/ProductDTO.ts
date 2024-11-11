@@ -7,7 +7,7 @@ export const ProductDTOSchema = z.object({
   name: z.string(),
   img: z.string().url(),
   price: z.number().nonnegative(),
-  quantity: z.number().int().nonnegative().default(1).optional(),
+  quantity: z.number().int().nonnegative().optional(),
   owner: ObjectIdSchema,
 });
 

@@ -3,12 +3,10 @@ import { Follow } from "../../../libs/zod/model/Follow";
 
 // Define schema for following document
 const followingSchema: Schema<Follow> = new Schema({
-  user_id: { type: Schema.Types.ObjectId, ref: "UserProfiles", required: true },
+  user_id: { type: Schema.Types.ObjectId, ref: "user_profiles", required: true },
   following: {
-    _id: { type: Schema.Types.ObjectId, ref: "UserProfiles", required: true },
-    name: { type: String, required: true },
-    avatar: { type: String, required: true },
-    followedAt: { type: Date, required: true },
+    _id: { type: Schema.Types.ObjectId, ref: "user_profiles", required: true },
+    followed_at: { type: Date, required: true },
   },
 });
 

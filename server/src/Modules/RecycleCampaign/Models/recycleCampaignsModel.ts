@@ -8,14 +8,14 @@ const recycleCampaignsSchema: Schema<RecycleCampaign> = new Schema({
   description_imgs: [{ type: String }],
   guide: { type: String },
   location: [{ type: String, required: true }],
-  recycledWeight: { type: Number, required: true },
-  recycledAmount: { type: Number, required: true },
+  recycled_weight: { type: Number, required: true },
+  recycled_amount: { type: Number, required: true },
   participants: { type: Number, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-  owner: {
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now },
+  creator_id: {
     type: Schema.Types.ObjectId,
-    ref: "UserProfiles",
+    ref: "user_profiles",
     required: true,
   },
   status: {
@@ -26,12 +26,9 @@ const recycleCampaignsSchema: Schema<RecycleCampaign> = new Schema({
 });
 
 recycleCampaignsSchema.index({ name: 1 });
-recycleCampaignsSchema.index({ createAt: 1 });
-recycleCampaignsSchema.index({ userId: 1 });
+recycleCampaignsSchema.index({ create_at: 1 });
+recycleCampaignsSchema.index({ creator_id: 1 });
 
-const recycleCampaignsModel = model<RecycleCampaign>(
-  "recycle_campaigns",
-  recycleCampaignsSchema,
-);
+const recycleCampaignsModel = model<RecycleCampaign>("recycle_campaigns", recycleCampaignsSchema);
 
 export default recycleCampaignsModel;
