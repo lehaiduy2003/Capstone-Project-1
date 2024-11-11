@@ -147,13 +147,10 @@ npm test
 
 - `server/`: Contains the Express server application.
     - `src/`: Contains the source code for the server.
-        - `routes/`: Contains the route definitions for the server.
-        - `controllers/`: Contains the controller functions for handling requests.
-        - `models/`: Contains the database models.
         - `middlewares/`: Contains middleware functions.
         - `config/`: Contains configuration files and databases connection.
         - `utils/`: Utility functions and helpers.
-        - `services/`: Contains service layer functions.
+        - `Modules`: Contains MVC modules.
         - `setup/`: Contains setup scripts and initial configurations.
         - `server.ts`: The main file to run the server application.
     - `tests/`: Contains the test cases for the server application.
