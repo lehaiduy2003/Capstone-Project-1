@@ -1,5 +1,5 @@
 import { StyleSheet, View, FlatList, Text } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useRouter } from "expo-router";
 import useCartStore from "../../store/useCartStore";
@@ -10,43 +10,59 @@ import CartItem from "../../components/Cart/CartItem";
 
 const Cart = () => {
   const router = useRouter();
-  const { totalPrice, removeProduct, increaseProductQuantity, decreaseProductQuantity } =
-    useCartStore();
+  const { totalPrice, removeProduct, updateQuantity } = useCartStore();
   const cartItems = useCartStore((state) => state.cartItems);
-  // Filter out duplicates based on `_id` if any are present
-  const uniqueCartItems = Array.from(new Set(cartItems.map((item) => item._id))).map((id) =>
-    cartItems.find((item) => item._id === id)
-  );
+  // Fetch product data for each cart item and filter out duplicates based on `_id`
+  const fetchProductData = async () => {
+    const products = await Promise.all(
+      cartItems.map(async (item) => {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/products/${item._id}`);
+        const data = await response.json();
+        // console.log("Product Data:", data);
+        data.cartQuantity = item.quantity;
+        return data;
+      })
+    );
+    // Filter out duplicates based on `_id` if any are present
+    const uniqueProducts = Array.from(new Set(products.map((item) => item._id))).map((id) =>
+      products.find((item) => item._id === id)
+    );
 
-  // const increaseQuantity = (productId) => {
-  //   const product = uniqueCartItems.find((item) => item.id === productId);
-  //   if (product) {
-  //     addProduct({ ...product, quantity: product.quantity + 1 });
-  //   }
-  // };
+    return uniqueProducts;
+  };
 
-  // const increaseProductQuantity = useCartStore((state) => state.increaseProductQuantity);
+  const [uniqueCartItems, setUniqueCartItems] = useState([]);
 
-  // const decreaseQuantity = (productId) => {
-  //   const product = uniqueCartItems.find((item) => item.id === productId);
-  //   if (product && product.quantity > 1) {
-  //     addProduct({ ...product, quantity: product.quantity - 1 });
-  //   } else {
-  //     removeProduct(productId);
-  //   }
-  // };
+  useEffect(() => {
+    const loadProductData = async () => {
+      const uniqueItems = await fetchProductData();
+      setUniqueCartItems(uniqueItems);
+    };
+
+    loadProductData();
+  }, [cartItems]);
 
   const increaseQuantity = (productId) => {
-    increaseProductQuantity(productId);
+    updateQuantity(productId, 1);
   };
 
   const decreaseQuantity = (productId) => {
     const product = uniqueCartItems.find((item) => item._id === productId);
     if (product && product.quantity > 1) {
-      decreaseProductQuantity(productId);
+      updateQuantity(productId, -1);
     } else {
       removeProduct(productId);
     }
+  };
+
+  const handleCheckout = () => {
+    router.push({
+      pathname: "checkOut",
+      params: {
+        totalPrice,
+        cartItems: JSON.stringify(uniqueCartItems),
+      },
+    });
   };
 
   return (
@@ -73,12 +89,12 @@ const Cart = () => {
           // Display Cart Items List
           <FlatList
             data={uniqueCartItems}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item._id.toString()}
             renderItem={({ item }) => (
               <CartItem
                 item={item}
-                onIncrease={() => increaseQuantity(item.id)}
-                onDecrease={() => decreaseQuantity(item.id)}
+                onIncrease={() => increaseQuantity(item._id)}
+                onDecrease={() => decreaseQuantity(item._id)}
               />
             )}
             contentContainerStyle={styles.cartList}
@@ -86,9 +102,7 @@ const Cart = () => {
           />
         )}
       </View>
-      {cartItems.length > 0 && (
-        <CartFooter totalPrice={totalPrice} onCheckout={() => router.push("checkOut")} />
-      )}
+      {cartItems.length > 0 && <CartFooter totalPrice={totalPrice} onCheckout={handleCheckout} />}
     </ScreenWrapper>
   );
 };

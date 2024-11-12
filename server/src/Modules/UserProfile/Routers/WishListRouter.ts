@@ -19,7 +19,15 @@ class WishlistRouter extends BaseRouter {
       validateToken,
       authenticateUser,
       authorizeUser.isCustomer,
-      this.wishListController.getProducts.bind(this.wishListController)
+      this.wishListController.getWishList.bind(this.wishListController)
+    );
+    // Overwrite wish list with new products, can not remove all products
+    this.router.put(
+      "/product",
+      validateToken,
+      authenticateUser,
+      authorizeUser.isCustomer,
+      this.wishListController.setWishList.bind(this.wishListController)
     );
     this.router.patch(
       "/product/:productId",

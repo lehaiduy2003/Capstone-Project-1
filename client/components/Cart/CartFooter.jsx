@@ -1,11 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import Button from "../../components/Button";
-import useCartStore from "../../store/useCartStore";
 
-
-const CartFooter = ({ onCheckout }) => {
-  const totalPrice = useCartStore((state) => state.totalPrice);
-
+const CartFooter = ({ totalPrice, onCheckout }) => {
   return (
     <View style={styles.footer}>
       <Text style={styles.totalPrice}>Total price: {totalPrice.toFixed(2)} đ</Text>
@@ -37,6 +33,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  containerCheckout: {
-  }
+  containerCheckout: {},
 });

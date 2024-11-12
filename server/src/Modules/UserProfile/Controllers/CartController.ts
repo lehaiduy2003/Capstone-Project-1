@@ -49,18 +49,20 @@ export default class CartController extends BaseController {
     }
   }
 
-  async clearCart(req: Request, res: Response) {
+  async setCart(req: Request, res: Response) {
     if (!this.checkReqBody(req, res)) return;
     try {
       const userId = new ObjectId(String(req.body.id));
+      const cart = req.body.cart;
+      // console.log(userId, cart);
 
-      const isCleared = await this.cartService.clearCart(userId);
-      if (!isCleared) {
-        res.status(400).send({ message: "Failed to clear cart" });
+      const updatedCart = await this.cartService.setProducts(userId, cart);
+      if (!updatedCart) {
+        res.status(502).send({ message: "Failed to update cart" });
         return;
       }
 
-      res.status(200).send({ message: "Cart cleared" });
+      res.status(200).send({ message: "Cart updated" });
     } catch (error) {
       this.error(error, res);
     }
@@ -74,7 +76,7 @@ export default class CartController extends BaseController {
 
       const products = await this.cartService.getProducts(userId);
 
-      if (products.length === 0) {
+      if (!products) {
         res.status(200).send({ message: "Cart is empty" });
         return;
       }

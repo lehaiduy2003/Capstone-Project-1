@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb";
 import userProfilesModel from "../Models/userProfilesModel";
 import UserProductService from "./init/UserProductService";
 import { ProductDTO } from "../../../libs/zod/dto/ProductDTO";
-import { validateCartDTO } from "../../../libs/zod/dto/CartDTO";
+import { CartDTO, validateCartDTO } from "../../../libs/zod/dto/CartDTO";
 
 export default class CartProductService extends UserProductService {
   constructor() {
@@ -55,7 +55,7 @@ export default class CartProductService extends UserProductService {
   }
 
   private async updateQuantity(userId: ObjectId, productId: ObjectId, quantity: number) {
-    if (quantity === 0) {
+    if (quantity <= 0) {
       const updatedStatus = await userProfilesModel.findOneAndUpdate(
         { _id: userId, "cart._id": productId },
         { $pull: { cart: { _id: productId } } },
@@ -67,7 +67,7 @@ export default class CartProductService extends UserProductService {
     } else {
       const updatedStatus = await userProfilesModel.findOneAndUpdate(
         { _id: userId, "cart._id": productId },
-        { $set: { "cart.$.quantity": quantity } },
+        { $inc: { "cart.$.quantity": quantity } },
         { new: true }
       );
 
@@ -78,22 +78,28 @@ export default class CartProductService extends UserProductService {
     }
   }
 
-  async clearCart(userId: ObjectId) {
-    const user = await this.findUser(userId);
-
-    const updatedStatus = await userProfilesModel.findOneAndUpdate(
-      { _id: user._id },
-      { $set: { cart: [] } },
-      { new: true }
-    );
-
-    if (!updatedStatus) throw new Error("Failed to clear the cart");
-
-    return updatedStatus.cart.length === 0;
-  }
-
   override async getProducts(userId: ObjectId): Promise<Partial<ProductDTO>[]> {
     const user = await this.findUser(userId);
     return validateCartDTO(user.cart);
+  }
+
+  override async setProducts(userId: ObjectId, cart: Partial<ProductDTO>[]): Promise<boolean> {
+    const user = await this.findUser(userId);
+    const parsedCart = validateCartDTO(cart);
+    // Check for duplicate products
+    if (this.checkForDuplicateProducts(parsedCart)) {
+      throw new Error("Duplicate products found in the cart");
+    }
+
+    // Check for valid quantities
+    await this.checkValidQuantities(parsedCart);
+
+    const updatedStatus = await userProfilesModel
+      .findOneAndUpdate({ _id: user._id }, { $set: { cart: parsedCart } }, { new: true })
+      .lean();
+
+    if (!updatedStatus) throw new Error("Failed to set the cart");
+
+    return JSON.stringify(updatedStatus.cart) === JSON.stringify(parsedCart);
   }
 }

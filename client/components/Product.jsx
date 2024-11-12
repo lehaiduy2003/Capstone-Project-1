@@ -1,30 +1,14 @@
-import React, { memo, useState } from "react";
+import React, { memo } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { theme } from "../constants/theme";
 import { hp } from "../helpers/common";
 import parsedCurrency from "../utils/currency";
-import useLikeStore from "../store/useLikeStore";
-import ArtDesign from "react-native-vector-icons/AntDesign";
 import { useNavigation } from "@react-navigation/native";
 
 const Product = memo(({ product }) => {
   const navigation = useNavigation();
-  //const [isLiked, setIsLiked] = useState(false);
   const formattedPrice = parsedCurrency("currency", "VND", product.price);
 
-  // const { addLikeItem, removeLikeItem } = useLikeStore((state) => ({
-  //   addLikeItem: state.addLikeItem,
-  //   removeLikeItem: state.removeLikeItem,
-  // }));
-
-  // const handleLikePress = () => {
-  //   if (isLiked) {
-  //     removeLikeItem(product);
-  //   } else {
-  //     addLikeItem(product);
-  //   }
-  //   setIsLiked(!isLiked);
-  // };
   return (
     <TouchableOpacity
       onPress={() => navigation.navigate("productDetails", { productId: product._id })}

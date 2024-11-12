@@ -6,7 +6,7 @@ import Icon from "../../assets/icons";
 import { deleteValueFor } from "../../utils/secureStore";
 import { useRouter } from "expo-router";
 
-const HeaderAcc = () => {
+const HeaderAcc = ({ user }) => {
   const router = useRouter();
   const handleClick = (label) => {
     console.log(`Clicked: ${label}`);
@@ -36,7 +36,7 @@ const HeaderAcc = () => {
           onPress: () => handleSignOut(), // Gọi hàm đăng xuất khi người dùng chọn "Đăng xuất"
         },
       ],
-      { cancelable: false }, // Không cho phép đóng hộp thoại bằng cách chạm ra ngoài
+      { cancelable: false } // Không cho phép đóng hộp thoại bằng cách chạm ra ngoài
     );
   };
 
@@ -54,8 +54,8 @@ const HeaderAcc = () => {
           />
         </TouchableOpacity>
         <View>
-          <Text style={styles.userName}>User Name</Text>
-          <Text style={styles.textSimple}> 100% Credibility</Text>
+          <Text style={styles.userName}>{user.name}</Text>
+          {/* <Text style={styles.textSimple}> 100% Credibility</Text> */}
         </View>
       </View>
       {/* Phần phải header */}

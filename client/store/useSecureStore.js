@@ -1,44 +1,32 @@
 import { create } from "zustand";
-import { getValueFor } from "../utils/secureStore";
 
 const useSecureStore = create((set) => ({
   userId: null,
   accessToken: null,
   refreshToken: null,
-  setAuthInfo: async () =>
-    set({
-      userId: await getUserId(),
-      accessToken: await getAccessToken(),
-      refreshToken: await getRefreshToken(),
-    }),
-  signIn: (id, accessToken, refreshToken) => {
-    set({
-      userId: id,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
+  // Load the user id, access token, and refresh token from secure store
+  setUserId: (id) => {
+    set((state) => {
+      state.userId = id;
     });
   },
-  resetAuthInfo: () =>
-    set({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-    }),
+  setAccessToken: (accessToken) => {
+    set((state) => {
+      state.accessToken = accessToken;
+    });
+  },
+  setRefreshToken: (refreshToken) => {
+    set((state) => {
+      state.refreshToken = refreshToken;
+    });
+  },
+  clearAuthInfo: () => {
+    set((state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.refreshToken = null;
+    });
+  },
 }));
-
-const getUserId = async () => {
-  const userId = await getValueFor("user_id");
-  return userId ? userId : null;
-};
-
-const getAccessToken = async () => {
-  const accessToken = await getValueFor("accessToken");
-  return accessToken ? accessToken : null;
-};
-
-const getRefreshToken = async () => {
-  const refreshToken = await getValueFor("refreshToken");
-  return refreshToken ? refreshToken : null;
-};
 
 export default useSecureStore;

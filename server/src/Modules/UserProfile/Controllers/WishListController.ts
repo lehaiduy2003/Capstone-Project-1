@@ -49,7 +49,7 @@ export default class WishListController extends BaseController {
     }
   }
 
-  async getProducts(req: Request, res: Response) {
+  async getWishList(req: Request, res: Response) {
     if (!this.checkReqBody(req, res)) return;
     try {
       const userId = new ObjectId(String(req.body.id));
@@ -60,6 +60,27 @@ export default class WishListController extends BaseController {
       }
 
       res.status(200).send(products);
+    } catch (error) {
+      this.error(error, res);
+    }
+  }
+
+  async setWishList(req: Request, res: Response) {
+    if (!this.checkReqBody(req, res)) return;
+    try {
+      const userId = new ObjectId(String(req.body.id));
+      const products = req.body.wishList;
+      if (products.length === 0) {
+        res.status(400).send({ message: "Can not update wish list to empty" });
+        return;
+      }
+
+      const updatedWishList = await this.wishListService.setProducts(userId, products);
+      if (!updatedWishList) {
+        res.status(502).send({ message: "Failed to update wish list" });
+        return;
+      }
+      res.status(200).send({ message: "Wish list updated" });
     } catch (error) {
       this.error(error, res);
     }

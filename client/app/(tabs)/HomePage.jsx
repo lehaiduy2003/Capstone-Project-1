@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, StatusBar, Pressable } from "react-native";
-import React, { useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { hp, wp } from "../../helpers/common";
 import { theme } from "../../constants/theme";
@@ -11,7 +11,7 @@ import ProductList from "../../components/ProductList";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useCartStore from "../../store/useCartStore";
 
-const HomePage = () => {
+const HomePage = memo(() => {
   const nameRef = React.useRef("");
 
   const { products, isLoading, fetchProducts, onEndReached } = usePagination();
@@ -54,7 +54,7 @@ const HomePage = () => {
       </View>
     </ScreenWrapper>
   );
-};
+});
 
 export default HomePage;
 

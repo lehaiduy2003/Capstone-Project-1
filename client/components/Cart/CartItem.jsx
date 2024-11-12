@@ -10,7 +10,13 @@ const CartItem = ({ item, onIncrease, onDecrease }) => {
         <Text style={styles.itemName}>{item.name}</Text>
         <Text style={styles.itemPrice}>{currency}</Text>
       </View>
-      <QuantitySelector quantity={item.quantity} onIncrease={onIncrease} onDecrease={onDecrease} />
+      <QuantitySelector
+        quantity={item.cartQuantity}
+        onIncrease={onIncrease}
+        onDecrease={onDecrease}
+        // item.quantity is the maximum available quantity from the database
+        maxQuantity={item.quantity}
+      />
     </View>
   );
 };

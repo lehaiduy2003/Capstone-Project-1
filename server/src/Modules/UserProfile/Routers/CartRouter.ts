@@ -22,6 +22,14 @@ class CartRouter extends BaseRouter {
       authorizeUser.isCustomer,
       this.cartProductController.getCart.bind(this.cartProductController)
     );
+    // Overwrite cart with new products, and remove all products if the empty array is sent
+    this.router.put(
+      "/",
+      validateToken,
+      authenticateUser,
+      authorizeUser.isCustomer,
+      this.cartProductController.setCart.bind(this.cartProductController)
+    );
     // For add, update quantity, and even remove product (for reduce quantity to zero user's action) in cart
     this.router.patch(
       "/product",
@@ -37,13 +45,6 @@ class CartRouter extends BaseRouter {
       authenticateUser,
       authorizeUser.isCustomer,
       this.cartProductController.removeProduct.bind(this.cartProductController)
-    );
-    this.router.delete(
-      "/products",
-      validateToken,
-      authenticateUser,
-      authorizeUser.isCustomer,
-      this.cartProductController.clearCart.bind(this.cartProductController)
     );
   }
 }

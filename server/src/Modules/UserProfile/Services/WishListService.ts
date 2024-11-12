@@ -51,4 +51,18 @@ export default class WishListService extends UserProductService {
     const user = await this.findUser(userId);
     return validateWishListDTO(user.wish_list);
   }
+
+  override async setProducts(userId: ObjectId, products: Partial<ProductDTO>[]): Promise<boolean> {
+    const user = await this.findUser(userId);
+    const productIds = products.map((product) => product._id);
+
+    const updatedStatus = await userProfilesModel.findOneAndUpdate(
+      { _id: user._id },
+      { wish_list: productIds },
+      { new: true }
+    );
+
+    if (!updatedStatus) return false;
+    return updatedStatus.wish_list.every((id) => productIds.includes(id));
+  }
 }

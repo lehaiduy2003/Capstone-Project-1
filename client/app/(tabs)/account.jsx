@@ -1,19 +1,22 @@
-import { View, ScrollView, Text, StyleSheet, Dimensions } from "react-native";
-import React from "react";
+import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
 import { theme } from "../../constants/theme";
-import { hp, wp } from "../../helpers/common";
 import HeaderAcc from "../../components/AccountPage/headerAcc";
 import OrderMenu from "../../components/AccountPage/orderMenu";
 import OtherFeature from "../../components/AccountPage/otherFeature";
+import useSecureStore from "../../store/useSecureStore";
 
 const { height } = Dimensions.get("window");
 
 const account = () => {
+  const userId = useSecureStore((state) => state.userId);
+  const [user, setUser] = useState(null);
+
   return (
     <ScrollView style={styles.container}>
       {/* Phần Header */}
       <View style={styles.headerPart}>
-        <HeaderAcc />
+        <HeaderAcc user={user} />
       </View>
 
       {/* Phần Order Menu */}

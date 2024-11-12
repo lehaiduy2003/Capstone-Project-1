@@ -56,12 +56,13 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {
     const productToAdd = {
-      ...product,
       id: product._id, // Rename _id to id
-      quantity,
+      quantity: quantity,
     };
 
-    useCartStore.getState().addProduct(productToAdd);
+    // console.log("Product to add:", productToAdd);
+
+    useCartStore.getState().addProduct(productToAdd.id, productToAdd.quantity);
     // router.push("/Screens/cartScreen"); // Optionally navigate to the Cart scree
   };
   return (

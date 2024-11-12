@@ -35,10 +35,16 @@ const SignIn = () => {
       console.error("Data is empty");
       return;
     }
-    await save("accessToken", String(data.accessToken));
-    await save("refreshToken", String(data.refreshToken));
-    await save("userId", String(data.user_id));
-    await save("isLoggedIn", "true");
+
+    const accessToken = String(data.accessToken);
+    const refreshToken = String(data.refreshToken);
+    const userId = String(data.user_id);
+
+    // console.log(accessToken, refreshToken, userId);
+
+    await save("accessToken", accessToken);
+    await save("refreshToken", refreshToken);
+    await save("userId", userId);
 
     router.push("(tabs)/HomePage");
   };
