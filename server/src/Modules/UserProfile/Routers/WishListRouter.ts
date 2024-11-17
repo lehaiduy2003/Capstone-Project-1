@@ -1,5 +1,5 @@
 import BaseRouter from "../../../Base/BaseRouter";
-import authenticateUser from "../../../middlewares/authenticationMiddleware";
+import { authenticateUserByReqParams } from "../../../middlewares/authenticationMiddleware";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
 import validateToken from "../../../middlewares/tokenMiddleware";
 import WishListController from "../Controllers/WishListController";
@@ -17,7 +17,7 @@ class WishlistRouter extends BaseRouter {
     this.router.get(
       "/",
       validateToken,
-      authenticateUser,
+      authenticateUserByReqParams,
       authorizeUser.isCustomer,
       this.wishListController.getWishList.bind(this.wishListController)
     );
@@ -25,21 +25,21 @@ class WishlistRouter extends BaseRouter {
     this.router.put(
       "/product",
       validateToken,
-      authenticateUser,
+      authenticateUserByReqParams,
       authorizeUser.isCustomer,
       this.wishListController.setWishList.bind(this.wishListController)
     );
     this.router.patch(
       "/product/:productId",
       validateToken,
-      authenticateUser,
+      authenticateUserByReqParams,
       authorizeUser.isCustomer,
       this.wishListController.updateProduct.bind(this.wishListController)
     );
     this.router.delete(
       "/product/:productId",
       validateToken,
-      authenticateUser,
+      authenticateUserByReqParams,
       authorizeUser.isCustomer,
       this.wishListController.removeProduct.bind(this.wishListController)
     );

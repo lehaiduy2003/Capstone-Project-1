@@ -4,6 +4,7 @@ import checkCache from "../../../middlewares/cacheMiddleware";
 import ProductService from "../Services/ProductService";
 import BaseRouter from "../../../Base/BaseRouter";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
+import { authenticateUserByReqBody } from "../../../middlewares/authenticationMiddleware";
 
 class ProductRouter extends BaseRouter {
   private readonly productController: ProductController;
@@ -16,6 +17,7 @@ class ProductRouter extends BaseRouter {
 
   public initRoutes(): void {
     this.router.get("/", checkCache, this.productController.findMany.bind(this.productController));
+    this.router.get("/list", this.productController.findProductList.bind(this.productController));
     this.router.get(
       "/search",
       checkCache,
@@ -35,6 +37,7 @@ class ProductRouter extends BaseRouter {
     this.router.patch(
       "/:id",
       validateToken,
+      authenticateUserByReqBody,
       authorizeUser.isCustomerOrRecycler,
       this.productController.updateById.bind(this.productController)
     );

@@ -4,9 +4,10 @@ import BaseController from "../../../Base/BaseController";
 import ProductService from "../Services/ProductService";
 import saveToCache from "../../../libs/redis/cacheSaving";
 import { validateFilter } from "../../../libs/zod/Filter";
-import { validateProduct } from "../../../libs/zod/model/Product";
-
+import { Product, validateProduct, validateProductUpdate } from "../../../libs/zod/model/Product";
+import queryString from "querystring";
 import { ObjectId } from "mongodb";
+import { validateObjectId } from "../../../libs/zod/ObjectId";
 
 export default class ProductController extends BaseController {
   private readonly productService: ProductService;
@@ -37,6 +38,32 @@ export default class ProductController extends BaseController {
     }
   }
 
+  public async findProductList(req: Request, res: Response): Promise<void> {
+    if (!this.checkReqQuery(req, res)) return;
+    try {
+      const url = req.originalUrl;
+      // console.log(url);
+      const parsedQuery = queryString.parse(url.split("?")[1]);
+      const ids = Array.isArray(parsedQuery.id) ? parsedQuery.id : [parsedQuery.id];
+      console.log(ids);
+
+      const validatedIds = ids
+        .filter((productId): productId is string => typeof productId === "string")
+        .map((productId: string) => validateObjectId(productId));
+
+      const products = await this.productService.findProductsList(validatedIds);
+
+      if (!products || products.length === 0) {
+        res.status(404).send({ message: "No products found" });
+        return;
+      } else {
+        res.status(200).send(products);
+      }
+    } catch (error) {
+      this.error(error, res);
+    }
+  }
+
   /**
    * for searching products based on query params (sort, order, find by, etc.)
    * @param req request containing query params (limit, skip, page, sort, order, find by, etc.)
@@ -46,6 +73,7 @@ export default class ProductController extends BaseController {
     if (!this.checkReqQuery(req, res)) return;
     try {
       const parsedFilter = validateFilter(req.query);
+
       const products = await this.productService.search(parsedFilter);
 
       if (!products || products.length === 0) {
@@ -99,8 +127,24 @@ export default class ProductController extends BaseController {
   async updateById(req: Request, res: Response): Promise<void> {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const productData = validateProduct(req.body);
       const id = new ObjectId(req.params.id);
+      const productData = validateProductUpdate(req.body.product);
+      if (productData.owner || productData.created_at || productData.updated_at) {
+        res.status(403).send({ message: "You can not update owner, created_at, or updated_at" });
+        return;
+      }
+
+      const product = await this.productService.findById(id);
+      if (!product) {
+        res.status(404).send({ message: "Updated product not found" });
+        return;
+      }
+
+      if (product.owner.toString() !== String(req.body.user_id)) {
+        res.status(403).send({ message: "You can not update other user's product" });
+        return;
+      }
+
       const isUpdated = await this.productService.updateById(id, productData);
 
       if (!isUpdated) {

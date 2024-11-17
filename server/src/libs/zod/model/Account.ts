@@ -9,11 +9,11 @@ const AccountSchema = z
   .object({
     email: z.string().trim().email({ message: "Invalid email address" }),
     password: PasswordSchema,
-    role: RoleEnum,
+    role: RoleEnum.default("customer"),
     created_at: z.date().default(new Date()),
     updated_at: z.date().default(new Date()),
     is_verified: z.boolean().default(false),
-    status: AccountStatusEnum,
+    status: AccountStatusEnum.default("inactive"),
     recycler_field: RecyclerFieldSchema.optional(),
     joined_campaigns: z.array(z.string()).default([]),
   })

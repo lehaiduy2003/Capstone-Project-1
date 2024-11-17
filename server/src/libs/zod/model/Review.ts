@@ -7,16 +7,16 @@ const ReplySchema = z.object({
   _id: ObjectIdSchema,
   reviewer_id: ObjectIdSchema,
   name: z.string(),
-  avatar: z.string().url(),
+  avatar: z.string().url({ message: "avatar must be an url" }),
   comment: z.string(),
 });
 
 // Schema cho Review
 export const ReviewSchema = z.object({
   reviewer_id: ObjectIdSchema,
-  reviewer_avatar: z.string().url(),
+  reviewer_avatar: z.string().url({ message: "avatar must be an url" }),
   reviewered_id: ObjectIdSchema,
-  rate: z.number().min(1).max(5),
+  rate: z.number({ message: "rate must be a number" }).min(1).max(5),
   comment: z.string(),
   reviewed_at: z.date().default(new Date()),
   updated_at: z.date().default(new Date()),

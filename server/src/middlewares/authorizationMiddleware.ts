@@ -4,6 +4,7 @@ enum Role {
   CUSTOMER = "customer",
   RECYCLER = "recycler",
   ADMIN = "admin",
+  SHIPPER = "shipper",
 }
 
 class AuthorizeUser {
@@ -13,7 +14,7 @@ class AuthorizeUser {
       next();
       return;
     }
-    res.status(403).send({ message: "No permission to access this route" });
+    res.status(403).send({ success: false, message: "No permission to access this route" });
   }
 
   isRecycler(req: Request, res: Response, next: NextFunction): void {
@@ -28,6 +29,15 @@ class AuthorizeUser {
   isAdmin(req: Request, res: Response, next: NextFunction): void {
     const role = req.body.user.role;
     if (role && role === Role.ADMIN) {
+      next();
+      return;
+    }
+    res.status(403).send({ message: "No permission to access this route" });
+  }
+
+  isShipper(req: Request, res: Response, next: NextFunction): void {
+    const role = req.body.user.role;
+    if (role && role === Role.SHIPPER) {
       next();
       return;
     }

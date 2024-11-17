@@ -8,10 +8,15 @@ const DonationSchema = z.object({
   created_at: z.date().default(new Date()),
   donated: z.object({
     name: z.string(),
-    img: z.string().url().optional(),
+    img: z.string().url({ message: "img must be an url" }).optional(),
     content: z.string(),
-    weight: z.number().positive(),
-    quantity: z.number().int().positive(),
+    weight: z
+      .number({ message: "weight must be a number" })
+      .positive({ message: "weight can not negative" }),
+    quantity: z
+      .number({ message: "quantity must be a number" })
+      .int({ message: "quantity must be an integer" })
+      .positive({ message: "quantity can not negative" }),
   }),
 });
 

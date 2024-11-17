@@ -9,6 +9,8 @@ import Loading from "../components/Loading";
 import Icon from "../assets/icons";
 import { theme } from "../constants/theme";
 
+import * as Linking from "expo-linking";
+
 import { initPaymentSheet, presentPaymentSheet, StripeProvider } from "@stripe/stripe-react-native";
 import { getValueFor } from "../utils/secureStore";
 import { Screen } from "react-native-screens";
@@ -16,27 +18,43 @@ import useCartStore from "../store/useCartStore";
 
 const checkOut = () => {
   const [loading, setLoading] = useState(true);
-  const { cartItems, totalPrice } = useCartStore();
-  // console.log(cartItems);
 
+  const { cartItems, totalPrice, clearCart } = useCartStore();
+  const products = cartItems.map((item) => ({
+    _id: item._id,
+    quantity: item.cartQuantity,
+    name: item.name,
+    price: item.price,
+    img: item.img,
+    owner: item.owner,
+  }));
+  // console.log(products);
+
+  const [intent, setIntent] = useState("");
   const checkout = async () => {
     const token = await getValueFor("accessToken");
+    const userId = await getValueFor("userId");
     // Call the API to create a checkout session
     // This is where you would typically call your backend server to create a checkout session
     // The backend server would then call the Stripe API to create a session
     // The client would then redirect to the Stripe hosted checkout page
     // The client would then be redirected back to the success_url or cancel_url specified in the session
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/payments/checkout`, {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/stripe/checkout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        cartItems,
+        products: products,
+        id: userId,
       }),
     });
     const data = await response.json();
+    // console.log(data);
+    setIntent(data.clientSecret);
+    // console.log(intent);
+
     return data.clientSecret;
   };
 
@@ -46,6 +64,7 @@ const checkOut = () => {
     const { error } = await initPaymentSheet({
       merchantDisplayName: "Example, Inc.",
       paymentIntentClientSecret: paymentIntent,
+      returnURL: Linking.createURL("HomePage"),
     });
     if (error) {
       console.log("Payment sheet initialization error:", error);
@@ -59,10 +78,34 @@ const checkOut = () => {
     const { error } = await presentPaymentSheet();
 
     if (error) {
-      Alert.alert(`Error code: ${error.code}`, error.message);
+      console.log(`Error code: ${error.code}`, error.message);
     } else {
       Alert.alert("Success", "Your order is confirmed!");
+      const token = await getValueFor("accessToken");
+      const userId = await getValueFor("userId");
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/transactions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          products: products,
+          metadata: {
+            payment_intent: intent,
+            payment_method: "cash",
+            shipping_address: "Cam Le, Da Nang",
+            payment_method: "card",
+            payment_status: "paid",
+          },
+        }),
+      });
+      const data = await response.json();
+      // console.log(data);
+      await clearCart();
     }
+
     setLoading(false);
   };
 
@@ -103,7 +146,7 @@ const checkOut = () => {
 
           {/* Cart Items */}
           <FlatList
-            data={cartItems}
+            data={products}
             keyExtractor={(item) => item._id.toString()}
             renderItem={({ item }) => (
               <View style={styles.itemContainer}>
@@ -113,7 +156,7 @@ const checkOut = () => {
                   <Text> {item.price.toLocaleString()}</Text>
                 </View>
                 <View style={styles.itemQuantity}>
-                  <Text>item.quantity</Text>
+                  <Text>{item.quantity}</Text>
                 </View>
               </View>
             )}
@@ -130,7 +173,7 @@ const checkOut = () => {
             <Text style={styles.sectionTitle}>Payment details</Text>
             <View style={styles.summaryRow}>
               <Text>Total cost</Text>
-              <Text>{calculateTotalPrice().toLocaleString()}</Text>
+              <Text>{totalPrice.toLocaleString()}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text>Total shipping cost</Text>
@@ -139,7 +182,7 @@ const checkOut = () => {
 
             <View style={styles.summaryRow}>
               <Text style={styles.grandTotalText}>Total payment</Text>
-              <Text style={styles.grandTotalText}>{grandTotal.toLocaleString()}</Text>
+              <Text style={styles.grandTotalText}>{grandTotal.toLocaleString()} VNĐ</Text>
             </View>
           </View>
 

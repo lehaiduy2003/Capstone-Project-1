@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Alert } from "react-native";
-import { fetchData } from "../utils/fetch";
 
 // for sending data via form to the server
 const useAuthSubmit = (apiUrl) => {

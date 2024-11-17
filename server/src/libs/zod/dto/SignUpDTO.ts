@@ -4,7 +4,7 @@ import { RecyclerFieldSchema } from "../RecyclerField";
 
 const SignUpDTOSchema = z
   .object({
-    email: z.string().email(),
+    email: z.string().email({ message: "Invalid email" }),
     password: PasswordSchema,
     role: z.enum(["customer", "recycler"]).default("customer"),
     recyclerField: RecyclerFieldSchema.optional(),
@@ -19,7 +19,7 @@ const SignUpDTOSchema = z
     {
       message: "recyclerField is required when role is recycler",
       path: ["recyclerField"],
-    },
+    }
   );
 
 export const validateSignUpDTO = (data: unknown) => {

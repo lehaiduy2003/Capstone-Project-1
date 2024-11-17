@@ -7,18 +7,11 @@ import PaymentStatusEnum from "../enums/PaymentStatus";
 const InvoiceSchema = z
   .object({
     products: ProductDTOSchema.array(),
-    payment_intent: z.string().optional(), // paymentIntent is optional for cash payment
-    from: z.string().optional(),
-    to: z.string().optional(),
-    fee: z.object({
-      shipping: z.number().default(20000).optional(), // default shipping fee is 20,000 VNĐ
-      tax: z.number().default(0.03), // default tax is 3%
-      service: z.number().default(0.05), // default service fee is 5%
-    }),
-    created_at: z.date().default(new Date()),
-    updated_at: z.date().default(new Date()),
+    from: z.string(),
+    to: z.string(),
     payment_status: PaymentStatusEnum,
     payment_method: PaymentMethodEnum,
+    payment_intent: z.string().optional(), // paymentIntent is optional for cash payment
   })
   .refine(
     (data) => {

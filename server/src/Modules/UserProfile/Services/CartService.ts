@@ -2,88 +2,171 @@ import ProductService from "../../Product/Services/ProductService";
 import { ObjectId } from "mongodb";
 import userProfilesModel from "../Models/userProfilesModel";
 import UserProductService from "./init/UserProductService";
-import { ProductDTO } from "../../../libs/zod/dto/ProductDTO";
+import { ProductDTO, validateProductDTO } from "../../../libs/zod/dto/ProductDTO";
 import { CartDTO, validateCartDTO } from "../../../libs/zod/dto/CartDTO";
+import { ClientSession } from "mongoose";
 
-export default class CartProductService extends UserProductService {
+type CartProduct = {
+  cartQuantity: number;
+} & ProductDTO;
+
+interface ICart {
+  total: number;
+  data: CartProduct[];
+}
+
+export default class CartService extends UserProductService {
   constructor() {
     super(new ProductService());
+  }
+
+  private async checkValidQuantities(products: CartDTO): Promise<void> {
+    for (const item of products) {
+      const product = await this.getProductService().findById(item._id);
+      if (!product) {
+        throw new Error(`Product with ID ${item._id} not found`);
+      }
+      if (item.quantity > product.quantity) {
+        throw new Error(`Quantity for product ${item._id} exceeds available stock`);
+      }
+    }
   }
 
   override async updateProduct(
     userId: ObjectId,
     productId: ObjectId,
     quantity: number
-  ): Promise<boolean> {
-    const { user, product } = await this.checkAction(userId, productId);
+  ): Promise<ICart> {
+    const user = await this.findUser(userId);
+    const product = await this.findProduct(productId);
 
-    if (!product.quantity || product.quantity < quantity) {
+    if (product.quantity < quantity) {
       throw new Error("Not enough product in stock");
-    } else {
-      product.quantity = quantity;
     }
+    await this.startSession();
+    this.startTransaction();
+    const session = this.getSession();
 
-    if (user.cart.some((cartProduct) => cartProduct._id.equals(product._id))) {
-      return await this.updateQuantity(userId, productId, quantity);
+    try {
+      if (user.cart.some((cartProduct) => cartProduct._id.equals(product._id))) {
+        // Update the quantity of the product in the cart
+        // The session is committed in the updateQuantity method if it is successful
+        // Else the method will throw an error and the session will be aborted by the catch block
+        return await this.updateQuantity(userId, productId, quantity, session);
+      }
+
+      const addedStatus = await userProfilesModel
+        .findOneAndUpdate(
+          { _id: user._id },
+          { $addToSet: { cart: { _id: product._id, quantity: quantity } } },
+          { new: true, session: session }
+        )
+        .lean();
+
+      // No need to abort transaction here because abortTransaction will be called twice by the catch block
+      // If the adding fails, the method will throw an error and the session will be aborted
+      if (!addedStatus) {
+        throw new Error("Failed to add product");
+      }
+
+      await this.commitTransaction();
+      return await this.getDetailsFromCart(userId, addedStatus.cart);
+    } catch (error) {
+      await this.abortTransaction();
+      throw error;
+    } finally {
+      await this.endSession();
     }
-
-    const addedStatus = await userProfilesModel
-      .findOneAndUpdate(
-        { _id: user._id },
-        { $addToSet: { cart: { _id: product._id, quantity: product.quantity } } },
-        { new: true }
-      )
-      .lean();
-
-    if (!addedStatus) {
-      throw new Error("Failed to add product");
-    }
-
-    return addedStatus.cart.some((cartProduct) => cartProduct._id.equals(product._id));
   }
 
   override async removeProduct(userId: ObjectId, productId: ObjectId) {
-    const { user, product } = await this.checkAction(userId, productId);
+    await this.startSession();
+    this.startTransaction();
+    const session = this.getSession();
+    try {
+      const removedStatus = await userProfilesModel
+        .findOneAndUpdate(
+          { _id: userId },
+          { $pull: { cart: { _id: productId } } },
+          { new: true, session: session }
+        )
+        .lean();
 
-    const removedStatus = await userProfilesModel
-      .findOneAndUpdate({ _id: user._id }, { $pull: { cart: { _id: product._id } } }, { new: true })
-      .lean();
-
-    if (!removedStatus) throw new Error("Failed to remove product");
-
-    return removedStatus.cart.every((cartProduct) => !cartProduct._id.equals(product._id));
+      if (!removedStatus) {
+        throw new Error("Failed to remove product from the cart");
+      }
+      await this.commitTransaction();
+      return await this.getDetailsFromCart(userId, removedStatus.cart);
+    } catch (error) {
+      await this.abortTransaction();
+      throw error;
+    } finally {
+      await this.endSession();
+    }
   }
 
-  private async updateQuantity(userId: ObjectId, productId: ObjectId, quantity: number) {
+  private async updateQuantity(
+    userId: ObjectId,
+    productId: ObjectId,
+    quantity: number,
+    session: ClientSession
+  ) {
     if (quantity <= 0) {
       const updatedStatus = await userProfilesModel.findOneAndUpdate(
         { _id: userId, "cart._id": productId },
         { $pull: { cart: { _id: productId } } },
-        { new: true }
+        { new: true, session: session }
       );
 
       if (!updatedStatus) throw new Error("Failed to update the quantity of product in the cart");
-      return updatedStatus.cart.every((cartProduct) => !cartProduct._id.equals(productId));
+      await session.commitTransaction();
+      return await this.getDetailsFromCart(userId, updatedStatus.cart);
     } else {
       const updatedStatus = await userProfilesModel.findOneAndUpdate(
         { _id: userId, "cart._id": productId },
-        { $inc: { "cart.$.quantity": quantity } },
-        { new: true }
+        { $set: { "cart.$.quantity": quantity } },
+        { new: true, session: session }
       );
 
       if (!updatedStatus) throw new Error("Failed to update the quantity of product in the cart");
-      return updatedStatus.cart.some(
-        (cartProduct) => cartProduct._id.equals(productId) && cartProduct.quantity === quantity
-      );
+
+      await session.commitTransaction();
+      return await this.getDetailsFromCart(userId, updatedStatus.cart);
     }
   }
 
-  override async getProducts(userId: ObjectId): Promise<Partial<ProductDTO>[]> {
-    const user = await this.findUser(userId);
-    return validateCartDTO(user.cart);
+  private async getDetailsFromCart(userId: ObjectId, products: CartDTO) {
+    let total = 0;
+    let data = [];
+    if (products.length === 0) return { total: 0, data: [] };
+    // Fetch all product details concurrently
+    const productDetailsPromises = products.map((product) =>
+      this.getProductService().findById(product._id)
+    );
+    const productDetailsArray = await Promise.all(productDetailsPromises);
+
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      const productDetails = productDetailsArray[i];
+
+      if (!productDetails) {
+        // Remove invalid product from the cart
+        await this.removeProduct(userId, product._id);
+        continue; // Skip invalid product
+      }
+      total += productDetails.price * product.quantity;
+      data.push({ ...validateProductDTO(productDetails), cartQuantity: product.quantity });
+    }
+    return { total, data };
   }
 
-  override async setProducts(userId: ObjectId, cart: Partial<ProductDTO>[]): Promise<boolean> {
+  async getProducts(userId: ObjectId): Promise<ICart> {
+    const user = await this.findUser(userId);
+    const products = user.cart;
+    return await this.getDetailsFromCart(userId, products);
+  }
+
+  override async setProducts(userId: ObjectId, cart: Partial<ProductDTO>[]) {
     const user = await this.findUser(userId);
     const parsedCart = validateCartDTO(cart);
     // Check for duplicate products
@@ -94,12 +177,28 @@ export default class CartProductService extends UserProductService {
     // Check for valid quantities
     await this.checkValidQuantities(parsedCart);
 
-    const updatedStatus = await userProfilesModel
-      .findOneAndUpdate({ _id: user._id }, { $set: { cart: parsedCart } }, { new: true })
-      .lean();
+    await this.startSession();
+    this.startTransaction();
+    try {
+      const updatedStatus = await userProfilesModel
+        .findOneAndUpdate(
+          { _id: user._id },
+          { $set: { cart: parsedCart } },
+          { new: true, session: this.getSession() }
+        )
+        .lean();
 
-    if (!updatedStatus) throw new Error("Failed to set the cart");
+      if (!updatedStatus) {
+        throw new Error("Failed to update the cart");
+      }
 
-    return JSON.stringify(updatedStatus.cart) === JSON.stringify(parsedCart);
+      await this.commitTransaction();
+      return await this.getDetailsFromCart(userId, updatedStatus.cart);
+    } catch (error) {
+      await this.abortTransaction();
+      throw error;
+    } finally {
+      await this.endSession();
+    }
   }
 }

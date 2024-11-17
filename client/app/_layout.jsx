@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Slot } from "expo-router";
 import Splash from "./splash"; // Path to your SplashScreen component
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 const _layout = () => {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
@@ -21,7 +24,11 @@ const _layout = () => {
   }
 
   // After the splash screen, render child components using <Slot />
-  return <Slot />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Slot />
+    </QueryClientProvider>
+  );
 };
 
 export default _layout;

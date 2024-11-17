@@ -1,17 +1,19 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 import Product from "../components/Product";
 import Loading from "./Loading";
 
-const ProductList = ({ products, onEndReached, isLoading }) => {
+const ProductList = forwardRef(({ products, onEndReached, isLoading, onScroll }, ref) => {
   return (
     <FlatList
+      ref={ref}
       data={products}
       renderItem={({ item }) => (
         <View style={styles.itemContainer}>
           <Product product={item} />
         </View>
       )}
+      onScroll={onScroll}
       showsVerticalScrollIndicator={false} // Hide the vertical scroll bar
       keyExtractor={(product) => product._id.toString()}
       numColumns={2} // Display items in 2 columns
@@ -21,7 +23,7 @@ const ProductList = ({ products, onEndReached, isLoading }) => {
       ListFooterComponent={isLoading ? <Loading /> : null} // Show loading indicator at the bottom
     />
   );
-};
+});
 
 const styles = StyleSheet.create({
   itemContainer: {

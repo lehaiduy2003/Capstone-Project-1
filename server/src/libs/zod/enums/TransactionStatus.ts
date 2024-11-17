@@ -1,7 +1,11 @@
 import { z } from "zod";
 
-const TransactionStatusEnum = z
-  .enum(["pending", "delivering", "completed", "refunded"])
-  .default("pending");
+const TransactionStatusEnum = z.enum([
+  "pending",
+  "transporting",
+  "delivering",
+  "completed",
+  "refunded",
+]);
 
 export default TransactionStatusEnum;

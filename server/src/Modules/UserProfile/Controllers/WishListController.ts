@@ -14,18 +14,18 @@ export default class WishListController extends BaseController {
   async updateProduct(req: Request, res: Response) {
     if (!this.checkReqBody(req, res) || !this.checkReqParams(req, res)) return;
     try {
-      const userId = new ObjectId(String(req.body.id));
+      const user_id = new ObjectId(String(req.body.user_id));
       const productId = new ObjectId(String(req.params.productId));
 
       // console.log(userId, productId);
 
-      const isAdded = await this.wishListService.updateProduct(userId, productId);
-      if (!isAdded) {
+      const wishList = await this.wishListService.updateProduct(user_id, productId);
+      if (!wishList) {
         res.status(400).send({ message: "Failed to add product to wish list" });
         return;
       }
 
-      res.status(200).send({ message: "Product added to wish list" });
+      res.status(200).send(wishList);
     } catch (error) {
       this.error(error, res);
     }
@@ -34,16 +34,16 @@ export default class WishListController extends BaseController {
   async removeProduct(req: Request, res: Response) {
     if (!this.checkReqBody(req, res) || !this.checkReqParams(req, res)) return;
     try {
-      const userId = new ObjectId(String(req.body.id));
-      const productId = new ObjectId(String(req.params.productId));
+      const user_id = new ObjectId(String(req.body.user_id));
+      const product_id = new ObjectId(String(req.params.productId));
 
-      const isRemoved = await this.wishListService.removeProduct(userId, productId);
-      if (!isRemoved) {
+      const wishList = await this.wishListService.removeProduct(user_id, product_id);
+      if (!wishList) {
         res.status(400).send({ message: "Failed to remove product from wish list" });
         return;
       }
 
-      res.status(200).send({ message: "Product removed from wish list" });
+      res.status(200).send(wishList);
     } catch (error) {
       this.error(error, res);
     }
@@ -52,14 +52,14 @@ export default class WishListController extends BaseController {
   async getWishList(req: Request, res: Response) {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const userId = new ObjectId(String(req.body.id));
-      const products = await this.wishListService.getProducts(userId);
-      if (products.length === 0) {
+      const user_id = new ObjectId(String(req.body.user_id));
+      const wishList = await this.wishListService.getProducts(user_id);
+      if (wishList.data.length === 0) {
         res.status(200).send({ message: "wish list is empty" });
         return;
       }
 
-      res.status(200).send(products);
+      res.status(200).send(wishList);
     } catch (error) {
       this.error(error, res);
     }
@@ -68,14 +68,14 @@ export default class WishListController extends BaseController {
   async setWishList(req: Request, res: Response) {
     if (!this.checkReqBody(req, res)) return;
     try {
-      const userId = new ObjectId(String(req.body.id));
+      const user_id = new ObjectId(String(req.body.user_id));
       const products = req.body.wishList;
       if (products.length === 0) {
         res.status(400).send({ message: "Can not update wish list to empty" });
         return;
       }
 
-      const updatedWishList = await this.wishListService.setProducts(userId, products);
+      const updatedWishList = await this.wishListService.setProducts(user_id, products);
       if (!updatedWishList) {
         res.status(502).send({ message: "Failed to update wish list" });
         return;

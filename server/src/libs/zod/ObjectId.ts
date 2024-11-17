@@ -10,8 +10,14 @@ const ObjectIdSchema = z
   .refine((val) => Types.ObjectId.isValid(val.toString()), {
     message: "Invalid ObjectId",
   })
-  .transform((val) =>
-    typeof val === "string" ? new Types.ObjectId(val) : val,
-  );
+  .transform((val) => (typeof val === "string" ? new Types.ObjectId(val) : val));
+
+export const validateObjectId = (data: unknown) => {
+  const result = ObjectIdSchema.safeParse(data);
+  if (!result.success) {
+    throw result.error;
+  }
+  return result.data;
+};
 
 export default ObjectIdSchema;

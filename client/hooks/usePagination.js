@@ -1,54 +1,67 @@
 import { useState } from "react";
 import useLoadingStore from "../store/useLoadingStore";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 const usePagination = () => {
-  const [products, setProducts] = useState([]);
   const { isLoading, setLoading } = useLoadingStore();
-  const [limit, setLimit] = useState(30); // Start with 30 products
-  const [skip, setSkip] = useState(0); // Start with 0
-  const [sort, setSort] = useState("updatedAt");
+  const [sort, setSort] = useState("updated_at");
   const [order, setOrder] = useState("desc");
 
-  const fetchProducts = async () => {
-    if (isLoading) return;
+  const queryClient = useQueryClient();
 
+  const fetchProducts = async ({ pageParam = 0 }) => {
     setLoading(true);
-    try {
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/products?limit=${limit}&skip=${skip}&sort=${sort}&order=${order}`,
-      );
-      const newProducts = await response.json();
+    // console.log("fetching products");
 
-      setProducts((prev) => {
-        return [...prev, ...newProducts];
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+    const response = await fetch(
+      `${process.env.EXPO_PUBLIC_API_URL}/products?limit=30&skip=${pageParam}&sort=${sort}&order=${order}`
+    );
+    setLoading(false);
+    return await response.json();
   };
 
-  const onEndReached = async () => {
-    setLimit(10); // Load 10 more products
-    setSkip((prev) => prev + limit);
-    await fetchProducts();
+  const {
+    data,
+    error,
+    isLoading: queryLoading,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["products", { sort, order }],
+    queryFn: fetchProducts,
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length === 0) return undefined;
+      return pages.length * 30;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 30 * 60 * 1000, // 30 minutes
+  });
+
+  const products = data ? data.pages.flat() : [];
+
+  const onEndReached = () => {
+    if (hasNextPage) {
+      fetchNextPage();
+    }
   };
 
   const sortOption = (sort) => {
     setSort(sort);
+    queryClient.invalidateQueries("products");
   };
 
   const orderOption = (order) => {
     setOrder(order);
+    queryClient.invalidateQueries("products");
   };
 
   return {
     products,
-    isLoading,
+    isLoading: queryLoading,
+    error,
+    fetchProducts,
     sortOption,
     orderOption,
-    fetchProducts,
     onEndReached,
   };
 };

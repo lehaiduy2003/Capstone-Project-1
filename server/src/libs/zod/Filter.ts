@@ -15,6 +15,7 @@ const FilterSchema = z.object({
     const num = Number(val);
     return isNaN(num) ? 0 : num < 0 ? 0 : num;
   }, z.number().optional().default(0)),
+  type: z.string().optional(),
 });
 
 export const validateFilter = (data: unknown) => {

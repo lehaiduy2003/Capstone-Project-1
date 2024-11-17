@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { fetchData, requestNewAccessToken } from "../utils/fetch";
-import { getValueFor } from "../utils/secureStore";
 
 // for fetching data from the server
 export const useFetch = (url, options) => {

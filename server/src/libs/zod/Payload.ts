@@ -4,8 +4,8 @@ import { z } from "zod";
 const PayloadSchema = z.object({
   sub: z.string(),
   role: z.string().optional(),
-  iat: z.number(),
-  exp: z.number(),
+  iat: z.number({ message: "issue at must be a number (UNIX timestamp)" }),
+  exp: z.number({ message: "expired must be a number (UNIX timestamp)" }),
   aud: z.string().optional(),
   iss: z.string().optional(),
 });

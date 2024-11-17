@@ -1,11 +1,8 @@
 import { z } from "zod";
 import ObjectIdSchema from "../ObjectId";
 
-const WishListDTOSchema = z.array(
-  z.object({
-    _id: ObjectIdSchema,
-  })
-);
+// For using with UserProfilesModel
+export const WishListDTOSchema = z.array(ObjectIdSchema);
 
 export const validateWishListDTO = (data: unknown) => {
   const result = WishListDTOSchema.safeParse(data);

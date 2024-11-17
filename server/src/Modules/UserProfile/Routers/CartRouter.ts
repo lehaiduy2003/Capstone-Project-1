@@ -2,8 +2,8 @@ import BaseRouter from "../../../Base/BaseRouter";
 import CartController from "../Controllers/CartController";
 import CartService from "../Services/CartService";
 import validateToken from "../../../middlewares/tokenMiddleware";
-import authenticateUser from "../../../middlewares/authenticationMiddleware";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
+import { authenticateUserByReqParams } from "../../../middlewares/authenticationMiddleware";
 
 class CartRouter extends BaseRouter {
   private readonly cartProductController: CartController;
@@ -18,7 +18,7 @@ class CartRouter extends BaseRouter {
     this.router.get(
       "/",
       validateToken,
-      authenticateUser,
+      authenticateUserByReqParams,
       authorizeUser.isCustomer,
       this.cartProductController.getCart.bind(this.cartProductController)
     );
@@ -26,7 +26,7 @@ class CartRouter extends BaseRouter {
     this.router.put(
       "/",
       validateToken,
-      authenticateUser,
+      authenticateUserByReqParams,
       authorizeUser.isCustomer,
       this.cartProductController.setCart.bind(this.cartProductController)
     );
@@ -34,7 +34,7 @@ class CartRouter extends BaseRouter {
     this.router.patch(
       "/product",
       validateToken,
-      authenticateUser,
+      authenticateUserByReqParams,
       authorizeUser.isCustomer,
       this.cartProductController.updateProduct.bind(this.cartProductController)
     );
@@ -42,7 +42,7 @@ class CartRouter extends BaseRouter {
     this.router.delete(
       "/product/:productId",
       validateToken,
-      authenticateUser,
+      authenticateUserByReqParams,
       authorizeUser.isCustomer,
       this.cartProductController.removeProduct.bind(this.cartProductController)
     );

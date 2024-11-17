@@ -20,8 +20,8 @@ const productsSchema: Schema<Product> = new Schema({
 });
 
 productsSchema.index({ status: 1 });
+productsSchema.index({ type: 1 });
 productsSchema.index({ type: 1, price: 1, updated_at: -1 });
-
 const productsModel = model<Product>("products", productsSchema);
 
 export default productsModel;

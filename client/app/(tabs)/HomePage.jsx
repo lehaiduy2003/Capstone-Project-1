@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, StatusBar, Pressable } from "react-native";
-import React, { memo, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { hp, wp } from "../../helpers/common";
 import { theme } from "../../constants/theme";
@@ -9,18 +9,28 @@ import { router } from "expo-router";
 import usePagination from "../../hooks/usePagination";
 import ProductList from "../../components/ProductList";
 import { SafeAreaView } from "react-native-safe-area-context";
-import useCartStore from "../../store/useCartStore";
+import { useScrollStore } from "../../store/useScrollStore";
 
-const HomePage = memo(() => {
-  const nameRef = React.useRef("");
+const HomePage = () => {
+  const { products, isLoading, error, onEndReached } = usePagination();
+  const flatListRef = useRef(null);
+  const setScrollPosition = useScrollStore((state) => state.setScrollPosition);
+  const getScrollPosition = useScrollStore((state) => state.getScrollPosition);
 
-  const { products, isLoading, fetchProducts, onEndReached } = usePagination();
-  const { initializeCart } = useCartStore();
   useEffect(() => {
-    fetchProducts(); // fetch initial products
-    initializeCart(); // initialize cart
+    const savedPosition = getScrollPosition("HomePage");
+    if (flatListRef.current) {
+      flatListRef.current.scrollToOffset({ offset: savedPosition, animated: false });
+    }
   }, []);
 
+  const handleScroll = (event) => {
+    const currentScrollPosition = event.nativeEvent.contentOffset.y;
+    setScrollPosition("HomePage", currentScrollPosition);
+  };
+  if (error) {
+    return <Text>Error: {error.message}</Text>;
+  }
   return (
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
@@ -49,12 +59,18 @@ const HomePage = memo(() => {
         </View>
         {/**product list */}
         <SafeAreaView>
-          <ProductList products={products} onEndReached={onEndReached} isLoading={isLoading} />
+          <ProductList
+            products={products}
+            onEndReached={onEndReached}
+            isLoading={isLoading}
+            ref={flatListRef}
+            onScroll={handleScroll}
+          />
         </SafeAreaView>
       </View>
     </ScreenWrapper>
   );
-});
+};
 
 export default HomePage;
 

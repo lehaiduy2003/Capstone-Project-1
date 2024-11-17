@@ -1,167 +1,147 @@
 // cartItemsStore.js
 import { create } from "zustand";
-import useSecureStore from "./useSecureStore";
-import { debounce } from "lodash";
 import { getValueFor } from "../utils/secureStore";
+
+const fetchCart = async (url, options) => {
+  const response = await fetch(url, {
+    method: options.method,
+    headers: options.headers,
+    body: options.body ? JSON.stringify(options.body) : null,
+  });
+  return await response.json();
+};
+
+// Create a store for the cart
+// Set data after fetching from the API
 const useCartStore = create((set, get) => ({
   cartItems: [],
   totalPrice: 0,
   initializeCart: async () => {
-    const userCart = await initCart();
+    const data = await fetchCart(
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getValueFor("accessToken")}`,
+        },
+      }
+    );
     set({
-      cartItems: userCart.items,
+      cartItems: data.data,
+      totalPrice: data.total,
     });
-    await calculateTotalPrice();
     // console.log("Cart initialized with items:", get().cartItems);
     // console.log("Total price:", get().totalPrice);
   },
 
-  addProduct: async (id, quantity) => {
-    set((state) => {
-      // Find the index of the product in cartItems
-      const productIndex = state.cartItems.findIndex((item) => item._id === id);
+  // Add product to cart
+  // If product already exists in cart, update the quantity (already handled in the backend)
+  addProduct: async (productId, quantity) => {
+    const product = get().cartItems.find((item) => item._id === productId);
 
-      let updatedCartItems;
+    let updatingProduct;
 
-      // If index is valid, update the quantity of the product
-      if (productIndex !== -1) {
-        // Copy the cartItems array
-        updatedCartItems = [...state.cartItems];
-        // Increase the quantity of the product at productIndex
-        updatedCartItems[productIndex] = {
-          // Copy the old product object data
-          ...updatedCartItems[productIndex],
-          // Increase the quantity
-          quantity: updatedCartItems[productIndex].quantity + quantity,
-        };
-      } else {
-        // If index is not valid, add the new product to the cart
-        updatedCartItems = [...state.cartItems, { _id: id, quantity: quantity }];
+    // If index is valid, update the quantity of the product
+    if (product) {
+      // Increase the quantity of the product
+      updatingProduct = {
+        _id: productId,
+        quantity: product.cartQuantity + quantity,
+      };
+    } else {
+      // If index is not valid, add the new product to the cart
+      updatingProduct = { _id: productId, quantity: quantity };
+    }
+
+    const data = await fetchCart(
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart/product`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getValueFor("accessToken")}`,
+        },
+        body: {
+          product_id: updatingProduct._id,
+          quantity: updatingProduct.quantity,
+        },
       }
-      // console.log("Updated cart items:", updatedCartItems);
-
-      return { cartItems: updatedCartItems };
+    );
+    console.log("Updated cart:", JSON.stringify(data.data, null, 2));
+    set({
+      cartItems: data.data,
+      totalPrice: data.total,
     });
-
-    const options = {
-      method: "PATCH",
-      accessToken: await getValueFor("accessToken"),
-      body: { productId: id, quantity: quantity },
-    };
-    const userId = await getValueFor("userId");
-    await fetchCart(`${process.env.EXPO_PUBLIC_API_URL}/users/${userId}/cart/product`, options);
-    await calculateTotalPrice();
   },
+  // Update quantity of a product in the cart
+  // Using PUT method to overwrite the cart with updated quantity
+  updateQuantity: async (productId, quantity) => {
+    // Loop through the cartItems array
+    const updatedCartItems = get()
+      .cartItems.map((item) =>
+        item._id === productId ? { ...item, cartQuantity: item.cartQuantity + quantity } : item
+      )
+      .filter((item) => item.cartQuantity > 0) // Remove product if quantity is 0
+      .map((item) => ({ _id: item._id, quantity: item.cartQuantity })); // Only keep _id and cartQuantity as quantity
 
-  updateQuantity: (productId, quantity) => {
-    set((state) => {
-      // Loop through the cartItems array
-      const updatedCartItems = state.cartItems
-        .map((item) =>
-          item._id === productId ? { ...item, quantity: item.quantity + quantity } : item
-        )
-        .filter((item) => item.quantity > 0); // Remove product if quantity is 0
-      return { cartItems: updatedCartItems };
+    const data = await fetchCart(
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getValueFor("accessToken")}`,
+        },
+        body: {
+          cart: updatedCartItems,
+        },
+      }
+    );
+    // console.log("Updated cart:", JSON.stringify(data.data, null, 2));
+
+    set({
+      cartItems: data.data,
+      totalPrice: data.total,
     });
-
-    debouncedFetchCart();
   },
 
   removeProduct: async (productId) => {
-    set((state) => {
-      const updatedCartItems = state.cartItems.filter((item) => item._id !== productId);
-
-      return { cartItems: updatedCartItems };
-    });
-    const options = {
-      method: "DELETE",
-      accessToken: await getValueFor("accessToken"),
-    };
-    const userId = await getValueFor("userId");
-    await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${userId}/cart/product/${productId}`,
-      options
+    const data = await fetchCart(
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor(
+        "userId"
+      )}/cart/product/${productId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getValueFor("accessToken")}`,
+        },
+      }
     );
-    await calculateTotalPrice();
+    set({
+      cartItems: data.data,
+      totalPrice: data.total,
+    });
   },
 
   clearCart: async () => {
-    set({ cartItems: [] });
-    const options = {
-      method: "PUT",
-      accessToken: await getValueFor("accessToken"),
-      body: [],
-    };
-    const userId = useSecureStore((state) => state.userId);
-    await fetchCart(`${process.env.EXPO_PUBLIC_API_URL}/users/${userId}/cart`, options);
-    await calculateTotalPrice();
+    const data = await fetchCart(
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${await getValueFor("accessToken")}`,
+        },
+        body: { cart: [] },
+      }
+    );
+    set({
+      cartItems: data.data,
+      totalPrice: data.total,
+    });
   },
 }));
-
-const fetchCart = async (url, options) => {
-  try {
-    const response = await fetch(url, {
-      method: options.method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${options.accessToken}`,
-      },
-      body: options.body ? JSON.stringify(options.body) : null,
-    });
-    const cart = await response.json();
-    // console.log("Cart updated:", cart);
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
-};
-
-const initCart = async () => {
-  try {
-    const userId = await getValueFor("userId");
-    const accessToken = await getValueFor("accessToken");
-
-    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${userId}/cart`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const data = await response.json();
-    return {
-      items: data,
-    };
-  } catch (error) {
-    throw error;
-  }
-};
-
-const debouncedFetchCart = debounce(async () => {
-  const options = {
-    method: "PUT",
-    accessToken: await getValueFor("accessToken"),
-    body: { cart: useCartStore.getState().cartItems },
-  };
-  const userId = await getValueFor("userId");
-  await fetchCart(`${process.env.EXPO_PUBLIC_API_URL}/users/${userId}/cart`, options);
-  await calculateTotalPrice();
-}, 500); // 500ms delay
-
-const calculateTotalPrice = async () => {
-  const cartItems = useCartStore.getState().cartItems;
-
-  // Fetch prices for all cart items
-  const prices = await Promise.all(
-    cartItems.map(async (item) => {
-      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/products/${item._id}`);
-      const data = await response.json();
-      // console.log("Product data:", data);
-      return data.price * item.quantity;
-    })
-  );
-  // Calculate the total price
-  const totalPrice = prices.reduce((acc, curr) => acc + curr, 0);
-  // Update the state with the new total price
-  useCartStore.setState({ totalPrice: totalPrice });
-};
 
 export default useCartStore;

@@ -1,10 +1,14 @@
 import { z } from "zod";
 import ObjectIdSchema from "../ObjectId";
 
-const CartDTOSchema = z.array(
+// For using with UserProfilesModel
+export const CartDTOSchema = z.array(
   z.object({
     _id: ObjectIdSchema,
-    quantity: z.number().int().positive(),
+    quantity: z
+      .number({ message: "quantity must a number" })
+      .int({ message: "quantity must be an integer" })
+      .positive({ message: "quantity can not negative" }),
   })
 );
 

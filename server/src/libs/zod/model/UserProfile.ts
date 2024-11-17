@@ -2,28 +2,32 @@ import { z } from "zod";
 import generateRandomString from "../../crypto/randomString";
 import { Document } from "mongoose";
 import ObjectIdSchema from "../ObjectId";
+import { CartDTOSchema } from "../dto/CartDTO";
+import { WishListDTOSchema } from "../dto/WishListDTO";
 
-const cartProduct = z.object({
-  _id: ObjectIdSchema,
-  quantity: z.number().int().positive(),
-});
 const UserProfileSchema = z.object({
   name: z.string().default(generateRandomString()),
   phone: z.string().optional(),
   avatar: z
     .string()
-    .url()
+    .url({ message: "avatar must be an url" })
     .default("https://static-00.iconduck.com/assets.00/avatar-default-icon-1975x2048-2mpk4u9k.png"),
   dob: z.date().default(new Date()),
   bio: z.string().default(""),
   gender: z.boolean().default(true), // male: 1 - female: 0
   address: z.array(z.string()).default([]),
-  reputation_score: z.number().default(100),
-  followers: z.number().int().default(0),
-  following: z.number().int().default(0),
+  reputation_score: z.number({ message: "score must be a number" }).default(100),
+  followers: z
+    .number({ message: "followers count must be a number" })
+    .int({ message: "followers count must be an integer" })
+    .default(0),
+  following: z
+    .number({ message: "following count must be a number" })
+    .int({ message: "following count must be an integer" })
+    .default(0),
   account_id: ObjectIdSchema,
-  cart: z.array(cartProduct).default([]),
-  wish_list: z.array(ObjectIdSchema).default([]),
+  cart: CartDTOSchema.default([]),
+  wish_list: WishListDTOSchema.default([]),
   joined_campaigns: z.array(ObjectIdSchema).default([]),
 });
 

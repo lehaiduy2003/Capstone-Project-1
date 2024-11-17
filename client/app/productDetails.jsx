@@ -55,14 +55,9 @@ const ProductDetails = () => {
   };
 
   const handleAddToCart = () => {
-    const productToAdd = {
-      id: product._id, // Rename _id to id
-      quantity: quantity,
-    };
-
     // console.log("Product to add:", productToAdd);
 
-    useCartStore.getState().addProduct(productToAdd.id, productToAdd.quantity);
+    useCartStore.getState().addProduct(product._id, quantity);
     // router.push("/Screens/cartScreen"); // Optionally navigate to the Cart scree
   };
   return (
