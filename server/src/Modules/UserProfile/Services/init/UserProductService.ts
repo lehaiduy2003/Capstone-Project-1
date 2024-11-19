@@ -5,7 +5,6 @@ import ProductService from "../../../Product/Services/ProductService";
 import { ProductDTO, validateProductDTO } from "../../../../libs/zod/dto/ProductDTO";
 import IInteractUserProduct from "./IInteractUserProduct";
 import SessionService from "../../../../Base/SessionService";
-import { ClientSession } from "mongoose";
 
 export default abstract class UserProductService
   extends SessionService

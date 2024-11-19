@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import { Product } from "../../../libs/zod/model/Product";
+import updateTimestamp from "../../../utils/updateTimestamp";
 
 const productsSchema: Schema<Product> = new Schema({
   name: { type: String, required: true },
@@ -18,6 +19,9 @@ const productsSchema: Schema<Product> = new Schema({
   },
   owner: { type: Schema.Types.ObjectId, ref: "user_profiles" },
 });
+
+productsSchema.pre("findOneAndUpdate", updateTimestamp);
+productsSchema.pre("updateOne", updateTimestamp);
 
 productsSchema.index({ status: 1 });
 productsSchema.index({ type: 1 });

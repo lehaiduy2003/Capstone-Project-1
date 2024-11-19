@@ -1,10 +1,7 @@
 import ProductController from "../Controllers/ProductController";
-import validateToken from "../../../middlewares/tokenMiddleware";
 import checkCache from "../../../middlewares/cacheMiddleware";
 import ProductService from "../Services/ProductService";
 import BaseRouter from "../../../Base/BaseRouter";
-import authorizeUser from "../../../middlewares/authorizationMiddleware";
-import { authenticateUserByReqBody } from "../../../middlewares/authenticationMiddleware";
 
 class ProductRouter extends BaseRouter {
   private readonly productController: ProductController;
@@ -27,25 +24,6 @@ class ProductRouter extends BaseRouter {
       "/:id",
       checkCache,
       this.productController.findById.bind(this.productController)
-    );
-    this.router.post(
-      "/",
-      validateToken,
-      authorizeUser.isCustomerOrRecycler,
-      this.productController.create.bind(this.productController)
-    );
-    this.router.patch(
-      "/:id",
-      validateToken,
-      authenticateUserByReqBody,
-      authorizeUser.isCustomerOrRecycler,
-      this.productController.updateById.bind(this.productController)
-    );
-    this.router.delete(
-      "/:id",
-      validateToken,
-      authorizeUser.isCustomerOrRecycler,
-      this.productController.deleteById.bind(this.productController)
     );
   }
 }

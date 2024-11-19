@@ -8,12 +8,14 @@ import createProfileEditingRouter from "../Modules/UserProfile/Routers/ProfileEd
 import createStripeRouter from "../Modules/Stripe/Routers/StripeRouter";
 import createCartRouter from "../Modules/UserProfile/Routers/CartRouter";
 import createWishListRouter from "../Modules/UserProfile/Routers/WishListRouter";
+import createProductOwnerRouter from "../Modules/UserProfile/Routers/ProductOwnerRouter";
 
 const setupRouters = (app: Application): void => {
   createAuthRouter().register("/auth", app);
   createUserRouter().register("/users", app);
   createCartRouter().register("/users/:id/cart", app);
   createWishListRouter().register("/users/:id/wishlist", app);
+  createProductOwnerRouter().register("/users/:id/products", app);
   createOtpRouter().register("/otp", app);
   createStripeRouter().register("/stripe", app);
   createTransactionRouter().register("/transactions", app);

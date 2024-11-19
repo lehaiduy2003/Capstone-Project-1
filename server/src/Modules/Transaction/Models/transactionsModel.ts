@@ -29,6 +29,11 @@ const transactionsSchema: Schema<Transaction> = new Schema({
   updated_at: { type: Date },
 });
 
+transactionsSchema.pre("save", function (next) {
+  this.updated_at = new Date();
+  next();
+});
+
 transactionsSchema.index({ user_id: 1 });
 transactionsSchema.index({ shipper_id: 1 });
 transactionsSchema.index({ transaction_status: 1 });

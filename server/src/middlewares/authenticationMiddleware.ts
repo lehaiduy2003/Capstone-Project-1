@@ -17,9 +17,9 @@ export const authenticateUserByReqParams = async (
   next: NextFunction
 ): Promise<void> => {
   const account_id = req.body.user.sub; // sub is the accountId from the token
-  let user_id = req.originalUrl.split("/")[2]; // user_id is the first parameter in the url: /users/:user_id or /transactions/:userId
-  user_id = user_id.split("?")[0]; // Split the user_id to remove any query parameters
-  // console.log(user_id);
+  // Using regex to get the user_id from the URL by matching the /users/ or /owner/ and the next string
+  const user_id_match = req.originalUrl.match(/\/(?:users|owner)\/([^\/?]+)/);
+  const user_id = user_id_match ? user_id_match[1] : null;
   if (!user_id || !account_id) {
     res.status(401).send({ success: false, message: "Invalid user_id or account_id" });
     return;

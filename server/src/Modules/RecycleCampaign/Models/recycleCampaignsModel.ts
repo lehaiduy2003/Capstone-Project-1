@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import { RecycleCampaign } from "../../../libs/zod/model/RecyclingCampaign";
+import updateTimestamp from "../../../utils/updateTimestamp";
 
 const recycleCampaignsSchema: Schema<RecycleCampaign> = new Schema({
   name: { type: String, required: true },
@@ -24,6 +25,9 @@ const recycleCampaignsSchema: Schema<RecycleCampaign> = new Schema({
     default: true,
   },
 });
+
+recycleCampaignsSchema.pre("findOneAndUpdate", updateTimestamp);
+recycleCampaignsSchema.pre("updateOne", updateTimestamp);
 
 recycleCampaignsSchema.index({ name: 1 });
 recycleCampaignsSchema.index({ create_at: 1 });
