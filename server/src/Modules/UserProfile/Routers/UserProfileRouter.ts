@@ -1,7 +1,6 @@
 import UserProfileController from "../Controllers/UserProfileController";
 import UserProfileService from "../Services/UserProfileService";
 import BaseRouter from "../../../Base/BaseRouter";
-import checkCache from "../../../middlewares/cacheMiddleware";
 class UserProfileRouter extends BaseRouter {
   private readonly userController: UserProfileController;
   public constructor(userController: UserProfileController) {
@@ -11,11 +10,7 @@ class UserProfileRouter extends BaseRouter {
   }
 
   public initRoutes(): void {
-    this.router.get(
-      "/:id",
-      checkCache,
-      this.userController.getUserProfileById.bind(this.userController)
-    );
+    this.router.get("/:id", this.userController.getUserProfileById.bind(this.userController));
   }
 }
 

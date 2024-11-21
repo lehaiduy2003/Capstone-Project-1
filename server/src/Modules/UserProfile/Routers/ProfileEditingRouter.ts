@@ -18,6 +18,11 @@ class ProfileEditingRouter extends BaseRouter {
       validateToken,
       this.profileEditingController.changePassword.bind(this.profileEditingController)
     );
+    this.router.patch(
+      "/address",
+      validateToken,
+      this.profileEditingController.updateAddress.bind(this.profileEditingController)
+    );
   }
 }
 

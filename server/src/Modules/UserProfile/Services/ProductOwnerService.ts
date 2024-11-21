@@ -3,7 +3,7 @@ import { Product } from "../../../libs/zod/model/Product";
 import productsModel from "../../Product/Models/productsModel";
 import { DeleteResult, ObjectId } from "mongodb";
 import ProductService from "../../Product/Services/ProductService";
-import IProductService from "../../Product/Services/init/IProductService";
+import IProductService from "./init/IProductService";
 export default class ProductOwnerService extends ProductService implements IProductService {
   public constructor() {
     super();

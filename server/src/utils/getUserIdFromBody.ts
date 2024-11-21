@@ -14,6 +14,7 @@ const getUserIdFromBody = (req: Request): string | null => {
     req.body.shipper_id ||
     req.body.shipperId ||
     req.body.owner ||
+    req.body.creator_id ||
     null
   );
 };

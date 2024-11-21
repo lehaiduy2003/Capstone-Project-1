@@ -29,7 +29,7 @@ const recycleCampaignsSchema: Schema<RecycleCampaign> = new Schema({
 recycleCampaignsSchema.pre("findOneAndUpdate", updateTimestamp);
 recycleCampaignsSchema.pre("updateOne", updateTimestamp);
 
-recycleCampaignsSchema.index({ name: 1 });
+recycleCampaignsSchema.index({ name: 1 }, { unique: true });
 recycleCampaignsSchema.index({ create_at: 1 });
 recycleCampaignsSchema.index({ creator_id: 1 });
 

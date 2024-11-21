@@ -5,6 +5,7 @@ const useSecureStore = create((set) => ({
   userId: null,
   accessToken: null,
   refreshToken: null,
+  isLoggedIn: false,
   // Load the user id, access token, and refresh token from secure store
   initAuthInfo: async () => {
     try {
@@ -17,6 +18,7 @@ const useSecureStore = create((set) => ({
           userId: userId,
           accessToken: accessToken,
           refreshToken: refreshToken,
+          isLoggedIn: true,
         });
       }
     } catch (error) {
@@ -39,11 +41,17 @@ const useSecureStore = create((set) => ({
       refreshToken: refreshToken,
     });
   },
+  setIsLoggedIn: (isLoggedIn) => {
+    set({
+      isLoggedIn: isLoggedIn,
+    });
+  },
   clearAuthInfo: () => {
     set({
       userId: null,
       accessToken: null,
       refreshToken: null,
+      isLoggedIn: false,
     });
   },
 }));

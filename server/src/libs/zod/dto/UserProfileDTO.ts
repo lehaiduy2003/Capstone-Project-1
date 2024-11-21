@@ -7,7 +7,7 @@ const UserProfileDTOSchema = z.object({
   avatar: z.string().url({ message: "avatar must be an url" }),
   followers: z.number().optional(),
   following: z.number().optional(),
-  address: z.array(z.string()).max(1), // for get only 1 address of user profile
+  address: z.array(z.string()), // for get only 1 address of user profile
   account_id: ObjectIdSchema,
 });
 

@@ -9,6 +9,7 @@ import createStripeRouter from "../Modules/Stripe/Routers/StripeRouter";
 import createCartRouter from "../Modules/UserProfile/Routers/CartRouter";
 import createWishListRouter from "../Modules/UserProfile/Routers/WishListRouter";
 import createProductOwnerRouter from "../Modules/UserProfile/Routers/ProductOwnerRouter";
+import createRecycleCampaignRouter from "../Modules/RecycleCampaign/Routers/RecycleCampaignRouter";
 
 const setupRouters = (app: Application): void => {
   createAuthRouter().register("/auth", app);
@@ -21,6 +22,7 @@ const setupRouters = (app: Application): void => {
   createTransactionRouter().register("/transactions", app);
   createProductRouter().register("/products", app);
   createProfileEditingRouter().register("/profile", app);
+  createRecycleCampaignRouter().register("/campaigns", app);
   console.log("Routers initialized");
 };
 

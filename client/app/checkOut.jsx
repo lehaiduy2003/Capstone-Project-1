@@ -15,11 +15,17 @@ import { initPaymentSheet, presentPaymentSheet, StripeProvider } from "@stripe/s
 import { getValueFor } from "../utils/secureStore";
 import { Screen } from "react-native-screens";
 import useCartStore from "../store/useCartStore";
+import { useRouter } from "expo-router";
 
 const checkOut = () => {
   const [loading, setLoading] = useState(true);
 
   const { cartItems, totalPrice, clearCart } = useCartStore();
+  const router = useRouter();
+  const [intent, setIntent] = useState("");
+  const [user, setUser] = useState({});
+  const [accessToken, setAccessToken] = useState("");
+  const [userId, setUserId] = useState("");
   const products = cartItems.map((item) => ({
     _id: item._id,
     quantity: item.cartQuantity,
@@ -30,10 +36,7 @@ const checkOut = () => {
   }));
   // console.log(products);
 
-  const [intent, setIntent] = useState("");
-  const checkout = async () => {
-    const token = await getValueFor("accessToken");
-    const userId = await getValueFor("userId");
+  const checkout = async (token, userId) => {
     // Call the API to create a checkout session
     // This is where you would typically call your backend server to create a checkout session
     // The backend server would then call the Stripe API to create a session
@@ -58,8 +61,25 @@ const checkOut = () => {
     return data.clientSecret;
   };
 
+  const getUser = async (userId) => {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const data = await response.json();
+    setUser(data);
+    return data;
+  };
+
   const initializePaymentSheet = async () => {
-    const paymentIntent = await checkout();
+    const token = await getValueFor("accessToken");
+    const userId = await getValueFor("userId");
+    setAccessToken(token);
+    setUserId(userId);
+    const fetchData = await Promise.all([checkout(token, userId), getUser(userId)]);
+    const paymentIntent = fetchData[0];
 
     const { error } = await initPaymentSheet({
       merchantDisplayName: "Example, Inc.",
@@ -135,8 +155,8 @@ const checkOut = () => {
             <Text style={styles.sectionTitle}>Shipping address</Text>
             <View style={styles.addressContainer}>
               <TouchableOpacity style={styles.addressEdit}>
-                <Text>Home</Text>
-                <Text>No 46, Awolowo Road....</Text>
+                <Text>Main address</Text>
+                <Text>{user.address[0]}</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => alert("pop edit address")}>
                 <Icon name="edit" size={26} strokeWidth={1.6} />
@@ -163,9 +183,9 @@ const checkOut = () => {
           />
 
           {/* Payment Method */}
-          <TouchableOpacity style={styles.section} onPress={() => alert("pop payment method")}>
+          <TouchableOpacity style={styles.section} onPress={() => router.push("AddressScreen")}>
             <Text style={styles.sectionTitle}>Payment method</Text>
-            <Text>Cash</Text>
+            <Text>Card</Text>
           </TouchableOpacity>
 
           {/* Order Summary */}

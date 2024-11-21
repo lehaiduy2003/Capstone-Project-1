@@ -23,7 +23,6 @@ export default class UserProfileController extends BaseController {
         res.status(502).send({ message: "No user profile found" });
         return;
       }
-      await saveToCache(req.body.cacheKey, 3600, userProfile);
       res.status(200).send(userProfile);
     } catch (error) {
       this.error(error, res);
