@@ -1,4 +1,4 @@
-import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import Icon from "../assets/icons";
 import BackButton from "../components/BackButton";
 import Button from "../components/Button";
@@ -13,19 +13,19 @@ import { emailIsValid, passwordMatches } from "../utils/inputValidation";
 import useAuthSubmit from "../hooks/useAuthSubmit";
 import { save } from "../utils/secureStore";
 import { useRouter } from "expo-router";
+import useSecureStore from "../store/useSecureStore";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
-  const [password, setpassword] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
 
+  const { initAuthInfo } = useSecureStore();
   const router = useRouter();
 
-  const { loading, error, onSubmit } = useAuthSubmit(
-    `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`
-  );
+  const { loading, onSubmit } = useAuthSubmit(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`);
 
   const onChangeEmail = (value) => {
     setEmail(value);
@@ -34,7 +34,7 @@ const SignUp = () => {
   };
 
   const onChangePassword = (value) => {
-    setpassword(value);
+    setPassword(value);
     if (confirmPassword) {
       passwordMatches(value, confirmPassword)
         ? setConfirmPasswordError(false)
@@ -51,22 +51,28 @@ const SignUp = () => {
   };
 
   const handleSignUp = async () => {
-    const data = await onSubmit({ body: { email: email, password: password } });
-    if (error) {
-      console.error(error);
-      return;
-    }
-    if (!data) {
-      console.error("Data is empty");
-      return;
-    }
-    await save("accessToken", String(data.accessToken));
-    await save("refreshToken", String(data.refreshToken));
-    await save("user_id", String(data.user_id));
-    await save("isLoggedIn", "true");
+    try {
+      const data = await onSubmit({
+        body: { email: email, password: password },
+      });
 
-    console.log("Tokens saved successfully");
-    router.push("(tabs)/homePage");
+      const accessToken = String(data.accessToken);
+      const refreshToken = String(data.refreshToken);
+      const userId = String(data.user_id);
+
+      // console.log(accessToken, refreshToken, userId);
+      await save("accessToken", accessToken);
+      await save("refreshToken", refreshToken);
+      await save("user_id", userId);
+      await save("isLoggedIn", "true");
+
+      await initAuthInfo();
+
+      console.log("Tokens saved successfully");
+      router.push("(tabs)/HomePage");
+    } catch (error) {
+      Alert.alert("Sign Up", "An error occurred. Please try again.");
+    }
   };
 
   return (

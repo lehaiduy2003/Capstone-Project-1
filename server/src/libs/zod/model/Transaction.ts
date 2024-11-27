@@ -9,6 +9,8 @@ import PaymentMethodEnum from "../enums/PaymentMethod";
 const TransactionSchema = z
   .object({
     user_id: ObjectIdSchema,
+    user_name: z.string(),
+    user_phone: z.string(),
     total: z
       .number({ message: "total must be a number" })
       .nonnegative({ message: "total can not negative" }),
@@ -27,6 +29,8 @@ const TransactionSchema = z
       // if paymentMethod is card, paymentIntent must not be undefined
       if (data.payment_method === "card") {
         return data.payment_intent !== undefined;
+      } else {
+        return true;
       }
     },
     {

@@ -13,7 +13,7 @@ const AccountSchema = z
     created_at: z.date().default(new Date()),
     updated_at: z.date().default(new Date()),
     is_verified: z.boolean().default(false),
-    status: AccountStatusEnum.default("inactive"),
+    status: AccountStatusEnum.default("active"),
     recycler_field: RecyclerFieldSchema.optional(),
     joined_campaigns: z.array(z.string()).default([]),
   })

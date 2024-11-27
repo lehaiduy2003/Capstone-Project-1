@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { Alert, Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import Icon from "../assets/icons";
 import BackButton from "../components/BackButton";
 import Button from "../components/Button";
@@ -12,41 +12,39 @@ import { hp, wp } from "../helpers/common";
 import { useRouter } from "expo-router";
 import { save } from "../utils/secureStore";
 import useAuthSubmit from "../hooks/useAuthSubmit";
+import useSecureStore from "../store/useSecureStore";
 
 const SignIn = () => {
-  const email = useRef("");
-  const password = useRef("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
+  const { initAuthInfo } = useSecureStore();
 
-  const { loading, error, onSubmit } = useAuthSubmit(
-    `${process.env.EXPO_PUBLIC_API_URL}/auth/sign-in`
-  );
+  const { loading, onSubmit } = useAuthSubmit(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-in`);
 
   const handleSignIn = async () => {
-    const data = await onSubmit({
-      body: { email: email.current, password: password.current },
-    });
+    try {
+      const data = await onSubmit({
+        body: { email: email, password: password },
+      });
 
-    if (error) {
-      console.error(error);
-      return;
+      const accessToken = String(data.accessToken);
+      const refreshToken = String(data.refreshToken);
+      const userId = String(data.user_id);
+
+      // console.log(accessToken, refreshToken, userId);
+
+      await save("accessToken", accessToken);
+      await save("refreshToken", refreshToken);
+      await save("user_id", userId);
+      await save("isLoggedIn", "true");
+
+      await initAuthInfo();
+
+      router.push("(tabs)/HomePage");
+    } catch (error) {
+      Alert.alert("Sign In", "An error occurred. Please try again.");
     }
-    if (!data) {
-      console.error("Data is empty");
-      return;
-    }
-
-    const accessToken = String(data.accessToken);
-    const refreshToken = String(data.refreshToken);
-    const userId = String(data.user_id);
-
-    // console.log(accessToken, refreshToken, userId);
-
-    await save("accessToken", accessToken);
-    await save("refreshToken", refreshToken);
-    await save("userId", userId);
-
-    router.push("(tabs)/HomePage");
   };
 
   return (
@@ -68,14 +66,12 @@ const SignIn = () => {
           <Input
             icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
             placeholder="Enter your email"
-            onChangeText={(value) => (email.current = value)}
+            onChangeText={(value) => setEmail(value)}
           />
           <InputPass
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
             placeholder="Enter your password"
-            onChangeText={(value) => {
-              password.current = value;
-            }}
+            onChangeText={(value) => setPassword(value)}
           />
 
           <Text style={styles.forgotPassword}>Forgot Password?</Text>

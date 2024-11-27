@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getValueFor } from "../utils/secureStore";
+import { deleteValueFor, getValueFor } from "../utils/secureStore";
 
 const useSecureStore = create((set) => ({
   userId: null,
@@ -9,7 +9,7 @@ const useSecureStore = create((set) => ({
   // Load the user id, access token, and refresh token from secure store
   initAuthInfo: async () => {
     try {
-      const userId = await getValueFor("userId");
+      const userId = await getValueFor("user_id");
       const accessToken = await getValueFor("accessToken");
       const refreshToken = await getValueFor("refreshToken");
 
@@ -46,7 +46,11 @@ const useSecureStore = create((set) => ({
       isLoggedIn: isLoggedIn,
     });
   },
-  clearAuthInfo: () => {
+  clearAuthInfo: async () => {
+    await deleteValueFor("user_id");
+    await deleteValueFor("userId");
+    await deleteValueFor("accessToken");
+    await deleteValueFor("refreshToken");
     set({
       userId: null,
       accessToken: null,

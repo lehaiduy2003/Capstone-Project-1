@@ -1,24 +1,15 @@
 import { ClientSession } from "mongoose";
 
-import {
-  UserProfile,
-  validateUserProfile,
-} from "../../../libs/zod/model/UserProfile";
+import { UserProfile, validateUserProfile } from "../../../libs/zod/model/UserProfile";
 
 import { ObjectId } from "mongodb";
 import userProfilesModel from "../Models/userProfilesModel";
-import {
-  UserProfileDTO,
-  validateUserProfileDTO,
-} from "../../../libs/zod/dto/UserProfileDTO";
+import { UserProfileDTO, validateUserProfileDTO } from "../../../libs/zod/dto/UserProfileDTO";
 
 export default class UserProfileService {
   public constructor() {}
 
-  async create(
-    data: Partial<UserProfile>,
-    session: ClientSession,
-  ): Promise<UserProfile> {
+  async create(data: Partial<UserProfile>, session: ClientSession): Promise<UserProfile> {
     const userProfile = new userProfilesModel(validateUserProfile(data));
 
     const createStatus = await userProfile.save({ session });

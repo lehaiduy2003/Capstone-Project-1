@@ -7,20 +7,24 @@ import {
   TouchableOpacity,
   ScrollView,
   auto,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import Button from "../components/Button";
-import { wp } from "../helpers/common";
+import { hp, wp } from "../helpers/common";
 import ArtDesign from "react-native-vector-icons/AntDesign";
 import { useRoute } from "@react-navigation/native";
 import Header from "../components/Header";
 import { useRouter } from "expo-router";
 import useCartStore from "../store/useCartStore";
+import { theme } from "../constants/theme";
 
 const ProductDetails = () => {
   const route = useRoute();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [isLiked, setIsLiked] = React.useState(false);
   const { productId } = route.params;
   const [quantity, setQuantity] = useState(1);
@@ -54,11 +58,17 @@ const ProductDetails = () => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
 
-  const handleAddToCart = () => {
-    // console.log("Product to add:", productToAdd);
-
-    useCartStore.getState().addProduct(product._id, quantity);
-    // router.push("/Screens/cartScreen"); // Optionally navigate to the Cart scree
+  const handleAddToCart = async () => {
+    try {
+      setLoading(true);
+      await useCartStore.getState().addProduct(product._id, quantity);
+      Alert.alert("Success", "Product added to cart");
+    } catch (error) {
+      Alert.alert("Error", "Failed to add product to cart");
+      console.error("Error adding product to cart:", error);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <ScreenWrapper bg={"white"}>
@@ -113,7 +123,21 @@ const ProductDetails = () => {
           <Text style={styles.contentDescription}>{product.description_content}</Text>
         </View>
       </ScrollView>
-      <Button title="Add to cart" onPress={handleAddToCart}></Button>
+      <TouchableOpacity onPress={handleAddToCart} style={styles.addCartButton}>
+        {loading ? (
+          <ActivityIndicator size="large" color={"white"} />
+        ) : (
+          <Text
+            style={{
+              color: "white",
+              fontSize: 20,
+              fontWeight: "bold",
+            }}
+          >
+            add to cart
+          </Text>
+        )}
+      </TouchableOpacity>
     </ScreenWrapper>
   );
 };
@@ -121,6 +145,19 @@ const ProductDetails = () => {
 export default ProductDetails;
 
 const styles = StyleSheet.create({
+  addCartButton: {
+    backgroundColor: theme.colors.primary,
+    padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    height: hp(6.6),
+    marginHorizontal: 15,
+    marginBottom: 15,
+    paddingHorizontal: 20,
+    width: "90%",
+    borderCurve: "continuous",
+    borderRadius: theme.radius.xxl,
+  },
   container: {
     flex: 1,
     paddingHorizontal: wp(2),

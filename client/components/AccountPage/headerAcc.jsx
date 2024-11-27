@@ -5,18 +5,18 @@ import { hp, wp } from "../../helpers/common";
 import Icon from "../../assets/icons";
 import { deleteValueFor } from "../../utils/secureStore";
 import { useRouter } from "expo-router";
+import useSecureStore from "../../store/useSecureStore";
 
-const HeaderAcc = ({ user }) => {
+const HeaderAcc = () => {
   const router = useRouter();
+  const { clearAuthInfo } = useSecureStore();
   const handleClick = (label) => {
     console.log(`Clicked: ${label}`);
   };
   /* Hàm xử lý đăng xuất */
   const handleSignOut = async () => {
     try {
-      await deleteValueFor("accessToken");
-      await deleteValueFor("refreshToken");
-      // console.log("Signed out successfully!");
+      await clearAuthInfo();
       router.push("welcome");
     } catch (error) {
       console.error("Error signing out:", error);
@@ -54,7 +54,7 @@ const HeaderAcc = ({ user }) => {
           />
         </TouchableOpacity>
         <View>
-          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={styles.userName}>name</Text>
           {/* <Text style={styles.textSimple}> 100% Credibility</Text> */}
         </View>
       </View>

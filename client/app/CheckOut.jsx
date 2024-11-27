@@ -1,4 +1,4 @@
-import { Alert, Button, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Button, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import Header from "../components/Header";
@@ -12,20 +12,24 @@ import { theme } from "../constants/theme";
 import * as Linking from "expo-linking";
 
 import { initPaymentSheet, presentPaymentSheet, StripeProvider } from "@stripe/stripe-react-native";
-import { getValueFor } from "../utils/secureStore";
 import { Screen } from "react-native-screens";
 import useCartStore from "../store/useCartStore";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
+import { useRoute } from "@react-navigation/native";
+import { RadioButton } from "react-native-paper";
+import useSecureStore from "../store/useSecureStore";
 
-const checkOut = () => {
+const CheckOut = () => {
   const [loading, setLoading] = useState(true);
-
+  const [paymentMethod, setPaymentMethod] = useState("card");
+  const navigation = useNavigation(); // navigate to another screen with payload
+  const route = useRoute(); // get params from previous screen
+  const router = useRouter(); // redirect to another screen after payment
   const { cartItems, totalPrice, clearCart } = useCartStore();
-  const router = useRouter();
   const [intent, setIntent] = useState("");
   const [user, setUser] = useState({});
-  const [accessToken, setAccessToken] = useState("");
-  const [userId, setUserId] = useState("");
+  const { userId, accessToken } = useSecureStore();
+  const [defaultAddress, setDefaultAddress] = useState(route.params?.defaultAddress || null);
   const products = cartItems.map((item) => ({
     _id: item._id,
     quantity: item.cartQuantity,
@@ -36,7 +40,13 @@ const checkOut = () => {
   }));
   // console.log(products);
 
-  const checkout = async (token, userId) => {
+  useEffect(() => {
+    if (route.params?.defaultAddress) {
+      setDefaultAddress(route.params.defaultAddress);
+    }
+  }, [route.params?.defaultAddress]);
+
+  const checkout = async () => {
     // Call the API to create a checkout session
     // This is where you would typically call your backend server to create a checkout session
     // The backend server would then call the Stripe API to create a session
@@ -46,7 +56,7 @@ const checkOut = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         products: products,
@@ -61,7 +71,7 @@ const checkOut = () => {
     return data.clientSecret;
   };
 
-  const getUser = async (userId) => {
+  const getUser = async () => {
     const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/users/${userId}`, {
       method: "GET",
       headers: {
@@ -70,15 +80,14 @@ const checkOut = () => {
     });
     const data = await response.json();
     setUser(data);
+    if (defaultAddress === null) {
+      setDefaultAddress(data.address[0]);
+    }
     return data;
   };
 
   const initializePaymentSheet = async () => {
-    const token = await getValueFor("accessToken");
-    const userId = await getValueFor("userId");
-    setAccessToken(token);
-    setUserId(userId);
-    const fetchData = await Promise.all([checkout(token, userId), getUser(userId)]);
+    const fetchData = await Promise.all([checkout(), getUser()]);
     const paymentIntent = fetchData[0];
 
     const { error } = await initPaymentSheet({
@@ -101,108 +110,189 @@ const checkOut = () => {
       console.log(`Error code: ${error.code}`, error.message);
     } else {
       Alert.alert("Success", "Your order is confirmed!");
-      const token = await getValueFor("accessToken");
-      const userId = await getValueFor("userId");
+      setLoading(true);
+      try {
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/transactions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            products: products,
+            metadata: {
+              payment_intent: intent,
+              shipping_address: defaultAddress,
+              payment_method: "card",
+              payment_status: "paid",
+              user_name: user.name,
+              user_phone: user.phone,
+            },
+          }),
+        });
+        const data = await response.json();
+        // console.log(data);
+        await clearCart();
+        router.push("(tabs)/HomePage");
+      } catch (error) {
+        Alert.alert("Error", "An error occurred. Please try again.");
+        throw new Error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const cashPayment = async () => {
+    setLoading(true);
+    try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/transactions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           user_id: userId,
           products: products,
           metadata: {
-            payment_intent: intent,
+            shipping_address: defaultAddress,
             payment_method: "cash",
-            shipping_address: "Cam Le, Da Nang",
-            payment_method: "card",
-            payment_status: "paid",
+            payment_status: "unpaid",
+            user_name: user.name,
+            user_phone: user.phone,
           },
         }),
       });
       const data = await response.json();
       // console.log(data);
       await clearCart();
+      Alert.alert("Success", "Your order is confirmed!");
+      router.push("(tabs)/HomePage");
+    } catch (error) {
+      Alert.alert("Error", "An error occurred. Please try again.");
+      throw new Error(error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   useEffect(() => {
     const fetchProducts = async () => {
       await initializePaymentSheet();
     };
-
     fetchProducts();
   }, []);
 
   const shippingCost = 42700;
-  const grandTotal = totalPrice + shippingCost;
+  const serviceCost = totalPrice * 0.01; // 1% of total price
+  const grandTotal = totalPrice + shippingCost + serviceCost;
 
   if (loading) {
-    return <Loading />;
+    return <ActivityIndicator size="large" color="#0000ff" />;
   }
+  // console.log(user);
+
+  const handleOrder = async () => {
+    if (paymentMethod === "card") {
+      await openPaymentSheet();
+    } else {
+      await cashPayment();
+    }
+  };
 
   return (
     <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PK}>
-      <ScreenWrapper>
+      <ScreenWrapper bg={"#f0f3f4"}>
         <View style={styles.container}>
           {/*Header*/}
           <Header title={"Check out"} showBackButton></Header>
           {/* Shipping Address */}
+          <Text style={styles.sectionTitle}>Shipping address</Text>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Shipping address</Text>
             <View style={styles.addressContainer}>
               <TouchableOpacity style={styles.addressEdit}>
-                <Text>Main address</Text>
-                <Text>{user.address[0]}</Text>
+                <Text>{user.name}</Text>
+                <Text>{user.phone}</Text>
+                <Text>{defaultAddress}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => alert("pop edit address")}>
-                <Icon name="edit" size={26} strokeWidth={1.6} />
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Screens/AddressScreen", {
+                    address: user.address,
+                    defaultAddress: defaultAddress,
+                  })
+                }
+              >
+                <Icon name="arrowLeft" size={26} strokeWidth={1.6} />
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Cart Items */}
+          <Text style={styles.sectionTitle}>Products</Text>
           <FlatList
+            style={styles.section}
             data={products}
             keyExtractor={(item) => item._id.toString()}
             renderItem={({ item }) => (
-              <View style={styles.itemContainer}>
-                <Image source={{ uri: item.img }} style={styles.itemImage} />
-                <View style={styles.itemDetails}>
-                  <Text>{item.name}</Text>
-                  <Text> {item.price.toLocaleString()}</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("productDetails", { productId: item._id })}
+              >
+                <View style={styles.itemContainer}>
+                  <Image source={{ uri: item.img }} style={styles.itemImage} />
+                  <View style={styles.itemDetails}>
+                    <Text>{item.name}</Text>
+                    <Text> {item.price.toLocaleString()}</Text>
+                  </View>
+                  <View style={styles.itemQuantity}>
+                    <Text>{item.quantity}</Text>
+                  </View>
                 </View>
-                <View style={styles.itemQuantity}>
-                  <Text>{item.quantity}</Text>
-                </View>
-              </View>
+              </TouchableOpacity>
             )}
           />
 
           {/* Payment Method */}
-          <TouchableOpacity style={styles.section} onPress={() => router.push("AddressScreen")}>
-            <Text style={styles.sectionTitle}>Payment method</Text>
-            <Text>Card</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Payment method</Text>
+          <View style={styles.radioContainer}>
+            <View style={styles.radioOption}>
+              <TouchableOpacity style={styles.radioOption} onPress={() => setPaymentMethod("card")}>
+                <RadioButton
+                  value="card"
+                  status={paymentMethod === "card" ? "checked" : "unchecked"}
+                  onPress={() => setPaymentMethod("card")}
+                />
+                <Text>Card</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.radioOption}>
+              <TouchableOpacity style={styles.radioOption} onPress={() => setPaymentMethod("cash")}>
+                <RadioButton
+                  value="cash"
+                  status={paymentMethod === "cash" ? "checked" : "unchecked"}
+                  onPress={() => setPaymentMethod("cash")}
+                />
+                <Text>Cash</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
           {/* Order Summary */}
+          <Text style={styles.sectionTitle}>Cost details</Text>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Payment details</Text>
             <View style={styles.summaryRow}>
               <Text>Total cost</Text>
               <Text>{totalPrice.toLocaleString()}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text>Total shipping cost</Text>
+              <Text>shipping cost</Text>
               <Text>{shippingCost.toLocaleString()}</Text>
             </View>
-
             <View style={styles.summaryRow}>
-              <Text style={styles.grandTotalText}>Total payment</Text>
-              <Text style={styles.grandTotalText}>{grandTotal.toLocaleString()} VNĐ</Text>
+              <Text>Service cost</Text>
+              <Text>{serviceCost.toLocaleString()}</Text>
             </View>
           </View>
 
@@ -210,7 +300,7 @@ const checkOut = () => {
           <View style={styles.footer}>
             <Text style={styles.footerTotalText}>Total payment: {grandTotal.toLocaleString()}</Text>
             <Screen>
-              <Button variant="primary" title="Order" onPress={openPaymentSheet} />
+              <Button variant="primary" title="Order" onPress={handleOrder} />
             </Screen>
           </View>
         </View>
@@ -219,7 +309,7 @@ const checkOut = () => {
   );
 };
 
-export default checkOut;
+export default CheckOut;
 
 const styles = StyleSheet.create({
   container: {
@@ -233,6 +323,8 @@ const styles = StyleSheet.create({
   },
   section: {
     marginVertical: 10,
+    backgroundColor: "white",
+    borderRadius: 5,
   },
   sectionTitle: {
     fontSize: 16,
@@ -261,6 +353,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginRight: 10,
   },
+  radioContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    backgroundColor: "white",
+  },
+  radioOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 16,
+  },
   itemDetails: {
     flex: 1,
   },
@@ -282,6 +385,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderTopWidth: 1,
     borderColor: "#ccc",
+    borderRadius: 5,
+    width: "100%",
+    backgroundColor: "white",
   },
   footerTotalText: {
     fontSize: 16,

@@ -18,7 +18,7 @@ const useCartStore = create((set, get) => ({
   totalPrice: 0,
   initializeCart: async () => {
     const data = await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart`,
       {
         method: "GET",
         headers: {
@@ -38,8 +38,30 @@ const useCartStore = create((set, get) => ({
   // Add product to cart
   // If product already exists in cart, update the quantity (already handled in the backend)
   addProduct: async (productId, quantity) => {
-    const product = get().cartItems.find((item) => item._id === productId);
+    console.log("Adding product to cart:", productId, quantity);
 
+    if (!get().cartItems) {
+      const data = await fetchCart(
+        `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart/product`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${await getValueFor("accessToken")}`,
+          },
+          body: {
+            product_id: productId,
+            quantity: quantity,
+          },
+        }
+      );
+      set({
+        cartItems: data.data,
+        totalPrice: data.total,
+      });
+      return;
+    }
+    const product = get().cartItems.find((item) => item._id === productId);
     let updatingProduct;
 
     // If index is valid, update the quantity of the product
@@ -55,7 +77,7 @@ const useCartStore = create((set, get) => ({
     }
 
     const data = await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart/product`,
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart/product`,
       {
         method: "PATCH",
         headers: {
@@ -68,7 +90,7 @@ const useCartStore = create((set, get) => ({
         },
       }
     );
-    console.log("Updated cart:", JSON.stringify(data.data, null, 2));
+    // console.log("Updated cart:", JSON.stringify(data.data, null, 2));
     set({
       cartItems: data.data,
       totalPrice: data.total,
@@ -86,7 +108,7 @@ const useCartStore = create((set, get) => ({
       .map((item) => ({ _id: item._id, quantity: item.cartQuantity })); // Only keep _id and cartQuantity as quantity
 
     const data = await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart`,
       {
         method: "PUT",
         headers: {
@@ -99,7 +121,6 @@ const useCartStore = create((set, get) => ({
       }
     );
     // console.log("Updated cart:", JSON.stringify(data.data, null, 2));
-
     set({
       cartItems: data.data,
       totalPrice: data.total,
@@ -109,7 +130,7 @@ const useCartStore = create((set, get) => ({
   removeProduct: async (productId) => {
     const data = await fetchCart(
       `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor(
-        "userId"
+        "user_id"
       )}/cart/product/${productId}`,
       {
         method: "DELETE",
@@ -127,7 +148,7 @@ const useCartStore = create((set, get) => ({
 
   clearCart: async () => {
     const data = await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart`,
       {
         method: "PUT",
         headers: {
@@ -138,8 +159,8 @@ const useCartStore = create((set, get) => ({
       }
     );
     set({
-      cartItems: data.data,
-      totalPrice: data.total,
+      cartItems: [],
+      totalPrice: 0,
     });
   },
 }));

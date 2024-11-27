@@ -12,11 +12,10 @@ import { debounce } from "lodash";
 const Cart = () => {
   const router = useRouter();
 
-  const initializeCart = useCartStore((state) => state.initializeCart);
-  const cartItems = useCartStore((state) => state.cartItems);
-  const totalPrice = useCartStore((state) => state.totalPrice);
+  const { cartItems, totalPrice, initializeCart } = useCartStore();
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeProduct = useCartStore((state) => state.removeProduct);
+  console.log("cartItems", cartItems);
 
   useEffect(() => {
     initializeCart();
@@ -41,7 +40,7 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
-    router.push("checkOut");
+    router.push("CheckOut");
   };
 
   return (
