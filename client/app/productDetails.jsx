@@ -49,6 +49,7 @@ const ProductDetails = () => {
       console.error("Error fetching data:", error);
     }
   };
+
   useEffect(() => {
     fetchProductData();
   }, [productId]);
@@ -70,17 +71,35 @@ const ProductDetails = () => {
       setLoading(false);
     }
   };
+
+  const navigateToShopScreen = () => {
+    router.push({
+      pathname: `/Screens/shopScreen`,
+      params: { ownerId: product.owner }, // Pass owner ID
+    });
+  };
+
   return (
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
       <ScrollView style={styles.container}>
-        <Header title={"Product Detail"} showBackButton></Header>
+        <Header title={"Product Detail"} showBackButton />
+
         <View style={styles.carousel}>
-          <Image source={{ uri: product.img }} style={styles.productImage} />
+          <Image
+            source={
+              product.img
+                ? { uri: product.img }
+                : require("../assets/images/products/defaultProduct.png")
+            }
+            style={styles.productImage}
+          />
         </View>
+
         <View>
           <Text style={styles.nameProduct}>{product.name}</Text>
         </View>
+
         <View style={styles.priceLikeContainer}>
           <Text style={styles.price}>{product.price} đ</Text>
           <TouchableOpacity
@@ -96,6 +115,7 @@ const ProductDetails = () => {
             )}
           </TouchableOpacity>
         </View>
+
         <View style={styles.quantityContainer}>
           <TouchableOpacity onPress={decreaseQuantity} style={styles.quantityButton}>
             <Text style={styles.quantityButtonText}>-</Text>
@@ -106,18 +126,24 @@ const ProductDetails = () => {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.imageGallery}>
+          {product.description?.imgs && Array.isArray(product.description.imgs) ? (
+            product.description.imgs.map((imgUrl, index) => (
+              <Image key={index} source={{ uri: imgUrl }} style={styles.additionalImage} />
+            ))
+          ) : (
+            <Text style={styles.noImagesText}>No additional images available</Text>
+          )}
+        </View>
+
         <View style={styles.information}>
           <Image source={{ uri: owner.avatar }} style={styles.convertImage} />
           <Text style={styles.nameShop}>{owner.name}</Text>
           <View style={styles.follow}>
-            <Button
-              title="Follow"
-              onPress={() => {
-                router.push(`/Screens/shopScreen/${owner.id}`);
-              }}
-            />
+            <Button title="Follow" onPress={navigateToShopScreen} />
           </View>
         </View>
+
         <View>
           <Text style={styles.description}>Description:</Text>
           <Text style={styles.contentDescription}>{product.description_content}</Text>
@@ -162,124 +188,93 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: wp(2),
   },
-
   carousel: {
     width: "100%",
-    height: auto,
-    backgroundColor: "white",
+    height: 300,
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  nameProduct: {
-    justifyContent: "center",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginHorizontal: 15,
-  },
-
-  priceLikeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 5,
-  },
-  price: {
-    fontSize: 18,
-    color: "#9C9C9C",
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  likeContainer: {
-    backgroundColor: "white",
-    justifyContent: "center",
-    height: 34,
-    width: 34,
-    alignItems: "center",
-    borderRadius: 20,
-    marginRight: 10,
-  },
-
-  information: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 5,
-    alignItems: "center",
-  },
-  convertImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 20,
-    marginVertical: 3,
-    marginLeft: 5,
-    marginTop: 5,
-  },
-  nameShop: {
-    padding: 10,
-    fontSize: 15,
-    fontWeight: "bold",
-    right: 15,
-    top: -10,
-  },
-
-  follow: {
-    backgroundColor: "white",
-    justifyContent: "center",
-    height: 34,
-    width: 150,
-    borderRadius: 2,
-    marginRight: 10,
-  },
-
-  description: {
-    paddingTop: 10,
-    marginHorizontal: 15,
-    fontSize: 20,
-    fontWeight: "bold",
-    marginVertical: 10,
-  },
-
-  contentDescription: {
-    padding: 10,
-    fontStyle: "italic",
-    fontSize: 17,
-    justifyContent: "center",
-    marginHorizontal: 5,
-    paddingBottom: 200,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   productImage: {
     width: "100%",
     height: 300,
     resizeMode: "contain",
-    marginBottom: 20,
   },
-  ratingContainer: {
+  nameProduct: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
+  priceLikeContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 10,
   },
-  ratingText: {
-    fontSize: 14,
-    marginRight: 5,
+  price: {
+    fontSize: 18,
+    color: "#333",
+  },
+  likeContainer: {
+    marginRight: 10,
   },
   quantityContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
     justifyContent: "center",
+    marginVertical: 15,
   },
   quantityButton: {
-    backgroundColor: "#000",
     padding: 10,
-    borderRadius: 8,
-    marginHorizontal: 5,
   },
   quantityButtonText: {
-    color: "#fff",
     fontSize: 16,
   },
   quantityText: {
     fontSize: 16,
     marginHorizontal: 10,
+  },
+  imageGallery: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginVertical: 10,
+  },
+  additionalImage: {
+    width: 100,
+    height: 100,
+    margin: 5,
+  },
+  noImagesText: {
+    fontSize: 14,
+    color: "#888",
+    textAlign: "center",
+  },
+  information: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  convertImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  nameShop: {
+    fontSize: 16,
     fontWeight: "bold",
+    marginLeft: 10,
+  },
+  follow: {
+    marginLeft: "auto",
+  },
+  description: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 15,
+  },
+  contentDescription: {
+    fontSize: 14,
+    marginTop: 5,
   },
 });

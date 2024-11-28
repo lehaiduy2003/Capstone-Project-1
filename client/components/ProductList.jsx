@@ -1,27 +1,40 @@
 import React, { forwardRef } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View, Text } from "react-native";
 import Product from "../components/Product";
 import Loading from "./Loading";
 
 const ProductList = forwardRef(({ products, onEndReached, isLoading, onScroll }, ref) => {
+  // Validate and filter products
+  const validProducts = products.filter((product) => product && product._id);
+  const filteredProducts = validProducts; // Apply additional filters if needed
+
+  // console.log("Filtered products for FlatList:", filteredProducts);
+
   return (
-    <FlatList
-      ref={ref}
-      data={products}
-      renderItem={({ item }) => (
-        <View style={styles.itemContainer}>
-          <Product product={item} />
+    <>
+      {filteredProducts.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No products to display</Text>
         </View>
+      ) : (
+        <FlatList
+          ref={ref}
+          data={filteredProducts}
+          renderItem={({ item }) => (
+            <View style={styles.itemContainer}>
+              <Product product={item} />
+            </View>
+          )}
+          keyExtractor={(product) => product._id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          onEndReached={onEndReached}
+          onEndReachedThreshold={5}
+          onScroll={onScroll}
+          ListFooterComponent={isLoading ? <Loading /> : null}
+        />
       )}
-      onScroll={onScroll}
-      showsVerticalScrollIndicator={false} // Hide the vertical scroll bar
-      keyExtractor={(product) => product._id.toString()}
-      numColumns={2} // Display items in 2 columns
-      columnWrapperStyle={styles.row} // Style for the row
-      onEndReached={onEndReached} // Load more data when scrolled to the end
-      onEndReachedThreshold={5} // Adjust this threshold to load more data earlier or later
-      ListFooterComponent={isLoading ? <Loading /> : null} // Show loading indicator at the bottom
-    />
+    </>
   );
 });
 
@@ -33,6 +46,16 @@ const styles = StyleSheet.create({
   row: {
     flex: 1,
     justifyContent: "space-between",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 18,
+    color: "#888",
   },
 });
 

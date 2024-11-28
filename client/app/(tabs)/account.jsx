@@ -1,31 +1,55 @@
-import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { View, ScrollView, StyleSheet, Text } from "react-native";
 import { theme } from "../../constants/theme";
 import HeaderAcc from "../../components/AccountPage/headerAcc";
 import OrderMenu from "../../components/AccountPage/orderMenu";
 import OtherFeature from "../../components/AccountPage/otherFeature";
 import useSecureStore from "../../store/useSecureStore";
-
-const { height } = Dimensions.get("window");
+import useUserStore from "../../store/useUserStore";
 
 const account = () => {
-  const userId = useSecureStore((state) => state.userId);
-  const [user, setUser] = useState(null);
+  const { userId } = useSecureStore();
+  const { user, fetchUserData, loading, error } = useUserStore();
+
+  useEffect(() => {
+    if (userId) {
+      console.log("User ID from store:", userId); // Debug log
+      fetchUserData(userId);
+    }
+  }, [userId]);
+  console.log("User data:", user); // Debug log
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-      {/* Phần Header */}
+      {/* Header Section */}
       <View style={styles.headerPart}>
         <HeaderAcc user={user} />
       </View>
 
-      {/* Phần Order Menu */}
-      <View style={styles.OrderMenu}>
+      {/* Order Menu Section */}
+      <View style={styles.orderMenu}>
         <OrderMenu />
       </View>
       <View style={styles.divider} />
-      {/* Phần 3 - Cuộn được chiếm phần còn lại */}
-      <View style={styles.OtherFeature}>
+
+      {/* Other Features Section */}
+      <View style={styles.otherFeature}>
         <OtherFeature />
       </View>
       <View style={styles.divider} />
@@ -40,21 +64,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerPart: {
-    height: height * 0.16, // Chiếm 20% chi
     backgroundColor: theme.colors.primary,
   },
-  OrderMenu: {
-    height: height * 0.25,
+  orderMenu: {
     backgroundColor: "white",
   },
-  OtherFeature: {
+  otherFeature: {
     flex: 1,
     backgroundColor: "white",
   },
-  text: {},
   divider: {
-    height: 1, // Độ dày của dòng
-    backgroundColor: "#e0e0e0", // Màu của dòng chia cách
-    marginVertical: 5, // Khoảng cách phía trên và dưới dòng chia cách
+    height: 1,
+    backgroundColor: "#e0e0e0",
+    marginVertical: 5,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: theme.colors.textSecondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "red",
   },
 });

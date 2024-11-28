@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { View, FlatList, Text, StyleSheet, Alert } from "react-native";
-import useProductStore from "../../store/useProductStore";
+import { StyleSheet, Text, View, FlatList, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import ScreenWrapper from '../../components/ScreenWrapper';
+import Header from '../../components/Header';
+import LottieView from 'lottie-react-native';
 import ProductEditForm from "../../components/ProductEditForm";
 import Button from "../../components/Button";
-import ScreenWrapper from "../../components/ScreenWrapper";
-import { useRoute } from "@react-navigation/native";
-import Header from "../../components/Header";
 import { getValueFor } from "../../utils/secureStore";
+import useProductStore from "../../store/useProductStore";
+import { useRouter } from 'expo-router';
 
-const ShopScreen = () => {
-  const route = useRoute();
-  const { ownerId } = route.params; // Selected owner ID
+const MyProductScreens = () => {
   const { products, fetchProductsByOwner, updateProduct, deleteProduct, error, loading } = useProductStore();
   const [editingProduct, setEditingProduct] = useState(null);
   const [userId, setUserId] = useState(null);
+  const router = useRouter();
 
   // Fetch the logged-in user ID from storage
   useEffect(() => {
@@ -24,10 +24,12 @@ const ShopScreen = () => {
     fetchUserId();
   }, []);
 
-  // Fetch products owned by the selected owner
+  // Fetch products owned by the logged-in user
   useEffect(() => {
-    fetchProductsByOwner(ownerId);
-  }, [ownerId]);
+    if (userId) {
+      fetchProductsByOwner(userId);
+    }
+  }, [userId]);
 
   const handleUpdateProduct = (updatedProduct) => {
     updateProduct(editingProduct._id, updatedProduct);
@@ -48,16 +50,33 @@ const ShopScreen = () => {
       ]
     );
   };
-
-  // Filter products to display only those owned by the selected owner
-  const filteredProducts = products.filter((product) => String(product.owner) === String(ownerId));
+  const navigateToAddNewProduct = () => {
+    router.push({
+      pathname: `/Screens/addNewProductScreen`,
+    });
+  }
+  // Filter products to display only those owned by the logged-in user
+  const filteredProducts = products.filter((product) => String(product.owner) === String(userId));
 
   return (
     <ScreenWrapper>
-      <Header title="Shop" showBackButton />
+      <Header title="My Products" showBackButton />
       <View style={styles.container}>
         {loading && <Text style={styles.loadingText}>Loading products...</Text>}
         {error && <Text style={styles.errorText}>Error: {error}</Text>}
+
+        <View style={styles.newProductContainer} >
+          <LottieView
+            style={styles.newProduct}
+            source={require('../../assets/animation/animation_add_new_product.json')}
+            autoPlay
+            loop
+          />
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }} onPress={navigateToAddNewProduct}>Add New Product</Text>
+        </View>
+        <View style={styles.listProductTitle}>
+          <Text style={{ fontSize: 26, fontWeight: 'bold' }}>All product</Text>
+        </View>
 
         <FlatList
           data={filteredProducts}
@@ -67,13 +86,10 @@ const ShopScreen = () => {
             <View style={styles.productCard}>
               <Text style={styles.productName}>{item.name}</Text>
               <Text style={styles.productPrice}>Price: {item.price} đ</Text>
-
-              {userId === item.owner && (
-                <View style={styles.buttonContainer}>
-                  <Button title="Edit" onPress={() => setEditingProduct(item)} />
-                  <Button title="Delete" onPress={() => handleDeleteProduct(item._id)} />
-                </View>
-              )}
+              <View style={styles.buttonContainer}>
+                <Button title="Edit" onPress={() => setEditingProduct(item)} />
+                <Button title="Delete" onPress={() => handleDeleteProduct(item._id)} />
+              </View>
             </View>
           )}
         />
@@ -93,8 +109,7 @@ const ShopScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+    alignItems: 'center',
   },
   loadingText: {
     textAlign: "center",
@@ -108,6 +123,39 @@ const styles = StyleSheet.create({
     color: "#e55b5b",
     marginBottom: 20,
   },
+  newProduct: {
+    width: 150,
+    height: 150,
+  },
+  newProductContainer: {
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: "#f9f9f9",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+    height: 200,
+    width: 300,
+  },
+  listProductTitle: {
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: "#f9f9f9",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
+    height: 100,
+    width: '100%',
+    marginTop: 50,
+    justifyContent: 'center',
+    marginBottom: 50,
+  },
   productCard: {
     marginBottom: 16,
     padding: 16,
@@ -118,6 +166,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
     elevation: 2,
+    width: 300,
   },
   productName: {
     fontSize: 18,
@@ -135,4 +184,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ShopScreen;
+export default MyProductScreens;

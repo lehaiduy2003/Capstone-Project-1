@@ -1,5 +1,5 @@
 import { StyleSheet, View, FlatList, Text } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useRouter } from "expo-router";
 import Header from "../../components/Header";

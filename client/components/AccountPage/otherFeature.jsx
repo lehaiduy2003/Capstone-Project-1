@@ -26,10 +26,10 @@ const OtherFeature = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => handlePress("Mua lại")}
+          onPress={() => router.push("/Screens/myProductScreens")}
         >
           <FontAwesome name="shopping-cart" size={24} style={styles.icon} />
-          <Text style={styles.buttonText}>........</Text>
+          <Text style={styles.buttonText}>My product</Text>
         </TouchableOpacity>
       </View>
 
