@@ -1,13 +1,15 @@
-// import admin from "firebase-admin";
-// import "firebase/auth";
+import admin from "firebase-admin";
+import "firebase/auth";
 
-// import dotenv from "dotenv";
-// dotenv.config();
+import dotenv from "dotenv";
+dotenv.config();
 
-// import serviceAccount from "../../ecotrade-1c694-firebase-adminsdk-je0py-45bc7fdd01.json";
+import serviceAccount from "../../ecotrade-1c694-firebase-adminsdk-je0py-45bc7fdd01.json";
 
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-// });
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+});
 
-// export default admin;
+const bucket = admin.storage().bucket();
+export { bucket };

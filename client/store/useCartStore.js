@@ -8,6 +8,10 @@ const fetchCart = async (url, options) => {
     headers: options.headers,
     body: options.body ? JSON.stringify(options.body) : null,
   });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Error fetching cart data");
+  }
   return await response.json();
 };
 
@@ -41,25 +45,29 @@ const useCartStore = create((set, get) => ({
     console.log("Adding product to cart:", productId, quantity);
 
     if (!get().cartItems) {
-      const data = await fetchCart(
-        `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart/product`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${await getValueFor("accessToken")}`,
-          },
-          body: {
-            product_id: productId,
-            quantity: quantity,
-          },
-        }
-      );
-      set({
-        cartItems: data.data,
-        totalPrice: data.total,
-      });
-      return;
+      try {
+        const data = await fetchCart(
+          `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart/product`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${await getValueFor("accessToken")}`,
+            },
+            body: {
+              product_id: productId,
+              quantity: quantity,
+            },
+          }
+        );
+        set({
+          cartItems: data.data,
+          totalPrice: data.total,
+        });
+        return;
+      } catch (error) {
+        throw error;
+      }
     }
     const product = get().cartItems.find((item) => item._id === productId);
     let updatingProduct;
@@ -76,25 +84,29 @@ const useCartStore = create((set, get) => ({
       updatingProduct = { _id: productId, quantity: quantity };
     }
 
-    const data = await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart/product`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${await getValueFor("accessToken")}`,
-        },
-        body: {
-          product_id: updatingProduct._id,
-          quantity: updatingProduct.quantity,
-        },
-      }
-    );
-    // console.log("Updated cart:", JSON.stringify(data.data, null, 2));
-    set({
-      cartItems: data.data,
-      totalPrice: data.total,
-    });
+    try {
+      const data = await fetchCart(
+        `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart/product`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${await getValueFor("accessToken")}`,
+          },
+          body: {
+            product_id: updatingProduct._id,
+            quantity: updatingProduct.quantity,
+          },
+        }
+      );
+      // console.log("Updated cart:", JSON.stringify(data.data, null, 2));
+      set({
+        cartItems: data.data,
+        totalPrice: data.total,
+      });
+    } catch (error) {
+      throw error;
+    }
   },
   // Update quantity of a product in the cart
   // Using PUT method to overwrite the cart with updated quantity

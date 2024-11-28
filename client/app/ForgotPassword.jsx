@@ -83,11 +83,14 @@ const ForgotPassword = () => {
       <View style={styles.container}>
         <StatusBar style="dark" />
         <BackButton router={router} />
+
         <Text style={styles.title}>Forgot Password</Text>
+
         <Text style={styles.subtitle}>
           Enter your email for the verification process. {"\n"}We will send 6
           digits code to your email.
         </Text>
+
         <View style={styles.form}>
           <Text style={styles.passText}>Email</Text>
           <Input

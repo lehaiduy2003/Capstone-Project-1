@@ -18,7 +18,7 @@ export default class WishListController extends BaseController {
       const productId = new ObjectId(String(req.params.productId));
 
       // console.log(userId, productId);
-
+      await this.wishListService.checkAction(user_id, productId);
       const wishList = await this.wishListService.updateProduct(user_id, productId);
       if (!wishList) {
         res.status(400).send({ message: "Failed to add product to wish list" });

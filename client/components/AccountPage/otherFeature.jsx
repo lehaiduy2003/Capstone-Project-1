@@ -59,30 +59,31 @@ const OtherFeature = () => {
           <FontAwesome name="lock" size={24} style={styles.icon} />
           <Text style={styles.buttonText}>Change Password</Text>
         </TouchableOpacity>
+
         {/* Thêm một TouchableOpacity */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push("test")}
+          onPress={() => router.push("/Screens/myOrderScreen")}
         >
-          <FontAwesome name="lock" size={hp(2)} style={styles.icon} />
-          <Text style={styles.buttonText}>...</Text>
+          <FontAwesome name="list" size={hp(2)} style={styles.icon} />
+          <Text style={styles.buttonText}>Order</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.row}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => handlePress("Săn Thưởng ")}
+          onPress={() => router.push("DonateRecycle")}
         >
           <FontAwesome name="gift" size={hp(2)} style={styles.icon} />
-          <Text style={styles.buttonText}>.........</Text>
+          <Text style={styles.buttonText}>Donate Recycle</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => handlePress("Liên Kết")}
+          onPress={() => router.push("DonateRecycleDetail")}
         >
           <FontAwesome name="share" size={hp(2)} style={styles.icon} />
-          <Text style={styles.buttonText}>.......</Text>
+          <Text style={styles.buttonText}>Donate Recycle Detail</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -19,6 +19,7 @@ export default class CartController extends BaseController {
       const quantity = Number(req.body.quantity);
 
       // console.log(userId, productId, quantity);
+      await this.cartService.checkAction(user_id, product_id);
       const cart = await this.cartService.updateProduct(user_id, product_id, quantity);
       if (!cart) {
         res.status(502).send({ success: false, message: "Failed to update product to cart" });

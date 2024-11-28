@@ -17,6 +17,10 @@ const usePagination = () => {
       `${process.env.EXPO_PUBLIC_API_URL}/products?limit=30&skip=${pageParam}&sort=${sort}&order=${order}`
     );
     setLoading(false);
+    if (!response.ok) {
+      const errorData = await response.json(); // Lấy dữ liệu lỗi từ server
+      throw new Error(errorData.message || "Failed to fetch products"); // Ném lỗi với thông báo từ server
+    }
     return await response.json();
   };
 

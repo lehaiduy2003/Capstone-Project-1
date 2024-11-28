@@ -25,7 +25,7 @@ const Cart = () => {
     if (product.cartQuantity < product.quantity) {
       debounce(async () => {
         await updateQuantity(product._id, 1);
-      }, 250)();
+      }, 100)();
     }
   };
 
@@ -33,7 +33,7 @@ const Cart = () => {
     if (product.cartQuantity > 1) {
       debounce(async () => {
         await updateQuantity(product._id, -1);
-      }, 250)();
+      }, 100)();
     } else {
       await removeProduct(product._id);
     }

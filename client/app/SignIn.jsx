@@ -28,6 +28,7 @@ const SignIn = () => {
         body: { email: email, password: password },
       });
 
+
       const accessToken = String(data.accessToken);
       const refreshToken = String(data.refreshToken);
       const userId = String(data.user_id);
@@ -44,6 +45,7 @@ const SignIn = () => {
       router.push("(tabs)/HomePage");
     } catch (error) {
       Alert.alert("Sign In", "An error occurred. Please try again.");
+
     }
   };
 

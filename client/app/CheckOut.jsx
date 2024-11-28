@@ -1,11 +1,10 @@
-import { ActivityIndicator, Alert, Button, StyleSheet, Text, View } from "react-native";
+import { Alert, Button, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import Header from "../components/Header";
 import { useState, useEffect } from "react";
 import { FlatList, Image, TouchableOpacity } from "react-native";
 import { wp } from "../helpers/common";
-import Loading from "../components/Loading";
 import Icon from "../assets/icons";
 import { theme } from "../constants/theme";
 
@@ -18,6 +17,8 @@ import { useNavigation, useRouter } from "expo-router";
 import { useRoute } from "@react-navigation/native";
 import { RadioButton } from "react-native-paper";
 import useSecureStore from "../store/useSecureStore";
+import parsedCurrency from "../utils/currency";
+import Loading from "../components/Loading";
 
 const CheckOut = () => {
   const [loading, setLoading] = useState(true);
@@ -134,7 +135,7 @@ const CheckOut = () => {
         const data = await response.json();
         // console.log(data);
         await clearCart();
-        router.push("(tabs)/HomePage");
+        router.push("Screens/myOrderScreen");
       } catch (error) {
         Alert.alert("Error", "An error occurred. Please try again.");
         throw new Error(error);
@@ -169,7 +170,7 @@ const CheckOut = () => {
       // console.log(data);
       await clearCart();
       Alert.alert("Success", "Your order is confirmed!");
-      router.push("(tabs)/HomePage");
+      router.replace("Screens/myOrderScreen");
     } catch (error) {
       Alert.alert("Error", "An error occurred. Please try again.");
       throw new Error(error);
@@ -189,9 +190,6 @@ const CheckOut = () => {
   const serviceCost = totalPrice * 0.01; // 1% of total price
   const grandTotal = totalPrice + shippingCost + serviceCost;
 
-  if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
   // console.log(user);
 
   const handleOrder = async () => {
@@ -206,103 +204,117 @@ const CheckOut = () => {
     <StripeProvider publishableKey={process.env.EXPO_PUBLIC_STRIPE_PK}>
       <ScreenWrapper bg={"#f0f3f4"}>
         <View style={styles.container}>
-          {/*Header*/}
-          <Header title={"Check out"} showBackButton></Header>
-          {/* Shipping Address */}
-          <Text style={styles.sectionTitle}>Shipping address</Text>
-          <View style={styles.section}>
-            <View style={styles.addressContainer}>
-              <TouchableOpacity style={styles.addressEdit}>
-                <Text>{user.name}</Text>
-                <Text>{user.phone}</Text>
-                <Text>{defaultAddress}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("Screens/AddressScreen", {
-                    address: user.address,
-                    defaultAddress: defaultAddress,
-                  })
-                }
-              >
-                <Icon name="arrowLeft" size={26} strokeWidth={1.6} />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Cart Items */}
-          <Text style={styles.sectionTitle}>Products</Text>
-          <FlatList
-            style={styles.section}
-            data={products}
-            keyExtractor={(item) => item._id.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => navigation.navigate("productDetails", { productId: item._id })}
-              >
-                <View style={styles.itemContainer}>
-                  <Image source={{ uri: item.img }} style={styles.itemImage} />
-                  <View style={styles.itemDetails}>
-                    <Text>{item.name}</Text>
-                    <Text> {item.price.toLocaleString()}</Text>
-                  </View>
-                  <View style={styles.itemQuantity}>
-                    <Text>{item.quantity}</Text>
-                  </View>
+          {loading ? (
+            <Loading />
+          ) : (
+            <>
+              {/*Header*/}
+              <Header title={"Check out"} showBackButton></Header>
+              {/* Shipping Address */}
+              <Text style={styles.sectionTitle}>Shipping address</Text>
+              <View style={styles.section}>
+                <View style={styles.addressContainer}>
+                  <TouchableOpacity style={styles.addressEdit}>
+                    <Text>{user.name}</Text>
+                    <Text>{user.phone}</Text>
+                    <Text>{defaultAddress}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.replace("Screens/AddressScreen", {
+                        address: user.address,
+                        defaultAddress: defaultAddress,
+                      })
+                    }
+                  >
+                    <Icon name="arrowLeft" size={26} strokeWidth={1.6} />
+                  </TouchableOpacity>
                 </View>
-              </TouchableOpacity>
-            )}
-          />
+              </View>
 
-          {/* Payment Method */}
-          <Text style={styles.sectionTitle}>Payment method</Text>
-          <View style={styles.radioContainer}>
-            <View style={styles.radioOption}>
-              <TouchableOpacity style={styles.radioOption} onPress={() => setPaymentMethod("card")}>
-                <RadioButton
-                  value="card"
-                  status={paymentMethod === "card" ? "checked" : "unchecked"}
-                  onPress={() => setPaymentMethod("card")}
-                />
-                <Text>Card</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.radioOption}>
-              <TouchableOpacity style={styles.radioOption} onPress={() => setPaymentMethod("cash")}>
-                <RadioButton
-                  value="cash"
-                  status={paymentMethod === "cash" ? "checked" : "unchecked"}
-                  onPress={() => setPaymentMethod("cash")}
-                />
-                <Text>Cash</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+              {/* Cart Items */}
+              <Text style={styles.sectionTitle}>Products</Text>
+              <FlatList
+                style={styles.section}
+                data={products}
+                keyExtractor={(item) => item._id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => navigation.replace("productDetails", { productId: item._id })}
+                  >
+                    <View style={styles.itemContainer}>
+                      <Image source={{ uri: item.img }} style={styles.itemImage} />
+                      <View style={styles.itemDetails}>
+                        <Text>{item.name}</Text>
+                        <Text> {parsedCurrency("currency", "VND", item.price)}</Text>
+                      </View>
+                      <View style={styles.itemQuantity}>
+                        <Text>{item.quantity}</Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
 
-          {/* Order Summary */}
-          <Text style={styles.sectionTitle}>Cost details</Text>
-          <View style={styles.section}>
-            <View style={styles.summaryRow}>
-              <Text>Total cost</Text>
-              <Text>{totalPrice.toLocaleString()}</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text>shipping cost</Text>
-              <Text>{shippingCost.toLocaleString()}</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text>Service cost</Text>
-              <Text>{serviceCost.toLocaleString()}</Text>
-            </View>
-          </View>
+              {/* Payment Method */}
+              <Text style={styles.sectionTitle}>Payment method</Text>
+              <View style={styles.radioContainer}>
+                <View style={styles.radioOption}>
+                  <TouchableOpacity
+                    style={styles.radioOption}
+                    onPress={() => setPaymentMethod("card")}
+                  >
+                    <RadioButton
+                      value="card"
+                      status={paymentMethod === "card" ? "checked" : "unchecked"}
+                      onPress={() => setPaymentMethod("card")}
+                    />
+                    <Text>Card</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.radioOption}>
+                  <TouchableOpacity
+                    style={styles.radioOption}
+                    onPress={() => setPaymentMethod("cash")}
+                  >
+                    <RadioButton
+                      value="cash"
+                      status={paymentMethod === "cash" ? "checked" : "unchecked"}
+                      onPress={() => setPaymentMethod("cash")}
+                    />
+                    <Text>Cash</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-          {/* Checkout Button */}
-          <View style={styles.footer}>
-            <Text style={styles.footerTotalText}>Total payment: {grandTotal.toLocaleString()}</Text>
-            <Screen>
-              <Button variant="primary" title="Order" onPress={handleOrder} />
-            </Screen>
-          </View>
+              {/* Order Summary */}
+              <Text style={styles.sectionTitle}>Cost details</Text>
+              <View style={styles.section}>
+                <View style={styles.summaryRow}>
+                  <Text>Total cost</Text>
+                  <Text>{parsedCurrency("currency", "VND", totalPrice)}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text>shipping cost</Text>
+                  <Text>{parsedCurrency("currency", "VND", shippingCost)}</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text>Service cost</Text>
+                  <Text>{parsedCurrency("currency", "VND", serviceCost)}</Text>
+                </View>
+              </View>
+
+              {/* Checkout Button */}
+              <View style={styles.footer}>
+                <Text style={styles.footerTotalText}>
+                  Total payment: {parsedCurrency("currency", "VND", grandTotal)}
+                </Text>
+                <Screen>
+                  <Button variant="primary" title="Order" onPress={handleOrder} />
+                </Screen>
+              </View>
+            </>
+          )}
         </View>
       </ScreenWrapper>
     </StripeProvider>

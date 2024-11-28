@@ -1,0 +1,263 @@
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Image,
+  Alert,
+  Pressable,
+  Platform,
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
+import ScreenWrapper from "../components/ScreenWrapper";
+import HeadScreen from "../components/HomePage/HeadScreen";
+import ProductCard from "../components/UI/../ProductCard";
+import Category from "../components/RecyclePage/Category";
+import { getValueFor } from "../utils/secureStore";
+import usePagination from "../hooks/usePagination";
+import { hp, wp } from "../helpers/common";
+import { theme } from "../constants/theme";
+import Icon from "../assets/icons";
+import Search from "../components/Search";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BackButton from "../components/BackButton";
+
+const DonateRecycle = () => {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [recycleItems, setRecycleItems] = useState([]);
+  const [campaign, setCampaign] = useState(null);
+
+  useEffect(() => {
+    const fetchCampaign = async () => {
+      try {
+        const response = await fetch(
+          "https://factually-selected-vervet.ngrok-free.app/campaigns/671a55ad61c19805528c1ee2"
+        );
+        const data = await response.json();
+        setCampaign(data);
+      } catch (error) {
+        console.error("Error fetching campaign data:", error);
+      }
+    };
+
+    fetchCampaign();
+  }, []);
+
+  const filteredItems = recycleItems.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.brands.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const renderItem = ({ item }) => (
+    <TouchableOpacity style={styles.itemContainer}>
+      <Image source={{ uri: item.img }} style={styles.itemImage} />
+      <View style={styles.itemDetails}>
+        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemLocation}>{item.location.join(", ")}</Text>
+        <Text style={styles.itemDescription}>{item.description_content}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  return (
+    <ScreenWrapper bg={"white"}>
+      <StatusBar style="dark" />
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <BackButton router={router} />
+          <Text style={styles.logoText}>Donate Recycle</Text>
+          <View style={styles.icons}>
+            <Pressable>
+              <Icon
+                name={"heart"}
+                size={hp(3.2)}
+                strokeWidth={2}
+                color={theme.colors.text}
+              />
+            </Pressable>
+          </View>
+        </View>
+        {/* Search */}
+        <View style={styles.row}>
+          <Search
+            icon={<Icon name="search" size={26} strokeWidth={1.6} />}
+            placeholder="Search for recycle..."
+            onChangeText={(value) => setSearchTerm(value)}
+          />
+          <Icon
+            name="filter"
+            size={hp(3.2)}
+            strokeWidth={2}
+            color={theme.colors.text}
+          />
+        </View>
+        {/* Category */}
+        <View style={styles.categoryContainer}>
+          <TouchableOpacity style={styles.categoryButton}>
+            <Text style={styles.categoryText}>All</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryButton}>
+            <Text style={styles.categoryText}>Bottles</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryButton}>
+            <Text style={styles.categoryText}>Paper</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryButton}>
+            <Text style={styles.categoryText}>Shoes</Text>
+          </TouchableOpacity>
+        </View>
+        {/* Recycle Items List */}
+        {campaign && (
+          <FlatList
+            data={[campaign]}
+            renderItem={renderItem}
+            keyExtractor={(item) => item._id}
+            style={styles.list}
+          />
+        )}
+
+        {/* Add New Campaign Button */}
+        <TouchableOpacity
+          style={styles.addNewCampaignButton}
+          onPress={() => router.push("AddNewCampaign")} // Navigate to AddNewCampaign screen
+        >
+          <Icon name="plus" size={hp(4)} strokeWidth={2} color="white" />
+        </TouchableOpacity>
+      </View>
+    </ScreenWrapper>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: wp(4),
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 50,
+    marginHorizontal: wp(4),
+    paddingTop: hp(2),
+  },
+  logoText: {
+    fontSize: hp(3.6),
+    fontWeight: theme.fonts.bold,
+    color: theme.colors.text,
+  },
+  icons: {
+    flexDirection: "row",
+    gap: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingBottom: 20,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  filterButton: {
+    padding: 8,
+    marginLeft: 5,
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 8,
+  },
+  categoryButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  categoryText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  list: {},
+  itemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    padding: 16,
+    marginBottom: 10,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  itemImage: {
+    width: 80,
+    height: 80,
+    marginRight: 16,
+    borderRadius: 8,
+  },
+  itemDetails: {
+    flex: 1,
+  },
+  itemName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  itemLocation: {
+    fontSize: 14,
+    color: "gray",
+    marginBottom: 4,
+  },
+  itemDescription: {
+    fontSize: 14,
+    color: "gray",
+  },
+});
+
+styles.addNewCampaignButton = {
+  position: "absolute",
+  bottom: hp(10), // Adjust as needed
+  right: wp(5), // Adjust as needed
+  backgroundColor: theme.colors.primary,
+  borderRadius: hp(5), // Make it a circle
+  width: hp(8),
+  height: hp(8),
+  justifyContent: "center",
+  alignItems: "center",
+  elevation: 5, // Add shadow for Android
+  ...Platform.select({
+    // Add shadow for iOS
+    ios: {
+      shadowColor: "black",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    android: {},
+  }),
+};
+
+export default DonateRecycle;

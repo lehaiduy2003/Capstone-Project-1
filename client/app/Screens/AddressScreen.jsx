@@ -59,7 +59,7 @@ const AddressScreen = () => {
         longitude: location.coords.longitude,
       });
       if (reverseGeocode.length > 0) {
-        const modifiedAddress = `${reverseGeocode[0].name}, ${reverseGeocode[0].street}, ${reverseGeocode[0].city}, ${reverseGeocode[0].region}, ${reverseGeocode[0].postalCode}, ${reverseGeocode[0].country}`;
+        const modifiedAddress = `${reverseGeocode[0].name}, ${reverseGeocode[0].street}, ${reverseGeocode[0].city}, ${reverseGeocode[0].region}, ${reverseGeocode[0].country}`;
         navigation.navigate("Screens/MapScreen", { location, modifiedAddress, addresses });
       } else {
         console.log("Reverse geocoding failed");
@@ -71,7 +71,7 @@ const AddressScreen = () => {
 
   const handleAddressSelect = (address) => {
     setCheckedAddress(address);
-    navigation.navigate("CheckOut", { defaultAddress: address });
+    navigation.replace("CheckOut", { defaultAddress: address });
   };
 
   return (
@@ -93,7 +93,7 @@ const AddressScreen = () => {
                       if (checkedAddress !== item) {
                         handleAddressSelect(item);
                       } else {
-                        navigation.navigate("CheckOut");
+                        navigation.replace("CheckOut");
                       }
                     }}
                   />

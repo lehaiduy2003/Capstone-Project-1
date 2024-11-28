@@ -1,126 +1,282 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-
-const orders = [
-  { id: '1', name: 'Regular Fit Slogan', size: 'M', price: 1190, status: 'In Transit' },
-  { id: '2', name: 'Regular Fit Polo', size: 'L', price: 1100, status: 'Picked' },
-  { id: '3', name: 'Regular Fit Black', size: 'L', price: 1690, status: 'In Transit' },
-];
-
-const OrderItem = ({ item }) => (
-  <View style={styles.orderContainer}>
-    <View style={styles.orderInfo}>
-      <Text style={styles.itemName}>{item.name}</Text>
-      <Text style={styles.itemDetails}>Size {item.size}</Text>
-      <Text style={styles.itemPrice}>${item.price}</Text>
-    </View>
-    <Text style={[styles.status, item.status === 'Picked' ? styles.picked : styles.inTransit]}>
-      {item.status}
-    </Text>
-    <TouchableOpacity style={styles.trackButton}>
-      <Text style={styles.trackButtonText}>Track Order</Text>
-    </TouchableOpacity>
-  </View>
-);
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  StatusBar,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import ScreenWrapper from "../../components/ScreenWrapper";
+import BackButton from "../../components/BackButton";
+import { useRouter } from "expo-router";
+import { theme } from "../../constants/theme";
+import useSecureStore from "../../store/useSecureStore";
+import { getValueFor } from "../../utils/secureStore";
+import parsedCurrency from "../../utils/currency";
 
 const MyOrdersScreen = () => {
+  const router = useRouter();
+  const { userId, accessToken, setUserId, setAccessToken } = useSecureStore(); // Use useSecureStore to get userId and accessToken
+  const [orders, setOrders] = useState([]);
+  const [activeTab, setActiveTab] = useState("pending");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // // Function to load user_id and access token (e.g., after successful login)
+    // const loadAuthInfo = async () => {
+    //   setUserId(await getValueFor("user_id"));
+    //   setAccessToken(await getValueFor("accessToken"));
+    // };
+
+    // loadAuthInfo(); // Call function when component mounts
+
+    const fetchOrders = async () => {
+      setLoading(true);
+      setError(null); // Reset error state before fetching
+
+      try {
+        if (!userId || !accessToken) {
+          // userId and accessToken from useSecureStore
+          throw new Error("Not logged in.");
+        }
+        console.log("userId: ", userId); // Check userId
+
+        // Log request details
+        console.log("Request URL:", `${process.env.EXPO_PUBLIC_API_URL}/transactions/${userId}`);
+        console.log("Request Headers:", {
+          Authorization: `Bearer ${accessToken}`,
+        });
+
+        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/transactions/${userId}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.log(response.status);
+          console.log("errorData", errorData);
+
+          throw new Error(errorData.message || "Error fetching order data");
+        }
+
+        const data = await response.json();
+        setOrders(data);
+      } catch (err) {
+        setError(err); // Set error state when an error occurs
+        console.error("Error fetching order data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId && accessToken) {
+      // Only fetch when userId and accessToken are available
+      fetchOrders();
+    }
+  }, [userId, accessToken]); // userId and accessToken from useSecureStore
+
+  const filteredOrders =
+    activeTab === "Ongoing"
+      ? orders.filter((order) => order.transaction_status === "pending")
+      : orders.filter((order) => order.transaction_status === "completed");
+
+  const OrderItem = ({ item }) => {
+    // item is a product object
+    if (!item || !item.product) {
+      // Only check item and item.product
+      return <Text>No products in this order.</Text>;
+    }
+
+    const { img, name, price } = item.product;
+
+    return (
+      <View style={styles.orderItemContainer}>
+        <Image source={{ uri: img }} style={styles.itemImage} />
+        <View style={styles.orderInfo}>
+          <Text style={styles.itemName}>{name}</Text>
+          <Text style={styles.itemPrice}>{parsedCurrency("currency", "VND", price)}</Text>
+        </View>
+        <TouchableOpacity style={styles.reviewButton}>
+          <Text style={styles.reviewButtonText}>Leave review</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return (
+      <ScreenWrapper bg={"white"}>
+        <StatusBar style="dark" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <ScreenWrapper bg={"white"}>
+        <StatusBar style="dark" />
+        <View style={styles.container}>
+          <BackButton router={router} />
+          <Text style={styles.title}>My Orders</Text>
+          <Text style={styles.errorText}>Error: {error.message}</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>My Orders</Text>
+    <ScreenWrapper bg={"white"}>
+      <StatusBar style="dark" />
+      <View style={styles.container}>
+        <BackButton router={router} />
+        <Text style={styles.title}>My Orders</Text>
+        <View style={styles.toggleButton}>
+          <TouchableOpacity
+            onPress={() => setActiveTab("Ongoing")}
+            style={[styles.tab, activeTab === "Ongoing" && styles.activeTab]}
+          >
+            <Text style={[styles.tabText, activeTab === "Ongoing" && styles.activeTabText]}>
+              Ongoing
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setActiveTab("Completed")}
+            style={[styles.tab, activeTab === "Completed" && styles.activeTab]}
+          >
+            <Text style={[styles.tabText, activeTab === "Completed" && styles.activeTabText]}>
+              Completed
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={filteredOrders}
+          keyExtractor={(item) => item._id.toString()}
+          renderItem={({ item }) => <OrderItem item={item} />}
+          style={styles.flatList}
+          ListEmptyComponent={<Text>No orders found.</Text>}
+        />
       </View>
-      <View style={styles.tabContainer}>
-        <Text style={[styles.tab, styles.activeTab]}>Ongoing</Text>
-        <Text style={styles.tab}>Completed</Text>
-      </View>
-      <FlatList
-        data={orders}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <OrderItem item={item} />}
-      />
-    </View>
+    </ScreenWrapper>
   );
 };
+
+export default MyOrdersScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F9F9',
-  },
-  header: {
     padding: 20,
-    backgroundColor: '#fff',
-    alignItems: 'center',
   },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
   },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 10,
+  toggleButton: {
+    width: 371,
+    height: 54,
+    padding: 8,
+    backgroundColor: "#E6E6E6",
+    borderRadius: 10,
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    marginBottom: 20,
   },
   tab: {
-    fontSize: 16,
-    paddingHorizontal: 20,
-    color: '#888',
+    height: 38,
+    paddingVertical: 9,
+    paddingHorizontal: 53,
+    backgroundColor: "#E6E6E6",
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
   },
   activeTab: {
-    color: '#000',
-    fontWeight: 'bold',
+    backgroundColor: "white",
   },
-  orderContainer: {
-    backgroundColor: '#fff',
-    marginVertical: 8,
-    marginHorizontal: 16,
-    padding: 16,
+  tabText: {
+    textAlign: "center",
+    color: "#999999",
+    fontSize: 14,
+    fontFamily: "General Sans",
+    fontWeight: "500",
+    lineHeight: 19.6,
+  },
+  activeTabText: {
+    color: "#1A1A1A",
+  },
+  flatList: {
+    flex: 1,
+  },
+  orderItemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  itemImage: {
+    width: 60,
+    height: 60,
     borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    marginRight: 10,
   },
   orderInfo: {
     flex: 1,
   },
   itemName: {
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  itemDetails: {
-    fontSize: 14,
-    color: '#666',
+    fontWeight: "bold",
   },
   itemPrice: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    color: theme.colors.primary,
   },
-  status: {
-    padding: 5,
-    borderRadius: 5,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  picked: {
-    backgroundColor: '#FFE5B4',
-    color: '#FF8C00',
-  },
-  inTransit: {
-    backgroundColor: '#E0F7FA',
-    color: '#00796B',
-  },
-  trackButton: {
-    backgroundColor: '#32CD32',
-    paddingHorizontal: 10,
+  reviewButton: {
     paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: theme.colors.primary,
     borderRadius: 5,
   },
-  trackButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  reviewButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: theme.colors.primary,
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "red",
   },
 });
-
-export default MyOrdersScreen;

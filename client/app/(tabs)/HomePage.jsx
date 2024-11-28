@@ -1,5 +1,17 @@
+// <<<<<<< HEAD
+// import {
+//   View,
+//   Text,
+//   StyleSheet,
+//   StatusBar,
+//   Pressable,
+//   Alert,
+// } from "react-native";
+// import React, { useEffect, useState, useCallback } from "react";
+// =======
 import { View, Text, StyleSheet, StatusBar, Pressable } from "react-native";
 import React, { useEffect, useRef } from "react";
+// >>>>>>> main
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { hp, wp } from "../../helpers/common";
 import { theme } from "../../constants/theme";
@@ -20,7 +32,10 @@ const HomePage = () => {
   useEffect(() => {
     const savedPosition = getScrollPosition("HomePage");
     if (flatListRef.current) {
-      flatListRef.current.scrollToOffset({ offset: savedPosition, animated: false });
+      flatListRef.current.scrollToOffset({
+        offset: savedPosition,
+        animated: false,
+      });
     }
   }, []);
 
@@ -52,13 +67,33 @@ const HomePage = () => {
           <Search
             icon={<Icon name="search" size={26} strokeWidth={1.6} />}
             placeholder="Search products, brands..."
-            onChangeText={(value) => (nameRef.current = value)}
+            // onChangeText={(value) => (nameRef.current = value)}
+            onChangeText={(value) => setSearchTerm(value)}
           />
 
           <Icon name="filter" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
         </View>
         {/**product list */}
+        {/* <SafeAreaView>
+      <ProductList
+        products={products}
+        onEndReached={onEndReached}
+        isLoading={isLoading}
+      />
+    </SafeAreaView> */}
+
         <SafeAreaView>
+          {/* <<<<<<< HEAD
+          {searchTerm ? ( // Conditionally render search results or original product list
+            <ProductList products={searchResults} isLoading={isLoading} />
+          ) : (
+            <ProductList
+              products={products}
+              onEndReached={onEndReached}
+              isLoading={isLoading}
+            />
+          )}
+======= */}
           <ProductList
             products={products}
             onEndReached={onEndReached}
@@ -66,6 +101,7 @@ const HomePage = () => {
             ref={flatListRef}
             onScroll={handleScroll}
           />
+          {/* >>>>>>> main */}
         </SafeAreaView>
       </View>
     </ScreenWrapper>
@@ -76,7 +112,7 @@ export default HomePage;
 
 const styles = StyleSheet.create({
   container: {
-    //flex: 1,
+    flex: 1,
     paddingHorizontal: wp(4),
   },
   header: {

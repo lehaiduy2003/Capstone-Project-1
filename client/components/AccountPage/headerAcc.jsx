@@ -3,7 +3,6 @@ import React from "react";
 import { theme } from "../../constants/theme";
 import { hp, wp } from "../../helpers/common";
 import Icon from "../../assets/icons";
-import { deleteValueFor } from "../../utils/secureStore";
 import { useRouter } from "expo-router";
 import useSecureStore from "../../store/useSecureStore";
 

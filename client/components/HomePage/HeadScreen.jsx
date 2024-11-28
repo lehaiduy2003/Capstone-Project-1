@@ -1,32 +1,35 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text, Pressable, StyleSheet } from "react-native";
 import { hp, wp } from "../../helpers/common";
 import { theme } from "../../constants/theme";
 import Icon from "../../assets/icons";
 import Search from "../Search";
+import { useRouter } from "expo-router";
 
 function HeadScreen() {
+  const router = useRouter();
   return (
     <View style={styles.header}>
       <Text style={styles.logoText}>Eco Trade</Text>
       <View style={styles.icons}>
-        <Pressable>
+        <Pressable
+          onPress={() => {
+            router.push("Screens/cartScreen");
+          }}
+        >
           <Icon name={"cart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
         </Pressable>
         <Pressable>
           <Icon name={"heart"} size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
         </Pressable>
       </View>
-
     </View>
-    
   );
 }
 
-export default HeadScreen
+export default HeadScreen;
 
 const styles = StyleSheet.create({
-
   header: {
     flexDirection: "row",
     justifyContent: "space-between",

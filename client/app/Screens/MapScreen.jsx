@@ -54,8 +54,7 @@ const MapScreen = () => {
         });
         const data = await response.json();
         if (response.ok) {
-          navigation.replace("Screens/AddressScreen", {
-            address: data.address,
+          navigation.replace("CheckOut", {
             defaultAddress: inputAddress,
           });
         } else {

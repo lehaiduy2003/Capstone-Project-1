@@ -8,6 +8,7 @@ const useAuthSubmit = (apiUrl) => {
       setLoading(true);
       console.log(options.body);
       const response = await fetch(apiUrl, {
+        // method: "POST",
         method: options.method || "POST", // Lấy method từ options, mặc định là POST
         headers: {
           "Content-Type": "application/json",
