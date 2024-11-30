@@ -46,6 +46,8 @@ class AuthorizeUser {
 
   isCustomerOrRecycler(req: Request, res: Response, next: NextFunction): void {
     const role = req.body.user.role;
+    // console.log("role", role);
+
     if (role && (role === Role.CUSTOMER || role === Role.RECYCLER)) {
       next();
       return;

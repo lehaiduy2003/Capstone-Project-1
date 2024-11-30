@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 
-import BaseController from "../../../Base/BaseController";
-import parseProducts from "../../../utils/parsedProducts";
-import StripeService from "../Services/StripeService";
+import BaseController from "../../Base/BaseController";
+import parseProducts from "../../utils/parsedProducts";
+import StripeService from "./StripeService";
 import { ObjectId } from "mongodb";
 
 export default class StripeController extends BaseController {

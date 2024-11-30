@@ -46,7 +46,7 @@ class ProductOwnerRouter extends BaseRouter {
     );
   }
 }
-
+// /users/:user_id/products
 const createProductOwnerRouter = (): ProductOwnerRouter => {
   const productOwnerService = new ProductOwnerService();
   const productOwnerController = new ProductOwnerController(productOwnerService);

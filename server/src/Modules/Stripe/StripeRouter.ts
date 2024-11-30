@@ -1,8 +1,8 @@
-import validateToken from "../../../middlewares/tokenMiddleware";
-import BaseRouter from "../../../Base/BaseRouter";
-import StripeController from "../Controllers/StripeController";
-import StripeService from "../Services/StripeService";
-import PaymentService from "../../Payment/Services/PaymentService";
+import validateToken from "../../middlewares/tokenMiddleware";
+import BaseRouter from "../../Base/BaseRouter";
+import StripeController from "./StripeController";
+import StripeService from "./StripeService";
+import PaymentService from "../Payment/Services/PaymentService";
 
 class StripeRouter extends BaseRouter {
   private readonly stripeController: StripeController;
@@ -22,6 +22,7 @@ class StripeRouter extends BaseRouter {
   }
 }
 
+// /cloudinary/
 const createStripeRouter = (): StripeRouter => {
   const paymentService = new PaymentService();
   const stripeService = new StripeService(paymentService);

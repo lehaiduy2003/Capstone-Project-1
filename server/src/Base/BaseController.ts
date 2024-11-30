@@ -47,10 +47,6 @@ export default class BaseController {
   //   return true;
   // }
 
-  protected sendResponse(res: Response, status: number, data: unknown): void {
-    res.status(status).send(data);
-  }
-
   protected error(error: any, res: Response): void {
     errorHandler(error, res);
   }

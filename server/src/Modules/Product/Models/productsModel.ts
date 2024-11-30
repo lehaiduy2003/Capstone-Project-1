@@ -7,7 +7,7 @@ const productsSchema: Schema<Product> = new Schema({
   price: { type: Number, required: true },
   quantity: { type: Number, default: 1 },
   img: { type: String, required: true },
-  description_content: { type: String, required: true },
+  description_content: { type: String, default: "" },
   description_imgs: { type: [String], default: [] },
   created_at: { type: Date },
   updated_at: { type: Date },

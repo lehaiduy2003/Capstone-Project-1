@@ -30,8 +30,7 @@ export default class ProductOwnerController extends BaseController {
     if (!this.checkReqBody(req, res)) return;
     try {
       const productData = validateProduct(req.body);
-      const owner = new ObjectId(String(req.body.user_id));
-      productData.owner = owner;
+
       const product = await this.productOwnerService.create(productData);
 
       if (!product) {

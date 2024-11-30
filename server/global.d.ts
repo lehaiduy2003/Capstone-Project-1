@@ -4,7 +4,6 @@ declare global {
       SECRET_KEY: string;
       DATABASE_URL: string;
       STRIPE_SECRET_KEY: string;
-      SHIPPO_API_KEY: string;
       NODE_ENV: "development" | "production" | "test";
       PORT: string;
       HOST: string;
@@ -23,8 +22,11 @@ declare global {
       AUTH_TOKEN: string;
       PHONE_NUMBER: string;
       SERVICE_SID: string;
-      // Firebase
-      FIREBASE_STORAGE_BUCKET: string;
+      // Cloudinary
+      CLOUDINARY_CLOUD_NAME: string;
+      CLOUDINARY_API_KEY: string;
+      CLOUDINARY_API_SECRET: string;
+      CLOUDINARY_UPLOAD_PRESET: string;
     }
   }
 }

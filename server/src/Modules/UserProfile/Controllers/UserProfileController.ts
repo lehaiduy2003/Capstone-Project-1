@@ -3,7 +3,6 @@ import UserProfileService from "../Services/UserProfileService";
 import BaseController from "../../../Base/BaseController";
 
 import { ObjectId } from "mongodb";
-import saveToCache from "../../../libs/redis/cacheSaving";
 
 export default class UserProfileController extends BaseController {
   private readonly userProfileService: UserProfileService;

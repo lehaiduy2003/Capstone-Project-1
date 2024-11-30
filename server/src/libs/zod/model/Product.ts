@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { Document } from "mongoose";
-import generateRandomString from "../../crypto/randomString";
 import ObjectIdSchema from "../ObjectId";
 
 const ProductSchema = z.object({
-  name: z.string().default(generateRandomString()),
+  name: z.string(),
   price: z
     .number({ message: "price must be a number" })
     .nonnegative({ message: "price can not negative" }),
@@ -17,7 +16,7 @@ const ProductSchema = z.object({
     .string()
     .url({ message: "img must be an url" })
     .default("https://static-00.iconduck.com/assets.00/avatar-default-icon-1975x2048-2mpk4u9k.png"),
-  description_content: z.string(),
+  description_content: z.string().optional(),
   description_imgs: z.array(z.string().url({ message: "img must be an url" })).optional(),
   type: z.string(),
   status: z.boolean().default(true),

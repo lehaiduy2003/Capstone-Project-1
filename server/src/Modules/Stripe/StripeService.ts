@@ -1,12 +1,12 @@
 import dotenv from "dotenv";
 import Stripe from "stripe";
 
-import SessionService from "../../../Base/SessionService";
+import SessionService from "../../Base/SessionService";
 
-import { CheckoutProductDTO } from "../../../libs/zod/dto/CheckoutProductDTO";
+import { CheckoutProductDTO } from "../../libs/zod/dto/CheckoutProductDTO";
 
-import calculateOrderAmount from "../../../utils/currency";
-import PaymentService from "../../Payment/Services/PaymentService";
+import calculateOrderAmount from "../../utils/currency";
+import PaymentService from "../Payment/Services/PaymentService";
 import { ObjectId } from "mongodb";
 
 dotenv.config();
