@@ -13,10 +13,8 @@ export default class CloudinaryController {
   getSignature(req: Request, res: Response): void {
     try {
       const timestamp = Math.floor(new Date().getTime() / 1000); // Unix timestamp
-      const folder = req.body.folder as string;
 
       const paramsToSign = {
-        folder,
         timestamp,
         upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET as string,
       };
