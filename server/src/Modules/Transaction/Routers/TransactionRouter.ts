@@ -7,6 +7,7 @@ import {
   authenticateUserByReqParams,
 } from "../../../middlewares/authenticationMiddleware";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
+import { Role } from "../../../libs/zod/enums/Role";
 
 class TransactionRouter extends BaseRouter {
   private readonly transactionController: TransactionController;
@@ -22,21 +23,21 @@ class TransactionRouter extends BaseRouter {
       "/",
       validateToken,
       authenticateUserByReqBody,
-      authorizeUser.isCustomer,
+      authorizeUser([Role.Enum.customer]),
       this.transactionController.create.bind(this.transactionController)
     );
     this.router.patch(
       "/:id",
       validateToken,
       authenticateUserByReqBody,
-      authorizeUser.isShipper,
+      authorizeUser([Role.Enum.customer, Role.Enum.recycler]),
       this.transactionController.updateById.bind(this.transactionController)
     );
     this.router.get(
       "/:userId",
       validateToken,
       authenticateUserByReqParams,
-      authorizeUser.isCustomer,
+      authorizeUser([Role.Enum.customer]),
       this.transactionController.getUserTransactions.bind(this.transactionController)
     );
   }

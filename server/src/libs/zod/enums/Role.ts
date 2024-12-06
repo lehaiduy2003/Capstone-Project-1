@@ -1,5 +1,5 @@
 import { z } from "zod";
 
-const RoleEnum = z.enum(["customer", "admin", "recycler", "shipper"]);
+export const Role = z.enum(["customer", "admin", "recycler"]);
 
-export default RoleEnum;
+export type RoleType = z.infer<typeof Role>;

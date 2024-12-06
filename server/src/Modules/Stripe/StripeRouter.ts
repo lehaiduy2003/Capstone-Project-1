@@ -22,7 +22,6 @@ class StripeRouter extends BaseRouter {
   }
 }
 
-// /cloudinary/
 const createStripeRouter = (): StripeRouter => {
   const paymentService = new PaymentService();
   const stripeService = new StripeService(paymentService);

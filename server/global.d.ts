@@ -23,7 +23,6 @@ declare global {
       PHONE_NUMBER: string;
       SERVICE_SID: string;
       // Cloudinary
-      CLOUDINARY_CLOUD_NAME: string;
       CLOUDINARY_API_KEY: string;
       CLOUDINARY_API_SECRET: string;
       CLOUDINARY_UPLOAD_PRESET: string;

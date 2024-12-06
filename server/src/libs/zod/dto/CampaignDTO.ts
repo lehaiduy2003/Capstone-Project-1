@@ -24,6 +24,19 @@ export const CampaignDTOSchema = z.object({
       "https://t3.ftcdn.net/jpg/05/04/28/96/360_F_504289605_zehJiK0tCuZLP2MdfFBpcJdOVxKLnXg1.jpg"
     ),
   location: z.array(z.string()).default([]),
+  created_at: z.date(),
+  recycled_weight: z
+    .number({ message: "weight must be a number" })
+    .nonnegative({ message: "weight can not negative" })
+    .default(0),
+  recycled_amount: z
+    .number({ message: "amount must be a number" })
+    .nonnegative({ message: "amount can not negative" })
+    .default(0),
+  participants: z
+    .number({ message: "participants must be a number" })
+    .nonnegative({ message: "participants can not negative" })
+    .default(0),
   creator_id: ObjectIdSchema,
 });
 

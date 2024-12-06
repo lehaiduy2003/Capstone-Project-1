@@ -1,10 +1,7 @@
 import { PipelineStage } from "mongoose";
 import SessionService from "../../../Base/SessionService";
 import { Filter } from "../../../libs/zod/Filter";
-import {
-  RecycleCampaign,
-  validateRecycleCampaign,
-} from "../../../libs/zod/model/RecyclingCampaign";
+import { RecycleCampaign } from "../../../libs/zod/model/RecyclingCampaign";
 import recycleCampaignsModel from "../Models/recycleCampaignsModel";
 import { ObjectId } from "mongodb";
 import { validateCampaignDTO } from "../../../libs/zod/dto/CampaignDTO";
@@ -48,7 +45,7 @@ export default class RecycleCampaignService extends SessionService {
 
     // console.log(campaigns);
 
-    return campaigns.map(validateRecycleCampaign);
+    return campaigns.map(validateCampaignDTO);
   }
 
   public async search(filter: Filter) {
@@ -74,7 +71,6 @@ export default class RecycleCampaignService extends SessionService {
     aggregationPipeline.push({
       $match: {
         status: true,
-        quantity: { $gte: 1 },
       },
     });
 
@@ -86,7 +82,7 @@ export default class RecycleCampaignService extends SessionService {
 
     const products: RecycleCampaign[] = await recycleCampaignsModel.aggregate(aggregationPipeline);
 
-    return products.map(validateRecycleCampaign);
+    return products.map(validateCampaignDTO);
   }
 
   public async findById(id: ObjectId) {

@@ -31,7 +31,7 @@ export default class ProductController extends BaseController {
       if (!products || products.length === 0) {
         res.status(404).send({ success: false, message: "No products found" });
       } else {
-        await saveToCache(req.body.cacheKey, 3600, products);
+        await saveToCache(req.body.cacheKey, 30, products); // save to cache for 30 seconds
         res.status(200).send(products);
       }
     } catch (error) {
@@ -82,7 +82,7 @@ export default class ProductController extends BaseController {
         return;
       }
 
-      await saveToCache(req.body.cacheKey, 3600, products);
+      await saveToCache(req.body.cacheKey, 30, products); // save to cache for 30 seconds
 
       res.status(200).send(products);
     } catch (error) {
@@ -101,7 +101,7 @@ export default class ProductController extends BaseController {
         res.status(404).send({ message: "Product not found" });
         return;
       }
-      await saveToCache(req.body.cacheKey, 3600, product);
+      await saveToCache(req.body.cacheKey, 10, product); // save to cache for 10 seconds
       res.status(200).send(product);
     } catch (error) {
       this.error(error, res);

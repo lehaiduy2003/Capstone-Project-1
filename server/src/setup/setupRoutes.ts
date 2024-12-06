@@ -11,6 +11,7 @@ import createWishListRouter from "../Modules/UserProfile/Routers/WishListRouter"
 import createProductOwnerRouter from "../Modules/UserProfile/Routers/ProductOwnerRouter";
 import createRecycleCampaignRouter from "../Modules/RecycleCampaign/Routers/RecycleCampaignRouter";
 import createCloudinaryRouter from "../Modules/Cloudinary/CloudinaryRouter";
+import createUserCampaignRouter from "../Modules/UserProfile/Routers/UserCampaignRouter";
 
 const setupRouters = (app: Application): void => {
   createAuthRouter().register("/auth", app);
@@ -18,6 +19,7 @@ const setupRouters = (app: Application): void => {
   createCartRouter().register("/users/:id/cart", app);
   createWishListRouter().register("/users/:id/wishlist", app);
   createProductOwnerRouter().register("/users/:id/products", app);
+  createUserCampaignRouter().register("/users/:id/campaigns", app);
   createOtpRouter().register("/otp", app);
   createStripeRouter().register("/stripe", app);
   createTransactionRouter().register("/transactions", app);

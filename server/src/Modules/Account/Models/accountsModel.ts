@@ -1,6 +1,5 @@
 import { model, Schema } from "mongoose";
 import { Account } from "../../../libs/zod/model/Account";
-import { RecyclerField } from "../../../libs/zod/RecyclerField";
 import updateTimestamp from "../../../utils/updateTimestamp";
 
 const accountsSchema: Schema<Account> = new Schema({
@@ -17,27 +16,7 @@ const accountsSchema: Schema<Account> = new Schema({
     type: String,
     enum: ["active", "inactive"],
   },
-  recycler_field: {
-    recyclingLicenseNumber: { type: String },
-    recyclingCapacity: { type: Number },
-  },
 });
-
-// Pre-save hook to check account type and conditionally add fields
-accountsSchema.pre("save", function (next) {
-  if (this.role !== "recycler") {
-    return next();
-  }
-
-  if (!isValidRecyclerField(this.recycler_field as RecyclerField)) {
-    return next(new Error("recyclerField is required when role is recycler"));
-  }
-  next();
-});
-
-function isValidRecyclerField(recyclerField: RecyclerField) {
-  return !!recyclerField?.license;
-}
 
 accountsSchema.pre("findOneAndUpdate", updateTimestamp);
 accountsSchema.pre("updateOne", updateTimestamp);

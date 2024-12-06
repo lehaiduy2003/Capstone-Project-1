@@ -23,7 +23,6 @@ export default class CloudinaryService {
       timestamp: paramsToSign.timestamp,
       apiKey: process.env.CLOUDINARY_API_KEY,
       uploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
     };
   }
 }

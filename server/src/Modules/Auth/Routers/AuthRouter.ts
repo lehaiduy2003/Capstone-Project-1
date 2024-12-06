@@ -5,6 +5,7 @@ import AuthService from "../Services/AuthService";
 import UserProfileService from "../../UserProfile/Services/UserProfileService";
 import BaseRouter from "../../../Base/BaseRouter";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
+import { Role } from "../../../libs/zod/enums/Role";
 
 class AuthRouter extends BaseRouter {
   private readonly authController: AuthController;
@@ -27,7 +28,7 @@ class AuthRouter extends BaseRouter {
     this.router.patch(
       "/deactivate",
       validateToken,
-      authorizeUser.isCustomerOrRecycler,
+      authorizeUser([Role.Enum.customer]),
       this.authController.deactivateAccount.bind(this.authController)
     );
     this.router.patch(

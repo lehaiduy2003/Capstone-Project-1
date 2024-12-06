@@ -4,6 +4,7 @@ import CartService from "../Services/CartService";
 import validateToken from "../../../middlewares/tokenMiddleware";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
 import { authenticateUserByReqParams } from "../../../middlewares/authenticationMiddleware";
+import { Role } from "../../../libs/zod/enums/Role";
 
 class CartRouter extends BaseRouter {
   private readonly cartProductController: CartController;
@@ -19,7 +20,7 @@ class CartRouter extends BaseRouter {
       "/",
       validateToken,
       authenticateUserByReqParams,
-      authorizeUser.isCustomer,
+      authorizeUser([Role.Enum.customer]),
       this.cartProductController.getCart.bind(this.cartProductController)
     );
     // Overwrite cart with new products, and remove all products if the empty array is sent
@@ -27,7 +28,7 @@ class CartRouter extends BaseRouter {
       "/",
       validateToken,
       authenticateUserByReqParams,
-      authorizeUser.isCustomer,
+      authorizeUser([Role.Enum.customer]),
       this.cartProductController.setCart.bind(this.cartProductController)
     );
     // For add, update quantity, and even remove product (for reduce quantity to zero user's action) in cart
@@ -35,7 +36,7 @@ class CartRouter extends BaseRouter {
       "/product",
       validateToken,
       authenticateUserByReqParams,
-      authorizeUser.isCustomer,
+      authorizeUser([Role.Enum.customer]),
       this.cartProductController.updateProduct.bind(this.cartProductController)
     );
     // For remove product (instantly) from cart
@@ -43,7 +44,7 @@ class CartRouter extends BaseRouter {
       "/product/:productId",
       validateToken,
       authenticateUserByReqParams,
-      authorizeUser.isCustomer,
+      authorizeUser([Role.Enum.customer]),
       this.cartProductController.removeProduct.bind(this.cartProductController)
     );
   }
