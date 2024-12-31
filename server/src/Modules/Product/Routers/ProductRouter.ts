@@ -20,11 +20,7 @@ class ProductRouter extends BaseRouter {
       checkCache,
       this.productController.search.bind(this.productController)
     );
-    this.router.get(
-      "/:id",
-      checkCache,
-      this.productController.findById.bind(this.productController)
-    );
+    this.router.get("/:id", this.productController.findById.bind(this.productController));
   }
 }
 

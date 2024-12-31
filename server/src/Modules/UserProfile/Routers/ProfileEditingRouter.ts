@@ -2,6 +2,7 @@ import ProfileEditingController from "../Controllers/ProfileEditingController";
 import validateToken from "../../../middlewares/tokenMiddleware";
 import ProfileEditingService from "../Services/ProfileEditingService";
 import BaseRouter from "../../../Base/BaseRouter";
+import { checkTokens } from "../../../middlewares/authenticationMiddleware";
 
 class ProfileEditingRouter extends BaseRouter {
   private readonly profileEditingController: ProfileEditingController;
@@ -15,12 +16,12 @@ class ProfileEditingRouter extends BaseRouter {
   public initRoutes(): void {
     this.router.patch(
       "/change-password",
-      validateToken,
+      checkTokens,
       this.profileEditingController.changePassword.bind(this.profileEditingController)
     );
     this.router.patch(
       "/address",
-      validateToken,
+      checkTokens,
       this.profileEditingController.updateAddress.bind(this.profileEditingController)
     );
   }

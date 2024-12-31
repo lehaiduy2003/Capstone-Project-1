@@ -45,7 +45,13 @@ const Cart = () => {
 
   return (
     <ScreenWrapper>
-      <Header title={"My Cart"} showBackButton />
+      <Header
+        title={"My Cart"}
+        showBackButton
+        backButtonPress={() => {
+          router.replace("(tabs)/HomePage");
+        }}
+      />
       <View style={styles.container}>
         {cartItems ? (
           // Display Cart Items List

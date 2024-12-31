@@ -30,7 +30,6 @@ const RecycleCampaignSchema = z.object({
     .default(0),
   guide: z
     .string()
-    .url({ message: "img must be an url" })
     .default(
       "https://t3.ftcdn.net/jpg/05/04/28/96/360_F_504289605_zehJiK0tCuZLP2MdfFBpcJdOVxKLnXg1.jpg"
     ),
@@ -39,6 +38,7 @@ const RecycleCampaignSchema = z.object({
   updated_at: z.date().default(new Date()),
   creator_id: ObjectIdSchema,
   status: z.boolean().default(true),
+  qrCode: z.string().default("").optional(),
 });
 
 export const validateRecycleCampaign = (data: unknown) => {

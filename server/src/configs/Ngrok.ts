@@ -1,4 +1,4 @@
-import Connection from "./Connection";
+import Connection from "../Base/Connection";
 import ngrok from "@ngrok/ngrok";
 
 import * as dotenv from "dotenv";

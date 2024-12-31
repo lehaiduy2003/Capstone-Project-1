@@ -1,6 +1,8 @@
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import useSecureStore from "../store/useSecureStore";
+import { getValueFor } from "../utils/secureStore";
+
 /**
  *
  * @param {string} folder the folder in Cloudinary to upload the image to, only 3 valid folder: ```users, products, campaigns.```
@@ -30,7 +32,7 @@ const useUploadSingleImage = (folder) => {
     // Launch the image picker
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: folder === "users", // Only allow editing for user profile pictures
-      mediaTypes: ["images"], // Only images are allowed
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Only images are allowed
       quality: 1,
       allowsMultipleSelection: false, // Allow only one image to be selected
     });
@@ -52,6 +54,7 @@ const useUploadSingleImage = (folder) => {
       aspect: [4, 3],
       quality: 1,
     });
+
     save(result);
   };
 
@@ -71,17 +74,20 @@ const useUploadSingleImage = (folder) => {
       const fileName = image.split("/").pop() || "uploaded_image.jpg";
 
       // Get signature from server
-      const signatureResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cloudinary/sign`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          userId,
-          folder,
-        }),
-      });
+      const signatureResponse = await fetch(
+        `${process.env.EXPO_PUBLIC_API_URL}/cloudinary/sign`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            userId,
+            folder,
+          }),
+        }
+      );
       const signatureData = await signatureResponse.json();
       const { signature, apiKey, timestamp, uploadPreset } = signatureData;
 
@@ -98,10 +104,13 @@ const useUploadSingleImage = (folder) => {
       formData.append("signature", signature);
 
       // Upload image to Cloudinary
-      const response = await fetch(`${process.env.EXPO_PUBLIC_CLOUDINARY_API}/image/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${process.env.EXPO_PUBLIC_CLOUDINARY_API}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to upload image");
@@ -110,7 +119,7 @@ const useUploadSingleImage = (folder) => {
       const data = await response.json();
       alert("Image uploaded successfully");
       // Return the secure url of the uploaded image
-      //this is the url to display the image and store in the database
+      // this is the url to display the image and store in the database
       return data.secure_url;
     } catch (err) {
       setError(err.message);

@@ -1,4 +1,4 @@
-import ConnectionManager from "../configs/ConnectionManager";
+import ConnectionManager from "../Base/ConnectionManager";
 import { mongoDB } from "../configs/MongoDB";
 import { ngrokClient } from "../configs/Ngrok";
 import { redis } from "../configs/Redis";

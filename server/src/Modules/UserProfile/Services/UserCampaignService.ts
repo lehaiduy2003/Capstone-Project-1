@@ -40,11 +40,16 @@ export default class UserCampaignService {
 
   async findById(id: ObjectId) {
     const user = await this.getUser(id);
-    return this.getDetailCampaigns(user.joined_campaigns);
+    const campaigns = await this.getDetailCampaigns(user.joined_campaigns);
+
+    return campaigns.filter((campaign) => campaign !== null);
   }
 
   async joinCampaign(userId: ObjectId, id: ObjectId) {
     const user = await this.getUser(userId);
+    if (!user.joined_campaigns) {
+      user.joined_campaigns = [];
+    }
 
     if (this.checkJoinedCampaigns(user.joined_campaigns, id)) {
       throw new Error("User already joined this campaign");

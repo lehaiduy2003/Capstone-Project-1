@@ -1,8 +1,7 @@
 import BaseRouter from "../../../Base/BaseRouter";
 import { Role } from "../../../libs/zod/enums/Role";
-import { authenticateUserByReqParams } from "../../../middlewares/authenticationMiddleware";
+import { checkTokens } from "../../../middlewares/authenticationMiddleware";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
-import validateToken from "../../../middlewares/tokenMiddleware";
 import WishListController from "../Controllers/WishListController";
 import WishListService from "../Services/WishListService";
 
@@ -17,30 +16,26 @@ class WishlistRouter extends BaseRouter {
   public initRoutes(): void {
     this.router.get(
       "/",
-      validateToken,
-      authenticateUserByReqParams,
+      checkTokens,
       authorizeUser([Role.Enum.customer]),
       this.wishListController.getWishList.bind(this.wishListController)
     );
     // Overwrite wish list with new products, can not remove all products
     this.router.put(
       "/product",
-      validateToken,
-      authenticateUserByReqParams,
+      checkTokens,
       authorizeUser([Role.Enum.customer]),
       this.wishListController.setWishList.bind(this.wishListController)
     );
     this.router.patch(
       "/product/:productId",
-      validateToken,
-      authenticateUserByReqParams,
+      checkTokens,
       authorizeUser([Role.Enum.customer]),
       this.wishListController.updateProduct.bind(this.wishListController)
     );
     this.router.delete(
       "/product/:productId",
-      validateToken,
-      authenticateUserByReqParams,
+      checkTokens,
       authorizeUser([Role.Enum.customer]),
       this.wishListController.removeProduct.bind(this.wishListController)
     );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRouter } from "expo-router";
@@ -21,50 +24,36 @@ import Input from "../components/Input"; // Import Input component
 import useAuthSubmit from "../hooks/useAuthSubmit"; // Import useAuthSubmit hook
 import { getValueFor } from "../utils/secureStore";
 import BackButton from "../components/BackButton"; // Import BackButton
+import { useRoute } from "@react-navigation/native";
 
 const DonateRecycleDetail = () => {
   const router = useRouter();
+  const route = useRoute();
+  const { id } = route.params; // Extract the id from route parameters
   const [content, setContent] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [pickUpAddress, setPickUpAddress] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [weight, setWeight] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); // For image
-  const [selectedVideo, setSelectedVideo] = useState(null); // For video
+
+  const [campaign, setCampaign] = useState(null);
+
+  // console.log("id", id);
 
   const { onSubmit } = useAuthSubmit(
-    `${process.env.EXPO_PUBLIC_API_URL}/donations` // Replace with your API endpoint
+    `${process.env.EXPO_PUBLIC_API_URL}/donations/qrcode` // Replace with your API endpoint
   );
 
   const handleIncreaseQuantity = () => setQuantity(quantity + 1);
-  const handleDecreaseQuantity = () =>
-    quantity > 1 && setQuantity(quantity - 1);
+  const handleDecreaseQuantity = () => quantity > 1 && setQuantity(quantity - 1);
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-  };
-
-  const pickVideo = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedVideo(result.assets[0].uri);
-    }
-  };
+  useEffect(() => {
+    const fetchCampaign = async () => {
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/campaigns/${id}`);
+      const data = await response.json();
+      setCampaign(data);
+    };
+    fetchCampaign();
+  }, []);
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -79,28 +68,21 @@ const DonateRecycleDetail = () => {
           Authorization: `Bearer ${accessToken}`,
         },
         body: {
-          user_id: userId,
-          campaign_id: "your_campaign_id", // Thay bằng campaign_id thích hợp
-          donated: {
-            name: content,
-            content: content,
-            weight: quantity, //  hoặc một giá trị weight khác nếu cần
-            quantity: quantity,
-            // img: "", // Thêm trường img nếu cần
-          },
-          from: pickUpAddress, // Thêm trường from
-          to: deliveryAddress, // Thêm trường to
+          userId: userId,
+          campaignId: id, // Thay bằng campaign_id thích hợp
+          content: content,
+          weight: weight, //  hoặc một giá trị weight khác nếu cần
+          quantity: quantity,
         },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to submit donation");
-      }
-
-      Alert.alert("Success", "Donation submitted successfully!");
+      // if (!response.ok) {
+      //   // const errorData = await response.json();
+      //   throw new Error("Failed to submit donation");
+      // }
+      // const data = await response.json();
       // Chuyển hướng hoặc thực hiện các hành động khác sau khi submit thành công
-      router.back();
+      router.replace(`Screens/qrCodeScreen?qrCode=${response.qrCode}`);
     } catch (error) {
       console.error("Error submitting donation:", error);
       Alert.alert("Error", error.message);
@@ -118,76 +100,62 @@ const DonateRecycleDetail = () => {
   };
 
   return (
-    <ScreenWrapper bg={"white"}>
-      <StatusBar style="dark" />
-      {/* <View>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScreenWrapper bg={"white"}>
+        <StatusBar style="dark" />
+        {/* <View>
         <BackButton router={router} />
         <Header title="Donate Details" />
       </View> */}
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <BackButton router={router} />
-          <Text style={styles.logoText}>Donate Details</Text>
-          <View style={{ width: 24 }} />
-        </View>
-        {/* ... (Icon buttons for photo/video) */}
-        <View style={styles.iconContainers}>
-          <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
-            <Icon
-              name="camera"
-              size={hp(3.2)}
-              strokeWidth={2}
-              color={theme.colors.text}
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.container}>
+            {/* Header */}
+            <View style={styles.header}>
+              <BackButton onPress={() => router.back()} />
+              <Text style={styles.logoText}>Donate Details</Text>
+              <View style={{ width: 24 }} />
+            </View>
+            <View style={styles.card}>
+              <Text style={styles.label}>Campaign</Text>
+              <Text style={styles.title}>{campaign?.name}</Text>
+              <Image source={{ uri: campaign?.img }} style={styles.image} />
+              <Text style={styles.description}>{campaign?.description_content}</Text>
+            </View>
+            <Text style={styles.label}>Content</Text>
+            <Input
+              placeholder="Recycled Goods..."
+              value={content}
+              onChangeText={setContent}
+              // other props for Input component if needed
             />
-            <Text style={styles.iconText}>Add photo</Text>
-            {selectedImage && (
-              <Image source={{ uri: selectedImage }} style={styles.thumbnail} />
-            )}
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={pickVideo}>
-            <Icon
-              name="video"
-              size={hp(3.2)}
-              strokeWidth={2}
-              color={theme.colors.text}
+            <Text style={styles.label}>Quantity</Text>
+            <QuantitySelector
+              quantity={quantity}
+              onIncrease={handleIncreaseQuantity}
+              onDecrease={handleDecreaseQuantity}
+              maxQuantity={100}
             />
-            <Text style={styles.iconText}>Add video</Text>
-            {selectedVideo && (
-              <Image source={{ uri: selectedVideo }} style={styles.thumbnail} />
-            )}
-            {/* Hiển thị video đã chọn (nếu có) */}
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.label}>Content</Text>
-        <Input
-          placeholder="Recycled Goods..."
-          value={content}
-          onChangeText={setContent}
-          // other props for Input component if needed
-        />
-        <Text style={styles.label}>Quantity</Text>
-        <QuantitySelector
-          quantity={quantity}
-          onIncrease={handleIncreaseQuantity}
-          onDecrease={handleDecreaseQuantity}
-          maxQuantity={100}
-        />
-        <Text style={styles.label}>From</Text>
-        <Input
-          placeholder="Pick up address..."
-          value={pickUpAddress}
-          onChangeText={setPickUpAddress}
-        />
-        <Text style={styles.label}>To</Text>
-        <Input
-          placeholder="Delivery address..."
-          value={deliveryAddress}
-          onChangeText={setDeliveryAddress}
-        />
-        <Button title="Submit" onPress={handleSubmit} loading={isLoading} />
-      </View>
-    </ScreenWrapper>
+            <Text style={styles.label}>Weight (Kg)</Text>
+            <Input
+              placeholder="Enter weight of the package..."
+              value={weight}
+              keyboardType="numeric"
+              returnKeyType="done"
+              onChangeText={setWeight}
+            />
+            <Button
+              buttonStyle={styles.button}
+              title="Submit"
+              onPress={handleSubmit}
+              loading={isLoading}
+            />
+          </View>
+        </ScrollView>
+      </ScreenWrapper>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -195,6 +163,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: wp(4),
+  },
+  button: {
+    marginVertical: 20,
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 3,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#333",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+    color: "#333",
+  },
+  image: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  description: {
+    fontSize: 16,
+    color: "#666",
   },
   iconContainers: {
     flexDirection: "row",

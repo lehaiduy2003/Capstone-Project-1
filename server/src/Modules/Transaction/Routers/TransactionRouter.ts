@@ -5,6 +5,7 @@ import BaseRouter from "../../../Base/BaseRouter";
 import {
   authenticateUserByReqBody,
   authenticateUserByReqParams,
+  checkTokens,
 } from "../../../middlewares/authenticationMiddleware";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
 import { Role } from "../../../libs/zod/enums/Role";
@@ -21,24 +22,30 @@ class TransactionRouter extends BaseRouter {
   public initRoutes(): void {
     this.router.post(
       "/",
-      validateToken,
+      checkTokens,
       authenticateUserByReqBody,
       authorizeUser([Role.Enum.customer]),
       this.transactionController.create.bind(this.transactionController)
     );
     this.router.patch(
       "/:id",
-      validateToken,
+      checkTokens,
       authenticateUserByReqBody,
       authorizeUser([Role.Enum.customer, Role.Enum.recycler]),
       this.transactionController.updateById.bind(this.transactionController)
     );
     this.router.get(
-      "/:userId",
-      validateToken,
-      authenticateUserByReqParams,
-      authorizeUser([Role.Enum.customer]),
-      this.transactionController.getUserTransactions.bind(this.transactionController)
+      "/:id",
+      checkTokens,
+      authorizeUser([Role.Enum.customer, Role.Enum.recycler]),
+      this.transactionController.getById.bind(this.transactionController)
+    );
+
+    this.router.get(
+      "/users/:id",
+      checkTokens,
+      authorizeUser([Role.Enum.customer, Role.Enum.recycler]),
+      this.transactionController.getPendingTransactions.bind(this.transactionController)
     );
   }
 }

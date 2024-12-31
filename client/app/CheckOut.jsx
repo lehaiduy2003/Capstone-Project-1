@@ -1,4 +1,4 @@
-import { Alert, Button, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Button, Modal, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import Header from "../components/Header";
@@ -64,6 +64,10 @@ const CheckOut = () => {
         id: userId,
       }),
     });
+    if (!response.ok) {
+      Alert.alert("Error", "An error occurred. Please try again.");
+      router.replace("(tabs)/HomePage");
+    }
     const data = await response.json();
     // console.log(data);
     setIntent(data.clientSecret);
@@ -80,6 +84,29 @@ const CheckOut = () => {
       },
     });
     const data = await response.json();
+    if (!data.phone) {
+      Alert.alert(
+        "Missing Information",
+        "Please update your phone number in the profile section. Do you want to go to the profile section?",
+        [
+          {
+            text: "Cancel",
+            onPress: () => {
+              navigation.goBack();
+            },
+            style: "cancel",
+          },
+          {
+            text: "Confirm",
+            onPress: () => {
+              navigation.navigate("Screens/userProfile");
+            },
+            style: "default",
+          },
+        ],
+        { cancelable: true }
+      );
+    }
     setUser(data);
     if (defaultAddress === null) {
       setDefaultAddress(data.address[0]);
@@ -88,8 +115,10 @@ const CheckOut = () => {
   };
 
   const initializePaymentSheet = async () => {
-    const fetchData = await Promise.all([checkout(), getUser()]);
-    const paymentIntent = fetchData[0];
+    await getUser();
+    const paymentIntent = await checkout();
+    // const fetchData = await Promise.all([getUser(), checkout()]);
+    // const paymentIntent = fetchData[0];
 
     const { error } = await initPaymentSheet({
       merchantDisplayName: "Example, Inc.",
@@ -135,7 +164,10 @@ const CheckOut = () => {
         const data = await response.json();
         // console.log(data);
         await clearCart();
-        router.push("Screens/myOrderScreen");
+        router.replace({
+          pathname: "Screens/myOrderScreen",
+          state: { from: "CheckOut" },
+        });
       } catch (error) {
         Alert.alert("Error", "An error occurred. Please try again.");
         throw new Error(error);
@@ -205,11 +237,27 @@ const CheckOut = () => {
       <ScreenWrapper bg={"#f0f3f4"}>
         <View style={styles.container}>
           {loading ? (
-            <Loading />
+            <Modal
+              transparent={true}
+              animationType="fade"
+              visible={loading}
+              onRequestClose={() => {}}
+            >
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <ActivityIndicator size="large" color="green" />
+                  <Text>Loading...</Text>
+                </View>
+              </View>
+            </Modal>
           ) : (
             <>
               {/*Header*/}
-              <Header title={"Check out"} showBackButton></Header>
+              <Header
+                title={"Check out"}
+                showBackButton
+                backButtonPress={() => router.back()}
+              ></Header>
               {/* Shipping Address */}
               <Text style={styles.sectionTitle}>Shipping address</Text>
               <View style={styles.section}>
@@ -221,7 +269,7 @@ const CheckOut = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() =>
-                      navigation.replace("Screens/AddressScreen", {
+                      navigation.push("Screens/AddressScreen", {
                         address: user.address,
                         defaultAddress: defaultAddress,
                       })
@@ -331,6 +379,18 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
     alignItems: "center",
   },
   section: {

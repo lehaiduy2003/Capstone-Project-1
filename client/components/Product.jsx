@@ -1,27 +1,20 @@
 import React, { memo } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { theme } from "../constants/theme";
 import { hp } from "../helpers/common";
 import parsedCurrency from "../utils/currency";
-import { useNavigation } from "@react-navigation/native";
 
 const Product = memo(({ product }) => {
-  const navigation = useNavigation();
   const formattedPrice = parsedCurrency("currency", "VND", product.price);
 
   return (
-    <TouchableOpacity
-      onPress={() => navigation.navigate("productDetails", { productId: product._id })}
-      style={styles.containerProduct}
-    >
-      <View>
-        <Image source={{ uri: product.img }} style={styles.convertImage} />
-        <View style={styles.content}>
-          <Text style={styles.title}>{product.name}</Text>
-          <Text style={styles.price}>{formattedPrice}</Text>
-        </View>
+    <View>
+      <Image source={{ uri: product.img }} style={styles.convertImage} />
+      <View style={styles.content}>
+        <Text style={styles.title}>{product.name}</Text>
+        <Text style={styles.price}>{formattedPrice}</Text>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 });
 

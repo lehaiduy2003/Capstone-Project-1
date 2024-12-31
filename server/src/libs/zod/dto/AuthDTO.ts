@@ -6,6 +6,7 @@ const AuthDTOSchema = z.object({
   user_id: ObjectIdSchema,
   refreshToken: z.string(),
   accessToken: z.string(),
+  role: z.string(),
 });
 
 export const validateAuthDTO = (data: unknown) => {

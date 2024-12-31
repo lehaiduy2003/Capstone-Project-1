@@ -1,131 +1,118 @@
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import useSecureStore from "../store/useSecureStore";
-/**
- *
- * @param {string} folder the folder in Cloudinary to upload the image to, only 3 valid folder: ```users, products, campaigns.```
- * @returns
- */
-const useUploadVideo = (folder) => {
+const useUploadVideo = (folder = "products") => {
   const [video, setVideo] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const { accessToken, userId } = useSecureStore();
 
-  // Save the images uri
-  const save = (result) => {
-    if (!result.canceled) {
-      setVideo(result.assets[0].uri); // Save the image uri, only the first image is saved
+  const pickVideo = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access media library is required.");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets) {
+        setVideo(result.assets[0].uri);
+        console.log("Selected Video URI:", result.assets[0].uri);
+      } else {
+        console.log("Video picker canceled or no assets found.");
+      }
+    } catch (err) {
+      console.error("Error during video selection:", err);
+      alert("Failed to pick video.");
     }
   };
 
-  const pickImage = async () => {
-    // Request permission to access the media library
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need camera roll permissions to make this work!");
-      return;
-    }
-
-    // Launch the image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["video"], // Only video are allowed
-      quality: 1,
-      allowsMultipleSelection: false, // Allow only one image to be selected
-    });
-
-    save(result);
-  };
-
-  const recordVideo = async () => {
-    // Request permission to access the camera
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need camera permissions to make this work!");
-      return;
-    }
-
-    // Launch the camera
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: folder === "users", // Only allow editing for user profile pictures
-      aspect: [4, 3],
-      quality: 1,
-    });
-    save(result);
-  };
-
-  const uploadImage = async () => {
+  const uploadVideo = async () => {
     if (!video) {
-      alert("No image selected");
-      return;
+      alert("No video selected.");
+      return null;
     }
 
     setUploading(true);
     setError(null);
 
     try {
-      // Get blob from image uri (for file name and type)
-      const blobResponse = await fetch(video);
-      const blob = await blobResponse.blob();
-      const fileName = video.split("/").pop() || "uploaded_image.jpg";
-
-      // Get signature from server
-      const signatureResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cloudinary/sign`, {
+      console.log("Requesting signature from backend...");
+      const signatureResponse = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/cloudinary/sign`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          userId,
-          folder,
-        }),
+        body: JSON.stringify({ userId, folder }),
       });
-      const signatureData = await signatureResponse.json();
-      const { signature, apiKey, timestamp, uploadPreset } = signatureData;
 
-      // Create form data to upload image
+      if (!signatureResponse.ok) {
+        const errorText = await signatureResponse.text();
+        console.error("Signature Error Response:", errorText);
+        throw new Error("Failed to get upload signature. Check backend or ngrok setup.");
+      }
+
+      const { signature, apiKey, timestamp, uploadPreset } = await signatureResponse.json();
+      console.log("Signature Data:", {
+        signature,
+        apiKey,
+        timestamp,
+        uploadPreset,
+      });
+
+      // Validate signature generation logic consistency
+      const expectedStringToSign = `timestamp=${timestamp}&upload_preset=${uploadPreset}`;
+      console.log("String to Sign:", expectedStringToSign);
+
       const formData = new FormData();
       formData.append("file", {
         uri: video,
-        name: fileName,
-        type: blob.type || "image/jpeg",
+        type: "video/mp4",
+        name: video.split("/").pop() || "uploaded_video.mp4",
       });
       formData.append("upload_preset", uploadPreset);
       formData.append("api_key", apiKey);
       formData.append("timestamp", timestamp);
       formData.append("signature", signature);
 
-      // Upload image to Cloudinary
-      const response = await fetch(`${process.env.EXPO_PUBLIC_CLOUDINARY_API}/video/upload`, {
+      console.log("Uploading video to Cloudinary...");
+      const uploadResponse = await fetch(`${process.env.EXPO_PUBLIC_CLOUDINARY_API}/video/upload`, {
         method: "POST",
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to upload image");
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error("Upload Error Response:", errorText);
+        throw new Error("Failed to upload video. Check Cloudinary configuration.");
       }
 
-      const data = await response.json();
-      alert("Image uploaded successfully");
-      // Return the secure url of the uploaded image
-      //this is the url to display the image and store in the database
+      const data = await uploadResponse.json();
+      console.log("Video uploaded successfully:", data.secure_url);
       return data.secure_url;
     } catch (err) {
+      console.error("Error during video upload:", err);
+      alert("Video upload failed. Please check network and backend settings.");
       setError(err.message);
-      alert("Failed to upload image");
+      return null;
     } finally {
       setUploading(false);
     }
   };
 
   return {
-    image: video,
+    video,
     uploading,
     error,
-    pickImage,
-    takePhoto: recordVideo,
-    uploadImage,
+    pickVideo,
+    uploadVideo,
+    setVideo,
   };
 };
 

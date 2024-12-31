@@ -4,6 +4,7 @@ import BaseController from "../../../Base/BaseController";
 import AuthService from "../Services/AuthService";
 import { validateSignUpDTO } from "../../../libs/zod/dto/SignUpDTO";
 import getCache from "../../../libs/redis/cacheGetting";
+import { setCookies } from "../../../middlewares/authenticationMiddleware";
 
 export default class AuthController extends BaseController {
   private readonly authService: AuthService;
@@ -93,7 +94,10 @@ export default class AuthController extends BaseController {
       // console.log("result", result);
       if (!result) {
         res.status(502).send({ message: "User already exists" });
-      } else res.status(201).send(result);
+      } else {
+        setCookies(res, result.accessToken, result.refreshToken);
+        res.status(201).send(result);
+      }
     } catch (error) {
       this.error(error, res);
     }
@@ -129,9 +133,20 @@ export default class AuthController extends BaseController {
       const result = await this.authService.signIn(account.email, account.password);
       // console.log("result", result);
       if (!result) {
-        res.status(502).send({ message: "Invalid credential" });
-      } else res.status(200).send(result);
+        res.status(502).send({ success: false, message: "Account Not Found" });
+      } else {
+        setCookies(res, result.accessToken, result.refreshToken);
+        res.status(200).send(result);
+      }
     } catch (error) {
+      if (error instanceof Error && error.message === "Invalid credentials") {
+        res.status(400).send({ success: false, message: "Wrong password" });
+        return;
+      }
+      if (error instanceof Error && error.message === "Account is inactive") {
+        res.status(401).send({ success: false, message: "Account is inactive" });
+        return;
+      }
       this.error(error, res);
     }
   }

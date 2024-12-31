@@ -1,16 +1,18 @@
 import { z } from "zod";
 import ObjectIdSchema from "../ObjectId";
+import { DobSchema } from "../DateTransformer";
+import { PhoneSchema } from "../PhoneTransformer";
 
 const UserProfileDTOSchema = z.object({
   _id: ObjectIdSchema,
   name: z.string(),
   avatar: z.string().url({ message: "avatar must be an url" }),
-  phone: z.string().default(""),
+  phone: PhoneSchema.optional(),
   followers: z.number().optional(),
   following: z.number().optional(),
   reputation_score: z.number().default(100),
   gender: z.boolean().default(true),
-  dob: z.date(),
+  dob: DobSchema.optional(),
   bio: z.string(),
   joined_campaigns: z.array(ObjectIdSchema).default([]),
   address: z.array(z.string()), // for get only 1 address of user profile

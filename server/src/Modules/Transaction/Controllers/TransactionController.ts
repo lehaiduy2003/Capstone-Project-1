@@ -84,15 +84,29 @@ export default class TransactionController extends BaseController {
     }
   }
 
-  public async getUserTransactions(req: Request, res: Response): Promise<void> {
-    if (!this.checkReqBody(req, res)) return;
+  public async getById(req: Request, res: Response): Promise<void> {
+    if (!this.checkReqParams(req, res)) return;
     try {
-      const user_id = validateObjectId(req.body.user_id);
-      const query = validateFilter(req.query);
-      const transaction = await this.transactionService.findManyByUserId(user_id, query);
+      const id = new ObjectId(req.params.id);
+      const transaction = await this.transactionService.findById(id);
+      res.status(200).send({ success: true, data: transaction });
+    } catch (error) {
+      this.error(error, res);
+    }
+  }
 
-      if (!transaction) res.status(404).send({ success: false, message: "Transaction not found" });
-      else res.status(200).send(transaction);
+  async getPendingTransactions(req: Request, res: Response): Promise<void> {
+    if (!this.checkReqQuery(req, res)) return;
+    try {
+      const filter = validateFilter(req.query);
+      const ownerId = new ObjectId(String(req.params.id));
+      const transactions = await this.transactionService.getPendingTransactions(ownerId, filter);
+
+      if (!transactions || transactions.length === 0) {
+        res.status(404).send({ success: false, message: "No pending transactions found" });
+        return;
+      }
+      res.status(200).send({ success: true, data: transactions });
     } catch (error) {
       this.error(error, res);
     }

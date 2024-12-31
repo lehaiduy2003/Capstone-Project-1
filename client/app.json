@@ -31,7 +31,16 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-font"
+      "expo-font",
+      "expo-barcode-scanner",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -41,6 +50,7 @@
         "projectId": "ec9e4307-cac8-4631-94b9-7749d3a1b46d"
       }
     },
-    "owner": "lehaiduy2003"
+    "owner": "lehaiduy2003",
+    "newArchEnabled": true
   }
 }

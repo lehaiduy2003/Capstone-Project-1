@@ -10,16 +10,18 @@ import {
   ActivityIndicator,
 } from "react-native";
 import ScreenWrapper from "../../components/ScreenWrapper";
-import BackButton from "../../components/BackButton";
-import { useRouter } from "expo-router";
 import { theme } from "../../constants/theme";
 import useSecureStore from "../../store/useSecureStore";
-import { getValueFor } from "../../utils/secureStore";
 import parsedCurrency from "../../utils/currency";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import Header from "../../components/Header";
+import { useRouter } from "expo-router";
 
 const MyOrdersScreen = () => {
+  const navigation = useNavigation();
   const router = useRouter();
-  const { userId, accessToken, setUserId, setAccessToken } = useSecureStore(); // Use useSecureStore to get userId and accessToken
+  const route = useRoute();
+  const { userId, accessToken } = useSecureStore(); // Use useSecureStore to get userId and accessToken
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
   const [loading, setLoading] = useState(true);
@@ -33,6 +35,13 @@ const MyOrdersScreen = () => {
     // };
 
     // loadAuthInfo(); // Call function when component mounts
+    if (route.params?.fromScreen === "CheckOut") {
+      // Clear the history and set the homepage screen
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "(tabs)/HomePage" }],
+      });
+    }
 
     const fetchOrders = async () => {
       setLoading(true);
@@ -45,29 +54,27 @@ const MyOrdersScreen = () => {
         }
         console.log("userId: ", userId); // Check userId
 
-        // Log request details
-        console.log("Request URL:", `${process.env.EXPO_PUBLIC_API_URL}/transactions/${userId}`);
-        console.log("Request Headers:", {
-          Authorization: `Bearer ${accessToken}`,
-        });
+        // // Log request details
+        // console.log(
+        //   "Request URL:",
+        //   `${process.env.EXPO_PUBLIC_API_URL}/users/${userId}/transactions`
+        // );
+        // console.log("Request Headers:", {
+        //   Authorization: `Bearer ${accessToken}`,
+        // });
 
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/transactions/${userId}`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.log(response.status);
-          console.log("errorData", errorData);
-
-          throw new Error(errorData.message || "Error fetching order data");
-        }
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/users/${userId}/transactions`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
 
         const data = await response.json();
-        setOrders(data);
+        setOrders(data.data);
       } catch (err) {
         setError(err); // Set error state when an error occurs
         console.error("Error fetching order data:", err);
@@ -126,8 +133,8 @@ const MyOrdersScreen = () => {
     return (
       <ScreenWrapper bg={"white"}>
         <StatusBar style="dark" />
+        <Header title={"Check out"} showBackButton></Header>
         <View style={styles.container}>
-          <BackButton router={router} />
           <Text style={styles.title}>My Orders</Text>
           <Text style={styles.errorText}>Error: {error.message}</Text>
         </View>
@@ -138,8 +145,12 @@ const MyOrdersScreen = () => {
   return (
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
+      <Header
+        title={"Check out"}
+        showBackButton
+        backButtonPress={() => router.replace("account")}
+      ></Header>
       <View style={styles.container}>
-        <BackButton router={router} />
         <Text style={styles.title}>My Orders</Text>
         <View style={styles.toggleButton}>
           <TouchableOpacity

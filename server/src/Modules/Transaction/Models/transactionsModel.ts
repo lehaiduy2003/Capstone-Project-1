@@ -20,8 +20,6 @@ const transactionsSchema: Schema<Transaction> = new Schema({
   shipping_address: { type: String },
   payment_method: { type: String, enum: ["card", "cash"] },
   payment_intent: { type: String },
-  user_name: { type: String },
-  user_phone: { type: String },
   payment_status: { type: String, enum: ["paid", "unpaid"] },
   transaction_status: {
     type: String,

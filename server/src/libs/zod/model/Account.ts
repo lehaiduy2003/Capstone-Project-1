@@ -11,7 +11,7 @@ const AccountSchema = z.object({
   created_at: z.date().default(new Date()),
   updated_at: z.date().default(new Date()),
   is_verified: z.boolean().default(false),
-  status: AccountStatusEnum.default("active"),
+  status: AccountStatusEnum.default("inactive"),
 });
 
 export const validateAccount = (data: unknown) => {

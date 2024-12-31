@@ -1,33 +1,34 @@
-import { StyleSheet, Text, View, FlatList, Alert } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import ScreenWrapper from '../../components/ScreenWrapper';
-import Header from '../../components/Header';
-import LottieView from 'lottie-react-native';
+import { StyleSheet, Text, View, FlatList, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import ScreenWrapper from "../../components/ScreenWrapper";
+import Header from "../../components/Header";
+import LottieView from "lottie-react-native";
 import ProductEditForm from "../../components/ProductEditForm";
 import Button from "../../components/Button";
-import { getValueFor } from "../../utils/secureStore";
 import useProductStore from "../../store/useProductStore";
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
+import useSecureStore from "../../store/useSecureStore";
 
 const MyProductScreens = () => {
-  const { products, fetchProductsByOwner, updateProduct, deleteProduct, error, loading } = useProductStore();
+  const { products, fetchProductsByOwner, updateProduct, deleteProduct, error, loading } =
+    useProductStore();
   const [editingProduct, setEditingProduct] = useState(null);
-  const [userId, setUserId] = useState(null);
   const router = useRouter();
 
   // Fetch the logged-in user ID from storage
-  useEffect(() => {
-    const fetchUserId = async () => {
-      const userIdFromStorage = await getValueFor("userId");
-      setUserId(userIdFromStorage);
-    };
-    fetchUserId();
-  }, []);
+  const { userId } = useSecureStore();
 
-  // Fetch products owned by the logged-in user
   useEffect(() => {
     if (userId) {
       fetchProductsByOwner(userId);
+    }
+  }, [userId]);
+
+  // Fetch products owned by the logged-in user when userId is available
+  useEffect(() => {
+    if (userId) {
+      console.log("Fetching products for userId:", userId); // Add this log
+      fetchProductsByOwner(userId); // Fetch products only when userId is available
     }
   }, [userId]);
 
@@ -37,47 +38,55 @@ const MyProductScreens = () => {
   };
 
   const handleDeleteProduct = (productId) => {
-    Alert.alert(
-      "Delete Product",
-      "Are you sure you want to delete this product?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => deleteProduct(productId),
-        },
-      ]
-    );
+    Alert.alert("Delete Product", "Are you sure you want to delete this product?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteProduct(productId),
+      },
+    ]);
   };
+
   const navigateToAddNewProduct = () => {
     router.push({
       pathname: `/Screens/addNewProductScreen`,
     });
-  }
+  };
+
   // Filter products to display only those owned by the logged-in user
   const filteredProducts = products.filter((product) => String(product.owner) === String(userId));
 
   return (
     <ScreenWrapper>
-      <Header title="My Products" showBackButton />
+      <Header
+        title="My Products"
+        showBackButton
+        backButtonPress={() => router.replace("HomePage")}
+      />
       <View style={styles.container}>
         {loading && <Text style={styles.loadingText}>Loading products...</Text>}
         {error && <Text style={styles.errorText}>Error: {error}</Text>}
 
-        <View style={styles.newProductContainer} >
+        {/* Add New Product */}
+        <View style={styles.newProductContainer}>
           <LottieView
             style={styles.newProduct}
-            source={require('../../assets/animation/animation_add_new_product.json')}
+            source={require("../../assets/animation/animation_add_new_product.json")}
             autoPlay
             loop
           />
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }} onPress={navigateToAddNewProduct}>Add New Product</Text>
-        </View>
-        <View style={styles.listProductTitle}>
-          <Text style={{ fontSize: 26, fontWeight: 'bold' }}>All product</Text>
+          <Text style={{ fontSize: 16, fontWeight: "bold" }} onPress={navigateToAddNewProduct}>
+            Add New Product
+          </Text>
         </View>
 
+        {/* Title Section */}
+        <View style={styles.listProductTitle}>
+          <Text style={{ fontSize: 26, fontWeight: "bold" }}>All Products</Text>
+        </View>
+
+        {/* Product List */}
         <FlatList
           data={filteredProducts}
           keyExtractor={(item) => item._id}
@@ -94,6 +103,7 @@ const MyProductScreens = () => {
           )}
         />
 
+        {/* Edit Form for Selected Product */}
         {editingProduct && (
           <ProductEditForm
             product={editingProduct}
@@ -109,7 +119,7 @@ const MyProductScreens = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   loadingText: {
     textAlign: "center",
@@ -128,7 +138,7 @@ const styles = StyleSheet.create({
     height: 150,
   },
   newProductContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 16,
     borderRadius: 8,
     backgroundColor: "#f9f9f9",
@@ -141,7 +151,7 @@ const styles = StyleSheet.create({
     width: 300,
   },
   listProductTitle: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: 16,
     borderRadius: 8,
     backgroundColor: "#f9f9f9",
@@ -151,9 +161,9 @@ const styles = StyleSheet.create({
     shadowRadius: 1.41,
     elevation: 2,
     height: 100,
-    width: '100%',
+    width: "100%",
     marginTop: 50,
-    justifyContent: 'center',
+    justifyContent: "center",
     marginBottom: 50,
   },
   productCard: {

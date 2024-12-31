@@ -4,7 +4,10 @@ import UserCampaignService from "../Services/UserCampaignService";
 import validateToken from "../../../middlewares/tokenMiddleware";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
 import { Role } from "../../../libs/zod/enums/Role";
-import { authenticateUserByReqParams } from "../../../middlewares/authenticationMiddleware";
+import {
+  authenticateUserByReqParams,
+  checkTokens,
+} from "../../../middlewares/authenticationMiddleware";
 class UserProfileRouter extends BaseRouter {
   private readonly userCampaignController: UserCampaignController;
   public constructor(userCampaignController: UserCampaignController) {
@@ -16,7 +19,7 @@ class UserProfileRouter extends BaseRouter {
   public initRoutes(): void {
     this.router.get(
       "/",
-      validateToken,
+      checkTokens,
       authenticateUserByReqParams,
       authorizeUser([Role.Enum.customer]),
       this.userCampaignController.getUserCampaignByUserId.bind(this.userCampaignController)
@@ -24,7 +27,7 @@ class UserProfileRouter extends BaseRouter {
 
     this.router.delete(
       "/:id",
-      validateToken,
+      checkTokens,
       authenticateUserByReqParams,
       authorizeUser([Role.Enum.customer]),
       this.userCampaignController.leaveCampaign.bind(this.userCampaignController)
@@ -32,7 +35,7 @@ class UserProfileRouter extends BaseRouter {
 
     this.router.patch(
       "/:id",
-      validateToken,
+      checkTokens,
       authenticateUserByReqParams,
       authorizeUser([Role.Enum.customer]),
       this.userCampaignController.joinCampaign.bind(this.userCampaignController)

@@ -20,7 +20,7 @@ The application aims to connect users who are interested in trading eco-friendly
 - **Languages**: JavaScript, TypeScript
 - **Frameworks**: React Native, Expo, Express
 - **Databases**: MongoDB, Redis
-- **Services**: Firebase, Twilio, Stripe, Shippo
+- **Services**: Cloudinary, Ngrok, Stripe, Shippo
 
 ### Repository
 
@@ -39,8 +39,8 @@ C1SE.43
 
 - **Member 1**: Le Hai Duy - [GitHub](https://github.com/lehaiduy2003)
 - **Member 2**: Dang Van Thoi Dai - [GitHub](https://github.com/thoidai12234556)
-- **Member 3**: Phung Minh Nghia - [GitHub](https://github.com/phungminhnghia)
-- **Member 4**: Le Trung Hieu - [GitHub](https://github.com/trhieu2310)
+- **Member 3**: Phung Minh Nghia - [GitHub](https://github.com/phungminhnghia) - (leaved in after sprint 1)
+- **Member 4**: Le Trung Hieu - [GitHub](https://github.com/trhieu2310) - (leaved in after sprint 1)
 - **Member 5**: Nguyen Anh Vu - [GitHub](https://github.com/vunguyenDev92)
 
 <hr/>
@@ -74,7 +74,7 @@ Ensure you have the following installed on your system:
 
 ### Environment Variables
 
-Ensure you have a `.env` file in the root directory with the following of `.env.example` file
+Ensure you have a `.env` file in the root directory with the following of `.env.example` file in each server.
 
 ### Running the Project
 

@@ -6,6 +6,11 @@ import UserProfileService from "../../UserProfile/Services/UserProfileService";
 import BaseRouter from "../../../Base/BaseRouter";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
 import { Role } from "../../../libs/zod/enums/Role";
+import {
+  checkTokens,
+  generateNewAccessToken,
+  signOut,
+} from "../../../middlewares/authenticationMiddleware";
 
 class AuthRouter extends BaseRouter {
   private readonly authController: AuthController;
@@ -19,15 +24,12 @@ class AuthRouter extends BaseRouter {
   public initRoutes(): void {
     this.router.post("/sign-in", this.authController.signIn.bind(this.authController));
     this.router.post("/sign-up", this.authController.signUp.bind(this.authController));
-    this.router.post(
-      "/refresh",
-      validateToken,
-      this.authController.generateNewAccessToken.bind(this.authController)
-    );
+    this.router.post("/sign-out", signOut);
+    this.router.post("/refresh", generateNewAccessToken);
     this.router.patch("/activate", this.authController.activateAccount.bind(this.authController));
     this.router.patch(
       "/deactivate",
-      validateToken,
+      checkTokens,
       authorizeUser([Role.Enum.customer]),
       this.authController.deactivateAccount.bind(this.authController)
     );

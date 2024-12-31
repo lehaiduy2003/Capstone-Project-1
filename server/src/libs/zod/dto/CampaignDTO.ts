@@ -19,7 +19,6 @@ export const CampaignDTOSchema = z.object({
     ]),
   guide: z
     .string()
-    .url({ message: "img must be an url" })
     .default(
       "https://t3.ftcdn.net/jpg/05/04/28/96/360_F_504289605_zehJiK0tCuZLP2MdfFBpcJdOVxKLnXg1.jpg"
     ),

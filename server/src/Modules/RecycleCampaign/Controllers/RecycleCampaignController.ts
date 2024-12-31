@@ -1,11 +1,12 @@
 import BaseController from "../../../Base/BaseController";
 import RecycleCampaignService from "../Services/RecycleCampaignService";
-
+import QRCode from "qrcode";
 import { Request, Response } from "express";
 import { validateRecycleCampaign } from "../../../libs/zod/model/RecyclingCampaign";
 import { validateFilter } from "../../../libs/zod/Filter";
 import saveToCache from "../../../libs/redis/cacheSaving";
 import { ObjectId } from "mongodb";
+import { Donate, validateDonate } from "../../../libs/zod/Donate";
 export default class RecycleCampaignController extends BaseController {
   private recycleCampaignService: RecycleCampaignService;
 
@@ -23,6 +24,60 @@ export default class RecycleCampaignController extends BaseController {
       res.status(201).send({ campaign });
     } catch (e) {
       this.error(e, res);
+    }
+  }
+
+  public async closeCampaign(req: Request, res: Response) {
+    if (!this.checkReqParams(req, res)) return;
+    try {
+      const id = new ObjectId(req.params.id);
+      const campaign = await this.recycleCampaignService.closeCampaign(id);
+
+      res.status(200).send({ campaign });
+    } catch (e) {
+      this.error(e, res);
+    }
+  }
+
+  public async openCampaign(req: Request, res: Response) {
+    if (!this.checkReqParams(req, res)) return;
+    try {
+      const id = new ObjectId(req.params.id);
+      const campaign = await this.recycleCampaignService.openCampaign(id);
+
+      res.status(200).send({ campaign });
+    } catch (e) {
+      this.error(e, res);
+    }
+  }
+
+  public async findByUserId(req: Request, res: Response) {
+    if (!this.checkReqParams(req, res)) return;
+    try {
+      const userId = new ObjectId(req.params.id);
+      const campaigns = await this.recycleCampaignService.findByUserId(userId);
+      if (!campaigns || campaigns.length === 0) {
+        res.status(404).send({ success: false, message: "No campaigns found" });
+      } else {
+        // await saveToCache(req.body.cacheKey, 30, campaigns); // save to cache for 30 seconds
+        res.status(200).send(campaigns);
+      }
+    } catch (error) {
+      this.error(error, res);
+    }
+  }
+
+  public async donateCampaign(req: Request, res: Response) {
+    if (!this.checkReqBody(req, res)) return;
+    try {
+      // console.log("QR code scanned");
+
+      const query = req.query;
+      const data = validateDonate(query);
+      const qrCode = await this.recycleCampaignService.donateCampaign(data);
+      res.status(200).send({ success: true, qrCode });
+    } catch (error) {
+      this.error(error, res);
     }
   }
 
@@ -74,7 +129,7 @@ export default class RecycleCampaignController extends BaseController {
         res.status(404).send({ message: "Product not found" });
         return;
       }
-      await saveToCache(req.body.cacheKey, 10, product); // save to cache for 10 seconds
+      // await saveToCache(req.body.cacheKey, 10, product); // save to cache for 10 seconds
       res.status(200).send(product);
     } catch (error) {
       this.error(error, res);

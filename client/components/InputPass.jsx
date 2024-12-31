@@ -8,9 +8,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 const InputPass = (props, status) => {
   const [showPassword, setshowPassword] = useState(false);
   return (
-    <View
-      style={[styles.container, props.containerStyles && props.containerStyles]}
-    >
+    <View style={[styles.container, props.containerStyles && props.containerStyles]}>
       {props.icon && props.icon}
       <TextInput
         style={{
@@ -18,16 +16,13 @@ const InputPass = (props, status) => {
           borderColor: status ? theme.colors.rose : theme.colors.text,
         }}
         placeholderTextColor={theme.colors.textLight}
+        textContentType={"oneTimeCode"}
         ref={props.inputRef && props.inputRef}
         {...props}
         secureTextEntry={!showPassword}
       />
       <TouchableOpacity onPress={() => setshowPassword(!showPassword)}>
-        <Icon
-          name={showPassword ? "visibility" : "visibility-off"}
-          size={24}
-          color="gray"
-        />
+        <Icon name={showPassword ? "visibility" : "visibility-off"} size={24} color="gray" />
       </TouchableOpacity>
     </View>
   );

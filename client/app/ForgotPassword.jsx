@@ -5,7 +5,6 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import useAuthSubmit from "../hooks/useAuthSubmit";
 import BackButton from "../components/BackButton";
-import { getValueFor } from "../utils/secureStore";
 import { useRouter } from "expo-router";
 import Icon from "../assets/icons";
 import { hp } from "../helpers/common";
@@ -20,17 +19,13 @@ const ForgotPassword = () => {
   //   `${process.env.EXPO_PUBLIC_API_URL}/profile/forgot-password`
   // );
 
-  const { loading, error, onSubmit } = useAuthSubmit(
-    `${process.env.EXPO_PUBLIC_API_URL}/otp/send`
-  );
+  const { loading, error, onSubmit } = useAuthSubmit(`${process.env.EXPO_PUBLIC_API_URL}/otp/send`);
 
   const handleSubmit = async () => {
     if (!email) {
       Alert.alert("Error", "Please enter your email");
       return;
     }
-
-    const accessToken = await getValueFor("accessToken");
 
     try {
       const response = await onSubmit({
@@ -66,7 +61,7 @@ const ForgotPassword = () => {
         // Navigate to OtpScreen, passing email as a URL parameter.
         router.push({
           pathname: "Screens/otpScreen", // Note the correct path.
-          params: { email },
+          params: { email, type: "forgot" },
         });
       } else {
         // Handle other server responses that are not error but not equal to "Otp sent".
@@ -87,8 +82,8 @@ const ForgotPassword = () => {
         <Text style={styles.title}>Forgot Password</Text>
 
         <Text style={styles.subtitle}>
-          Enter your email for the verification process. {"\n"}We will send 6
-          digits code to your email.
+          Enter your email for the verification process. {"\n"}We will send 6 digits code to your
+          email.
         </Text>
 
         <View style={styles.form}>

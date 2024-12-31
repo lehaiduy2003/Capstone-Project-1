@@ -1,27 +1,42 @@
 import { useState } from "react";
 import useLoadingStore from "../store/useLoadingStore";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-
-const usePagination = () => {
+import { getValueFor } from "../utils/secureStore";
+const usePagination = (searchType, isSearching = false, searchQuery = null, type = null) => {
   const { isLoading, setLoading } = useLoadingStore();
   const [sort, setSort] = useState("updated_at");
   const [order, setOrder] = useState("desc");
-
   const queryClient = useQueryClient();
 
   const fetchProducts = async ({ pageParam = 0 }) => {
     setLoading(true);
-    // console.log("fetching products");
+    console.log("fetching products", searchType, type, searchQuery, isSearching);
 
-    const response = await fetch(
-      `${process.env.EXPO_PUBLIC_API_URL}/products?limit=30&skip=${pageParam}&sort=${sort}&order=${order}`
-    );
+    let url = `${process.env.EXPO_PUBLIC_API_URL}/${searchType}`;
+    if (isSearching) {
+      if (!searchQuery && !type) {
+        throw new Error("Query or type is required for searching");
+      }
+      url += `/search?limit=30&skip=${pageParam}&sort=${sort}&order=${order}`;
+    } else url += `?limit=30&skip=${pageParam}&sort=${sort}&order=${order}`;
+    if (searchQuery) {
+      url += `&query=${searchQuery}`;
+    }
+    if (type) {
+      url += `&type=${type}`;
+    }
+
+    console.log("url", url);
+
+    const response = await fetch(url);
+
     setLoading(false);
     if (!response.ok) {
       const errorData = await response.json(); // Lấy dữ liệu lỗi từ server
-      throw new Error(errorData.message || "Failed to fetch products"); // Ném lỗi với thông báo từ server
+      throw new Error(errorData.message || "Failed to fetch data"); // Ném lỗi với thông báo từ server
     }
-    return await response.json();
+    const data = await response.json(); // Lấy dữ liệu từ server
+    return data;
   };
 
   const {
@@ -31,17 +46,19 @@ const usePagination = () => {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["products", { sort, order }],
+    queryKey: [searchType, sort, order, searchQuery, type],
     queryFn: fetchProducts,
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length === 0) return undefined;
       return pages.length * 30;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 1 * 60 * 1000, // 1 minutes for fresh data
+    cacheTime: 5 * 60 * 1000, // 5 minutes for cache
   });
 
   const products = data ? data.pages.flat() : [];
+
+  // console.log("products", products);
 
   const onEndReached = () => {
     if (hasNextPage) {
@@ -51,12 +68,12 @@ const usePagination = () => {
 
   const sortOption = (sort) => {
     setSort(sort);
-    queryClient.invalidateQueries("products");
+    queryClient.invalidateQueries([searchType, sort, order, searchQuery, type]);
   };
 
   const orderOption = (order) => {
     setOrder(order);
-    queryClient.invalidateQueries("products");
+    queryClient.invalidateQueries([searchType, sort, order, searchQuery, type]);
   };
 
   return {
@@ -67,6 +84,8 @@ const usePagination = () => {
     sortOption,
     orderOption,
     onEndReached,
+    hasNextPage,
+    fetchNextPage,
   };
 };
 

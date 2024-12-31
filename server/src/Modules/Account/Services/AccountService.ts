@@ -101,13 +101,15 @@ export default class AccountService {
 
   async activateAccount(email: string, session: ClientSession): Promise<Account> {
     const account = await accountsModel.findOne({ email: email });
-    console.log("account", account);
+    // console.log("account", account);
     if (!account || account.status === "active") {
       throw new Error("Account not found or already activated");
     }
 
-    const updatedStatus = await account.updateOne({ status: "active" }, { session });
-    if (!updatedStatus?.isModified) {
+    const updatedStatus = await account.updateOne({ status: "active" }, { new: true, session });
+    // console.log("updatedStatus", updatedStatus);
+
+    if (updatedStatus.modifiedCount < 1) {
       throw new Error("Failed to activate account");
     }
     return updatedStatus;

@@ -7,7 +7,7 @@ import Input from "../components/Input";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { theme } from "../constants/theme";
 import { hp, wp } from "../helpers/common";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InputPass from "../components/InputPass";
 import { emailIsValid, passwordMatches } from "../utils/inputValidation";
 import useAuthSubmit from "../hooks/useAuthSubmit";
@@ -21,11 +21,12 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { initAuthInfo } = useSecureStore();
   const router = useRouter();
 
-  const { loading, onSubmit } = useAuthSubmit(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`);
+  // const { loading, onSubmit } = useAuthSubmit(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`);
 
   const onChangeEmail = (value) => {
     setEmail(value);
@@ -50,26 +51,77 @@ const SignUp = () => {
     console.log(confirmPasswordError);
   };
 
+  useEffect(() => {
+    // Clear all fields when the component mounts
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setEmailError(false);
+    setConfirmPasswordError(false);
+  }, []);
+
   const handleSignUp = async () => {
+    if (!email || !password || !confirmPassword) {
+      Alert.alert("Sign Up", "Please fill in all fields.");
+      return;
+    }
+    if (emailError) {
+      Alert.alert("Sign Up", "Please correct email in the form.");
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert("Sign Up", "Password must be at least 6 characters.");
+      return;
+    }
+    if (confirmPasswordError) {
+      Alert.alert("Sign Up", "Passwords do not match.");
+      return;
+    }
     try {
-      const data = await onSubmit({
-        body: { email: email, password: password },
+      setLoading(true);
+      const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-up`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
 
-      const accessToken = String(data.accessToken);
-      const refreshToken = String(data.refreshToken);
-      const userId = String(data.user_id);
+      const data = await response.json();
+      // console.log("API response:", data);
 
-      // console.log(accessToken, refreshToken, userId);
-      await save("accessToken", accessToken);
-      await save("refreshToken", refreshToken);
-      await save("user_id", userId);
-      await save("isLoggedIn", "true");
+      if (!response.ok) {
+        Alert.alert("Sign Up", `An error occurred. ${data.message}`);
+        setLoading(false);
+        return;
+      }
 
-      await initAuthInfo();
+      const sendOtpResponse = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/otp/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identifier: email,
+          type: "activate",
+        }),
+      });
 
-      console.log("Tokens saved successfully");
-      router.push("(tabs)/HomePage");
+      if (!sendOtpResponse.ok) {
+        Alert.alert("Sign Up", "An error occurred. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(false);
+
+      router.push({
+        pathname: "Screens/otpScreen",
+        params: { email: email, type: "activate", password: password },
+      });
     } catch (error) {
       Alert.alert("Sign Up", "An error occurred. Please try again.");
     }
@@ -79,7 +131,7 @@ const SignUp = () => {
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
       <View style={styles.container}>
-        <BackButton router={router} />
+        <BackButton onPress={() => router.back()} />
 
         {/* Welcome */}
         <View>
@@ -130,6 +182,20 @@ const SignUp = () => {
               Sign In
             </Text>
           </Pressable>
+          <View style={styles.divider} />
+          <Pressable onPress={() => router.push("RecyclerSignUp")}>
+            <Text
+              style={[
+                styles.footerText,
+                {
+                  color: theme.colors.primaryDark,
+                  fontWeight: theme.fonts.semibold,
+                },
+              ]}
+            >
+              Create recycler account
+            </Text>
+          </Pressable>
         </View>
       </View>
     </ScreenWrapper>
@@ -140,7 +206,7 @@ export default SignUp;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 45,
+    gap: 30,
     paddingHorizontal: wp(5),
   },
   welcomeText: {
@@ -160,5 +226,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: theme.colors.text,
     fontSize: hp(1.6),
+  },
+  divider: {
+    width: "80%",
+    height: 1,
+    alignSelf: "center",
+    backgroundColor: "#000",
+    marginVertical: 10,
   },
 });

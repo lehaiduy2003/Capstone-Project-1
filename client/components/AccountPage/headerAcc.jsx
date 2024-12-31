@@ -3,45 +3,56 @@ import React from "react";
 import { theme } from "../../constants/theme";
 import { hp, wp } from "../../helpers/common";
 import Icon from "../../assets/icons";
-import { useRouter } from "expo-router";
-import useSecureStore from "../../store/useSecureStore";
+import { deleteValueFor } from "../../utils/secureStore";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 
-const HeaderAcc = () => {
-  const router = useRouter();
-  const { clearAuthInfo } = useSecureStore();
+const HeaderAcc = ({ user }) => {
+  const navigation = useNavigation();
+
   const handleClick = (label) => {
     console.log(`Clicked: ${label}`);
   };
-  /* Hàm xử lý đăng xuất */
+
   const handleSignOut = async () => {
     try {
-      await clearAuthInfo();
-      router.push("welcome");
+      await deleteValueFor("accessToken");
+      await deleteValueFor("userId");
+      await deleteValueFor("refreshToken");
+      await deleteValueFor("user");
+      await deleteValueFor("role");
+      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/auth/sign-out`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: "SignIn" }],
+        })
+      );
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
+
   const confirmLogout = () => {
     Alert.alert(
       "Confirm sign out",
       "Are you sure you want to sign out?",
       [
-        {
-          text: "cancel",
-          style: "cancel",
-        },
-        {
-          text: "sign out",
-          onPress: () => handleSignOut(), // Gọi hàm đăng xuất khi người dùng chọn "Đăng xuất"
-        },
+        { text: "Cancel", style: "cancel" },
+        { text: "Sign out", onPress: () => handleSignOut() },
       ],
-      { cancelable: false } // Không cho phép đóng hộp thoại bằng cách chạm ra ngoài
+      { cancelable: false }
     );
   };
 
   return (
     <View style={styles.container}>
-      {/* Phần trái header */}
+      {/* Left Header */}
       <View style={styles.leftHeader}>
         <TouchableOpacity onPress={() => handleClick("Change Avatar")}>
           <Icon
@@ -53,11 +64,10 @@ const HeaderAcc = () => {
           />
         </TouchableOpacity>
         <View>
-          <Text style={styles.userName}>name</Text>
-          {/* <Text style={styles.textSimple}> 100% Credibility</Text> */}
+          <Text style={styles.userName}>{user?.name || "Guest"}</Text>
         </View>
       </View>
-      {/* Phần phải header */}
+      {/* Right Header */}
       <View style={styles.rightHeader}>
         <TouchableOpacity onPress={() => handleClick("mail")}>
           <Icon name="messenger" size={hp(4)} strokeWidth={2} color="white" />
@@ -71,6 +81,7 @@ const HeaderAcc = () => {
 };
 
 export default HeaderAcc;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -84,26 +95,18 @@ const styles = StyleSheet.create({
   leftHeader: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 2, // Chiếm 2 phần của header
+    flex: 2,
   },
   rightHeader: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    flex: 1, // Chiếm 1 phần của header
+    flex: 1,
   },
   userName: {
     fontSize: hp(2.2),
     fontWeight: "bold",
     color: "#fff",
     marginLeft: wp(2),
-  },
-  textSimple: {
-    fontSize: hp(1.4),
-    color: "#fff",
-    marginLeft: wp(2),
-  },
-  userInfo: {
-    marginHorizontal: wp(2),
   },
 });

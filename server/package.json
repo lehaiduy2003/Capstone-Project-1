@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "description": "capstone project 1",
+  "description": "capstone project server (private)",
   "BE": "server.js",
   "scripts": {
     "test": "jest",
@@ -9,16 +9,8 @@
     "inspect": "node --inspect --trace-gc --max-old-space-size=500 -r ts-node/register src/server.local.ts",
     "start": "node --max-old-space-size=4092 -r ts-node/register src/server.ts"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lehaiduy2003/Capstone-Project-1.git"
-  },
   "author": "c1se.43",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/lehaiduy2003/Capstone-Project-1/issues"
-  },
-  "homepage": "https://github.com/lehaiduy2003/Capstone-Project-1#readme",
   "dependencies": {
     "@ngrok/ngrok": "1.4.1",
     "axios": "1.7.7",
@@ -30,16 +22,21 @@
     "dotenv": "16.4.5",
     "express-mongo-sanitize": "2.2.0",
     "express-rate-limit": "7.4.1",
+    "express-session": "1.18.1",
+    "firebase-admin": "13.0.1",
     "helmet": "8.0.0",
     "hpp": "0.2.3",
     "jsonwebtoken": "9.0.2",
     "mongodb": "6.9.0",
     "mongoose": "8.7.0",
-    "multer": "1.4.5-lts.1",
+    "node-cron": "3.0.3",
     "nodemailer": "6.9.15",
+    "qrcode": "1.5.4",
     "redis": "4.7.0",
+    "shippo": "2.7.0",
     "stripe": "17.1.0",
     "twilio": "5.3.3",
+    "uuid": "11.0.3",
     "zod": "3.23.8"
   },
   "devDependencies": {
@@ -49,13 +46,15 @@
     "@types/country-list": "2.1.4",
     "@types/eslint__js": "8.42.3",
     "@types/express": "5.0.0",
+    "@types/express-session": "1.18.1",
     "@types/hpp": "0.2.6",
     "@types/jest": "29.5.13",
     "@types/jsonwebtoken": "9.0.7",
-    "@types/multer": "1.4.12",
     "@types/node": "22.7.7",
+    "@types/node-cron": "3.0.11",
     "@types/nodemailer": "6.4.16",
     "@types/nodemon": "1.19.6",
+    "@types/qrcode": "1.5.5",
     "eslint": "9.13.0",
     "express": "4.21.1",
     "jest": "29.7.0",

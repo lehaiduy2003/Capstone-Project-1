@@ -12,3 +12,8 @@ export const emailIsValid = (email) => {
 export const passwordMatches = (password, confirmPassword) => {
   return confirmPassword === password;
 };
+
+export const phoneIsValid = (phone) => {
+  const phoneRegex = /^\+?[0-9]{10,15}$/; // Updated regex to allow + symbol and between 10 to 15 digits
+  return phoneRegex.test(phone);
+};

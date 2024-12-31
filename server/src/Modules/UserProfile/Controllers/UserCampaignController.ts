@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import errorHandler from "../../../middlewares/errorMiddleware";
 import { ObjectId } from "mongodb";
 import UserCampaignService from "../Services/UserCampaignService";
-import deleteCache from "../../../libs/redis/cacheDeleting";
 export default class UserCampaignController {
   private readonly userCampaignService: UserCampaignService;
 

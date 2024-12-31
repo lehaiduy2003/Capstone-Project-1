@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Connection from "./Connection";
+import Connection from "../Base/Connection";
 dotenv.config();
 
 class Mongoose extends Connection {

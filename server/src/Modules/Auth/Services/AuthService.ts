@@ -34,7 +34,7 @@ export default class AuthService extends SessionService {
     this.userProfileService = userProfileService;
   }
 
-  async signUp(data: Partial<Account>): Promise<Account | null> {
+  async signUp(data: Partial<Account>): Promise<AuthDTO | null> {
     await this.startSession();
     this.startTransaction();
     try {
@@ -44,16 +44,30 @@ export default class AuthService extends SessionService {
         await this.abortTransaction();
         return null;
       }
+      if (accountData.phone) {
+        if (await this.userProfileService.isPhoneExist(accountData.phone)) {
+          await this.abortTransaction();
+          return null;
+        }
+      }
       const newAccount = await this.accountService.create(accountData, this.getSession());
 
       const userData = validateUserProfile({
         account_id: String(newAccount._id),
+        phone: accountData.phone,
+        name: accountData.name,
+        address: accountData.address ? [accountData.address] : [],
       });
 
-      await this.userProfileService.create(userData, this.getSession());
-
+      const newUser = await this.userProfileService.create(userData, this.getSession());
+      const tokens = generateTokens(String(newAccount._id), newAccount.role);
       await this.commitTransaction();
-      return newAccount;
+      return validateAuthDTO({
+        account_id: String(newAccount._id),
+        user_id: String(newUser._id),
+        role: newAccount.role,
+        ...tokens,
+      });
     } catch (error) {
       await this.abortTransaction();
       throw error;
@@ -63,26 +77,38 @@ export default class AuthService extends SessionService {
   }
 
   async getNewAccessToken(token: string) {
-    const payloadDecoded = decodeToken(token) as Payload;
-    if (!payloadDecoded) {
-      throw new Error("Invalid token");
-    }
+    try {
+      const payloadDecoded = decodeToken(token) as Payload;
+      if (!payloadDecoded) {
+        throw new Error("Invalid token");
+      }
 
-    const account = await this.accountService.findById(new ObjectId(payloadDecoded.sub));
-    if (!account) {
-      throw new Error("Account not found");
-    }
+      const account = await this.accountService.findById(new ObjectId(payloadDecoded.sub));
+      if (!account) {
+        throw new Error("Account not found");
+      }
 
-    return refreshAccessToken(String(account._id), account.role);
+      return refreshAccessToken(String(account._id), account.role);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async signIn(email: string, password: string): Promise<AuthDTO | null> {
     const account = await this.accountService.findByEmail(email);
-    if (!account || account.status === "inactive") {
-      throw new Error("Account not found or inactive");
+    if (!account) {
+      throw new Error("Account not found");
     }
     //console.log("account", account);
     const isPasswordValid = this.accountService.verifyAccountPassword(account, password);
+
+    if (!isPasswordValid) {
+      throw new Error("Invalid credentials");
+    }
+
+    if (account.status === "inactive") {
+      throw new Error("Account is inactive");
+    }
 
     const userProfile = await this.userProfileService.findByAccountId(
       new ObjectId(String(account._id))
@@ -96,6 +122,7 @@ export default class AuthService extends SessionService {
     return validateAuthDTO({
       account_id: String(account._id),
       user_id: String(userProfile._id),
+      role: account.role,
       ...tokens,
     });
   }

@@ -7,11 +7,10 @@ const Input = (props, emailStatus) => {
   //console.log(emailStatus);
 
   return (
-    <View
-      style={[styles.container, props.containerStyles && props.containerStyles]}
-    >
+    <View style={[styles.container, props.containerStyles && props.containerStyles]}>
       {props.icon && props.icon}
       <TextInput
+        textContentType={"oneTimeCode"}
         style={{ flex: 1 }}
         placeholderTextColor={theme.colors.textLight}
         ref={props.inputRef && props.inputRef}

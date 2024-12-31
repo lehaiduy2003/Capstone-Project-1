@@ -1,26 +1,14 @@
 import { z } from "zod";
 import { PasswordSchema } from "../Password";
-import { RecyclerFieldSchema } from "../RecyclerField";
 
-const SignUpDTOSchema = z
-  .object({
-    email: z.string().email({ message: "Invalid email" }),
-    password: PasswordSchema,
-    role: z.enum(["customer", "recycler"]).default("customer"),
-    recyclerField: RecyclerFieldSchema.optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.role === "recycler") {
-        return data.recyclerField !== undefined && data.recyclerField !== null;
-      }
-      return true;
-    },
-    {
-      message: "recyclerField is required when role is recycler",
-      path: ["recyclerField"],
-    }
-  );
+const SignUpDTOSchema = z.object({
+  email: z.string().email({ message: "Invalid email" }),
+  password: PasswordSchema,
+  name: z.string().optional(),
+  phone: z.string().min(10).max(15).optional(),
+  address: z.string().optional(),
+  role: z.enum(["customer", "recycler"]).default("customer"),
+});
 
 export const validateSignUpDTO = (data: unknown) => {
   const result = SignUpDTOSchema.safeParse(data);

@@ -1,5 +1,5 @@
 import BaseRouter from "../../Base/BaseRouter";
-import { authenticateUserByReqBody } from "../../middlewares/authenticationMiddleware";
+import { authenticateUserByReqBody, checkTokens } from "../../middlewares/authenticationMiddleware";
 import validateToken from "../../middlewares/tokenMiddleware";
 import CloudinaryController from "./CloudinaryController";
 import CloudinaryService from "./CloudinaryService";
@@ -16,7 +16,7 @@ class CloudinaryRouter extends BaseRouter {
   public initRoutes(): void {
     this.router.post(
       "/sign",
-      validateToken,
+      checkTokens,
       authenticateUserByReqBody,
       this.cloudinaryController.getSignature.bind(this.cloudinaryController)
     );

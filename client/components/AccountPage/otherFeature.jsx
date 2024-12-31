@@ -17,10 +17,7 @@ const OtherFeature = () => {
       <Text style={styles.header}>More Feature</Text>
 
       <View style={styles.row}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handlePress("Thông tin cá nhân")}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/Screens/userProfile")}>
           <FontAwesome name="user" size={24} style={styles.icon} />
           <Text style={styles.buttonText}>Personal Info</Text>
         </TouchableOpacity>
@@ -36,26 +33,20 @@ const OtherFeature = () => {
       <View style={styles.row}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => handlePress("Kênh người sáng tạo")}
+          onPress={() => router.push("/Screens/JoinedCampaigns")}
         >
           <FontAwesome name="pencil" size={hp(2)} style={styles.icon} />
-          <Text style={styles.buttonText}>.........</Text>
+          <Text style={styles.buttonText}>Joined Campaigns</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handlePress("Số dư TK")}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => router.push("PrepareOrder")}>
           <FontAwesome name="pencil" size={hp(2)} style={styles.icon} />
-          <Text style={styles.buttonText}>........</Text>
+          <Text style={styles.buttonText}>Process sell order</Text>
         </TouchableOpacity>
       </View>
 
       {/* "Change Password" */}
       <View style={styles.row}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("ChangePassword")}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => router.push("ChangePassword")}>
           <FontAwesome name="lock" size={24} style={styles.icon} />
           <Text style={styles.buttonText}>Change Password</Text>
         </TouchableOpacity>
@@ -71,16 +62,14 @@ const OtherFeature = () => {
       </View>
 
       <View style={styles.row}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("DonateRecycle")}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => router.push("Screens/myPostScreen")}>
           <FontAwesome name="gift" size={hp(2)} style={styles.icon} />
-          <Text style={styles.buttonText}>Donate Recycle</Text>
+          <Text style={styles.buttonText}>My Post</Text>
         </TouchableOpacity>
+        {/* <TouchableOpacity style={styles.button} onPress={() => router.push("DonateRecycleDetail")}> */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push("DonateRecycleDetail")}
+          onPress={() => console.log("Donate Recycle Detail")}
         >
           <FontAwesome name="share" size={hp(2)} style={styles.icon} />
           <Text style={styles.buttonText}>Donate Recycle Detail</Text>

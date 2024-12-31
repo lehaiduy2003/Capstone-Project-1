@@ -6,6 +6,7 @@ dotenv.config();
 type ParamsToSign = {
   timestamp: number;
   upload_preset: string;
+  folder: string;
 };
 
 export default class CloudinaryService {

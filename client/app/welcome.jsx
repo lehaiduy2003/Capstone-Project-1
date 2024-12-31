@@ -1,4 +1,4 @@
-import { Pressable, StatusBar, StyleSheet, Text, View, Alert } from "react-native";
+import { Pressable, StatusBar, StyleSheet, Text, View } from "react-native";
 import React, { useEffect } from "react";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { wp } from "../helpers/common";
@@ -7,17 +7,9 @@ import { theme } from "../constants/theme";
 import Button from "../components/Button";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import { requestNewAccessToken } from "../utils/fetch";
 
 const welcome = () => {
   const router = useRouter();
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const token = await requestNewAccessToken();
-  //     token !== null ? router.push("homePage") : Alert.alert("Hi", "Please login or sign up to continue");
-  //   };
-  //   checkAuth();
-  // }, []);
   return (
     <ScreenWrapper bg="white">
       <StatusBar style="dark" />
@@ -32,7 +24,9 @@ const welcome = () => {
 
         {/* title*/}
         <View style={{ gap: 20 }}>
-          <Text style={styles.punchLine}>Discover Deals, Anytime, Anywhere</Text>
+          <Text style={styles.punchLine}>
+            Discover Deals, Anytime, Anywhere
+          </Text>
         </View>
         {/* footer*/}
         <View style={styles.footer}>

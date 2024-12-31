@@ -2,22 +2,23 @@ import React, { useEffect } from "react";
 import { View, ScrollView, StyleSheet, Text } from "react-native";
 import { theme } from "../../constants/theme";
 import HeaderAcc from "../../components/AccountPage/headerAcc";
-import OrderMenu from "../../components/AccountPage/orderMenu";
+import OrderMenuCustomer from "../../components/AccountPage/orderMenuCustomer";
 import OtherFeature from "../../components/AccountPage/otherFeature";
 import useSecureStore from "../../store/useSecureStore";
 import useUserStore from "../../store/useUserStore";
+import { usePathname } from "expo-router";
 
 const account = () => {
   const { userId } = useSecureStore();
   const { user, fetchUserData, loading, error } = useUserStore();
-
+  // const path = usePathname();
   useEffect(() => {
     if (userId) {
-      console.log("User ID from store:", userId); // Debug log
+      console.log("User ID:", userId);
       fetchUserData(userId);
     }
+    // console.log("Pathname: ", path);
   }, [userId]);
-  console.log("User data:", user); // Debug log
 
   if (loading) {
     return (
@@ -44,7 +45,7 @@ const account = () => {
 
       {/* Order Menu Section */}
       <View style={styles.orderMenu}>
-        <OrderMenu />
+        <OrderMenuCustomer />
       </View>
       <View style={styles.divider} />
 
@@ -65,6 +66,7 @@ const styles = StyleSheet.create({
   },
   headerPart: {
     backgroundColor: theme.colors.primary,
+    paddingBottom: 20,
   },
   orderMenu: {
     backgroundColor: "white",

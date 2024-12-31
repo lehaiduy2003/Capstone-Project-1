@@ -12,21 +12,13 @@ class OtpRouter extends BaseRouter {
   }
 
   public initRoutes(): void {
-    this.router.post(
-      "/send",
-      this.otpController.sendOtp.bind(this.otpController),
-    );
-    this.router.post(
-      "/verify",
-      this.otpController.verifyOtp.bind(this.otpController),
-    );
-    this.router.post(
-      "/resend",
-      this.otpController.resendOtp.bind(this.otpController),
-    );
+    this.router.post("/send", this.otpController.sendOtp.bind(this.otpController));
+    this.router.post("/verify", this.otpController.verifyOtp.bind(this.otpController));
+    this.router.post("/resend", this.otpController.resendOtp.bind(this.otpController));
   }
 }
 
+// /otp/
 const createOtpRouter = (): OtpRouter => {
   const emailService = new EmailService();
   const otpController = new OtpController(emailService);

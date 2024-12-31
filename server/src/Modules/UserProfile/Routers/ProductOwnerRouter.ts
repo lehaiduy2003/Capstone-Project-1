@@ -1,6 +1,9 @@
 import BaseRouter from "../../../Base/BaseRouter";
 import { Role } from "../../../libs/zod/enums/Role";
-import { authenticateUserByReqParams } from "../../../middlewares/authenticationMiddleware";
+import {
+  authenticateUserByReqParams,
+  checkTokens,
+} from "../../../middlewares/authenticationMiddleware";
 import authorizeUser from "../../../middlewares/authorizationMiddleware";
 import validateToken from "../../../middlewares/tokenMiddleware";
 import ProductOwnerController from "../Controllers/ProductOwnerController";
@@ -18,7 +21,7 @@ class ProductOwnerRouter extends BaseRouter {
   public initRoutes(): void {
     this.router.get(
       "/",
-      validateToken,
+      checkTokens,
       authenticateUserByReqParams,
       authorizeUser([Role.Enum.customer, Role.Enum.recycler]),
       this.productOwnerController.findByOwner.bind(this.productOwnerController)
@@ -26,21 +29,21 @@ class ProductOwnerRouter extends BaseRouter {
 
     this.router.post(
       "/",
-      validateToken,
+      checkTokens,
       authenticateUserByReqParams,
       authorizeUser([Role.Enum.customer, Role.Enum.recycler]),
       this.productOwnerController.create.bind(this.productOwnerController)
     );
     this.router.patch(
       "/:productId",
-      validateToken,
+      checkTokens,
       authenticateUserByReqParams,
       authorizeUser([Role.Enum.customer, Role.Enum.recycler]),
       this.productOwnerController.updateById.bind(this.productOwnerController)
     );
     this.router.delete(
       "/:productId",
-      validateToken,
+      checkTokens,
       authenticateUserByReqParams,
       authorizeUser([Role.Enum.customer, Role.Enum.recycler]),
       this.productOwnerController.deleteById.bind(this.productOwnerController)

@@ -6,7 +6,6 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  auto,
   Alert,
   ActivityIndicator,
 } from "react-native";
@@ -17,25 +16,29 @@ import { hp, wp } from "../helpers/common";
 import ArtDesign from "react-native-vector-icons/AntDesign";
 import { useRoute } from "@react-navigation/native";
 import Header from "../components/Header";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import useCartStore from "../store/useCartStore";
 import { theme } from "../constants/theme";
-
+import CustomCarousel from "../components/Carousel";
+import parsedCurrency from "../utils/currency";
 const ProductDetails = () => {
   const route = useRoute();
+  const navigator = useNavigation();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isLiked, setIsLiked] = React.useState(false);
-  const { productId } = route.params;
+  const { productId } = useLocalSearchParams();
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState({});
   const [owner, setOwner] = useState({});
+  const [carouselImages, setCarouselImages] = useState([]);
 
   const fetchProductData = async () => {
     try {
       const productResponse = await fetch(
         `${process.env.EXPO_PUBLIC_API_URL}/products/${productId}`
       );
+      // console.log("Product ID:", productId); //Find the product ID
       const productData = await productResponse.json();
 
       const ownerResponse = await fetch(
@@ -45,6 +48,12 @@ const ProductDetails = () => {
 
       setProduct(productData);
       setOwner(ownerData);
+      // Dynamically add product and additional images
+      const images = [
+        ...(productData.img ? [productData.img] : []),
+        ...(productData.description_imgs || []),
+      ];
+      setCarouselImages(images);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -83,9 +92,13 @@ const ProductDetails = () => {
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
       <ScrollView style={styles.container}>
-        <Header title={"Product Detail"} showBackButton />
+        <Header
+          title={"Product Detail"}
+          showBackButton={true}
+          backButtonPress={() => navigator.goBack()}
+        />
 
-        <View style={styles.carousel}>
+        {/* <View style={styles.carousel}>
           <Image
             source={
               product.img
@@ -94,6 +107,11 @@ const ProductDetails = () => {
             }
             style={styles.productImage}
           />
+        </View> */}
+
+        {/* Custom Carousel */}
+        <View style={styles.carouselContainer}>
+          <CustomCarousel images={carouselImages} height={300} />
         </View>
 
         <View>
@@ -101,7 +119,7 @@ const ProductDetails = () => {
         </View>
 
         <View style={styles.priceLikeContainer}>
-          <Text style={styles.price}>{product.price} đ</Text>
+          <Text style={styles.price}>{parsedCurrency("currency", "VND", product.price)}</Text>
           <TouchableOpacity
             onPress={() => {
               setIsLiked(!isLiked);
@@ -140,7 +158,7 @@ const ProductDetails = () => {
           <Image source={{ uri: owner.avatar }} style={styles.convertImage} />
           <Text style={styles.nameShop}>{owner.name}</Text>
           <View style={styles.follow}>
-            <Button title="Follow" onPress={navigateToShopScreen} />
+            <Button title="View" onPress={navigateToShopScreen} />
           </View>
         </View>
 
@@ -156,11 +174,11 @@ const ProductDetails = () => {
           <Text
             style={{
               color: "white",
-              fontSize: 20,
+              fontSize: 25,
               fontWeight: "bold",
             }}
           >
-            add to cart
+            Add to cart
           </Text>
         )}
       </TouchableOpacity>
@@ -188,13 +206,22 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: wp(2),
   },
-  carousel: {
-    width: "100%",
+  // carousel: {
+  //   width: "100%",
+  //   height: 300,
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   borderRadius: 10,
+  //   marginBottom: 10,
+  // },
+  carouselContainer: {
+    marginVertical: 10,
+  },
+  carouselImage: {
+    width: "90%",
     height: 300,
-    alignItems: "center",
-    justifyContent: "center",
     borderRadius: 10,
-    marginBottom: 10,
+    resizeMode: "cover",
   },
   productImage: {
     width: "100%",

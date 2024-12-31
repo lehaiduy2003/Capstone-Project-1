@@ -5,6 +5,8 @@ declare global {
       DATABASE_URL: string;
       STRIPE_SECRET_KEY: string;
       NODE_ENV: "development" | "production" | "test";
+      COOKIE_SECRET: string;
+      SESSION_SECRET: string;
       PORT: string;
       HOST: string;
       REDIS_HOST: string;
@@ -26,6 +28,9 @@ declare global {
       CLOUDINARY_API_KEY: string;
       CLOUDINARY_API_SECRET: string;
       CLOUDINARY_UPLOAD_PRESET: string;
+      // Shippo
+      SHIPPO_API_KEY: string;
+      SHIPPO_API_URL: string;
     }
   }
 }

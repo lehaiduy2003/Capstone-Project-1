@@ -1,22 +1,23 @@
-import { View, Text, StyleSheet, StatusBar, Pressable } from "react-native";
+import { View, Text, StyleSheet, StatusBar, Pressable, FlatList } from "react-native";
 import React, { useEffect, useRef } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { hp, wp } from "../../helpers/common";
 import { theme } from "../../constants/theme";
 import Icon from "../../assets/icons";
-import Search from "../../components/Search";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import usePagination from "../../hooks/usePagination";
 import ProductList from "../../components/ProductList";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useScrollStore } from "../../store/useScrollStore";
+import Search from "../../components/Search";
 
 const HomePage = () => {
-  const { products, isLoading, error, onEndReached } = usePagination();
+  const router = useRouter();
+  const { products, isLoading, onEndReached } = usePagination("products");
   const flatListRef = useRef(null);
+  const nameRef = useRef("");
   const setScrollPosition = useScrollStore((state) => state.setScrollPosition);
   const getScrollPosition = useScrollStore((state) => state.getScrollPosition);
-
   useEffect(() => {
     const savedPosition = getScrollPosition("HomePage");
     if (flatListRef.current) {
@@ -31,9 +32,14 @@ const HomePage = () => {
     const currentScrollPosition = event.nativeEvent.contentOffset.y;
     setScrollPosition("HomePage", currentScrollPosition);
   };
-  if (error) {
-    return <Text>Error: {error.message}</Text>;
-  }
+
+  const handleTypePress = (type) => {
+    console.log("type", type.toLowerCase());
+
+    router.push(`Screens/SearchResultScreen?searchType=products&type=${type.toLowerCase()}`);
+  };
+
+  const productTypes = ["clothing", "furniture", "gear", "electronics", "books"];
   return (
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
@@ -51,15 +57,28 @@ const HomePage = () => {
           </View>
         </View>
         {/* Search */}
-        <View style={styles.row}>
+        <View style={styles.searchContainer}>
           <Search
             icon={<Icon name="search" size={26} strokeWidth={1.6} />}
             placeholder="Search products, brands..."
             onChangeText={(value) => (nameRef.current = value)}
+            searchType="products"
+            screen={"Screens/SearchResultScreen"}
           />
-
-          <Icon name="filter" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
+          <FlatList
+            data={productTypes}
+            horizontal
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <Pressable onPress={() => handleTypePress(item)} style={styles.typeButton}>
+                <Text style={styles.typeText}>{item}</Text>
+              </Pressable>
+            )}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.typeList}
+          />
         </View>
+
         {/**product list */}
         <SafeAreaView>
           <ProductList
@@ -82,6 +101,11 @@ const styles = StyleSheet.create({
     //flex: 1,
     paddingHorizontal: wp(4),
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -101,11 +125,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingBottom: 20,
+  searchContainer: {
+    flexDirection: "column",
   },
   item: {
     height: hp(8),
@@ -127,6 +148,20 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 10,
   },
+  typeList: {
+    paddingHorizontal: hp(2),
+    paddingVertical: hp(1),
+  },
+  typeButton: {
+    marginRight: hp(1),
+    padding: hp(1),
+    backgroundColor: theme.colors.primary,
+    borderRadius: hp(1),
+  },
+  typeText: {
+    color: "white",
+    fontSize: hp(2),
+  },
   convertImage: {
     width: "90%",
     height: 200,
@@ -136,7 +171,6 @@ const styles = StyleSheet.create({
     marginTop: 15,
     resizeMode: "cover",
   },
-
   price: {
     fontSize: 18,
     color: "#9C9C9C",

@@ -8,7 +8,7 @@ const authorizeUser = (role: RoleType[]) => {
       next();
       return;
     }
-    res.status(403).send({ message: "No permission to access this route" });
+    res.status(403).send({ success: false, message: "No permission to access this route" });
   };
 };
 

@@ -82,7 +82,7 @@ export default class ProductController extends BaseController {
         return;
       }
 
-      await saveToCache(req.body.cacheKey, 30, products); // save to cache for 30 seconds
+      await saveToCache(req.body.cacheKey, 300, products); // save to cache for 300 seconds
 
       res.status(200).send(products);
     } catch (error) {

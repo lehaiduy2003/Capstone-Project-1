@@ -1,151 +1,170 @@
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import useSecureStore from "../store/useSecureStore";
-/**
- *
- * @param {string} folder the folder in Cloudinary to upload the image to, only 3 valid folder: ```users, products, campaigns.```
- * @returns
- */
 
-const UPLOAD_LIMIT = 10; // Limit the number of images to upload
-const useUploadMultipleImages = (folder) => {
-  const [images, setImages] = useState(null);
-  const [uploading, setUploading] = useState(false);
+const UPLOAD_LIMIT = 6; // Limit the number of images to upload
+const useUploadMultipleImages = (folder = "products") => {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { accessToken, userId } = useSecureStore();
 
   const pickImage = async () => {
-    // Request permission to access the media library
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need camera roll permissions to make this work!");
-      return;
-    }
-
-    // Launch the image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: folder === "users", // Only allow editing for user profile pictures
-      mediaTypes: ["images"], // Only images are allowed
-      quality: 1,
-      allowsMultipleSelection: true, // Allow multiple images to be selected
-    });
-
-    // Save the images uri
-    if (!result.canceled) {
-      const selectedImages = result.assets.map((asset) => asset.uri);
-      if (images.length + selectedImages.length > UPLOAD_LIMIT) {
-        alert(`You can only upload a maximum of ${UPLOAD_LIMIT} images`);
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access the media library is required.");
         return;
       }
-      setImages((prevImages) => [...prevImages, ...selectedImages]);
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsMultipleSelection: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets) {
+        const newImages = result.assets.map((asset) => asset.uri);
+
+        setImages((prevImages) => {
+          const combinedImages = [...prevImages, ...newImages];
+          if (combinedImages.length > UPLOAD_LIMIT) {
+            alert(`You can only upload up to ${UPLOAD_LIMIT} images.`);
+            return prevImages; // Keep existing images if limit exceeded
+          }
+          return combinedImages;
+        });
+      }
+      console.log("Images selected:", images);
+    } catch (err) {
+      console.error("Error selecting images:", err);
+      setError("Failed to pick images. Please try again");
     }
   };
 
   const takePhoto = async () => {
-    // Request permission to access the camera
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need camera permissions to make this work!");
-      return;
-    }
-
-    // Launch the camera
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: folder === "users", // Only allow editing for user profile pictures
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    // Save the images uri
-    if (!result.canceled) {
-      const selectedImages = result.assets.map((asset) => asset.uri);
-      if (images.length + selectedImages.length > UPLOAD_LIMIT) {
-        alert(`You can only upload a maximum of ${UPLOAD_LIMIT} images`);
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access the camera is required.");
         return;
       }
-      setImages((prevImages) => [...prevImages, ...selectedImages]);
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: folder === "users",
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets) {
+        const newImageUri = result.assets[0].uri;
+
+        setImages((prevImages) => {
+          if (prevImages.length + 1 > UPLOAD_LIMIT) {
+            alert(`You can only upload a maximum of ${UPLOAD_LIMIT} images.`);
+            return prevImages;
+          }
+          return [...prevImages, newImageUri];
+        });
+      }
+    } catch (err) {
+      console.error("Error taking photo:", err);
+      setError("Failed to take photo. Please try again.");
     }
   };
 
-  // Start upload all images to Cloudinary
+  const removeImage = (index) => {
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+  };
+
   const uploadImages = async () => {
-    if (!images) {
-      alert("No image selected");
-      return;
+    if (!images || images.length === 0) {
+      alert("No images selected to upload.");
+      return [];
     }
 
-    setUploading(true);
+    setLoading(true);
     setError(null);
 
     try {
-      // Get signature from server first after uploading the images
-      const signatureResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cloudinary/sign`, {
+      console.log("Requesting upload signature...");
+      const signatureUrl = `${process.env.EXPO_PUBLIC_API_URL}/cloudinary/sign`;
+
+      const signatureResponse = await fetch(signatureUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          userId,
-          folder,
-        }),
+        body: JSON.stringify({ userId, folder }),
       });
-      const signatureData = await signatureResponse.json();
-      const { signature, apiKey, timestamp, uploadPreset } = signatureData;
 
-      // Upload all images concurrently
-      const uploadPromises = images.map(async (image) => {
-        // Get blob from image uri (for file name and type)
-        const blobResponse = await fetch(image);
-        const blob = await blobResponse.blob();
-        const fileName = image.split("/").pop() || "uploaded_image.jpg";
+      if (!signatureResponse.ok) {
+        const errorText = await signatureResponse.text();
+        console.error("Signature error:", errorText);
+        throw new Error("Failed to get upload signature.");
+      }
 
-        // Create form data to upload image
+      const { signature, apiKey, timestamp, uploadPreset } = await signatureResponse.json();
+      console.log("Signature received:", {
+        signature,
+        apiKey,
+        timestamp,
+        uploadPreset,
+      });
+
+      const uploadPromises = images.map(async (imageUri, index) => {
         const formData = new FormData();
         formData.append("file", {
-          uri: image,
-          name: fileName,
-          type: blob.type || "image/jpeg",
+          uri: imageUri,
+          type: "image/jpeg",
+          name: `upload_${index}.jpg`,
         });
         formData.append("upload_preset", uploadPreset);
         formData.append("api_key", apiKey);
         formData.append("timestamp", timestamp);
         formData.append("signature", signature);
+        formData.append("folder", folder); // Include the folder parameter
 
-        // Upload image to Cloudinary
-        // no need to await here because we are using Promise.all
-        // for running all promises concurrently
-        return fetch(`${process.env.EXPO_PUBLIC_CLOUDINARY_API}/image/upload`, {
+        const uploadUrl = `${process.env.EXPO_PUBLIC_CLOUDINARY_API}/image/upload`;
+        console.log(`Uploading image ${index + 1} to ${uploadUrl}...`);
+
+        const response = await fetch(uploadUrl, {
           method: "POST",
           body: formData,
-        }).then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to upload image");
-          }
-          return response.json();
         });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Error uploading image ${index + 1}:`, errorText);
+          throw new Error(`Failed to upload image ${index + 1}.`);
+        }
+
+        const data = await response.json();
+        console.log(`Image ${index + 1} uploaded successfully:`, data.secure_url);
+        return data.secure_url;
       });
 
-      const uploadResult = await Promise.all(uploadPromises);
-
-      const imagesUrl = uploadResult.map((data) => data.secure_url);
-      alert("Image uploaded successfully");
-      return imagesUrl;
+      const uploadedUrls = await Promise.all(uploadPromises);
+      console.log("All images uploaded:", uploadedUrls);
+      return uploadedUrls;
     } catch (err) {
-      setError(err.message);
-      alert("Failed to upload image");
+      console.error("Image upload error:", err);
+      setError("Failed to upload images. Please try again.");
+      throw err;
     } finally {
-      setUploading(false);
+      setLoading(false);
     }
   };
 
   return {
     images,
-    uploading,
+    loading,
     error,
     pickImage,
     takePhoto,
     uploadImages,
+    removeImage,
+    setImages,
   };
 };
 

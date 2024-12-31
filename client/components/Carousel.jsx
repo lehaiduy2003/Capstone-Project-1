@@ -1,56 +1,72 @@
-import { View, Text, FlatList, Dimensions, Image, StyleSheet } from 'react-native'
-import React from 'react'
+import React, { useState, useRef } from "react";
+import { FlatList, Image, StyleSheet, View, Dimensions } from "react-native";
 
-const Carousel = () => {
+const { width: screenWidth } = Dimensions.get("window");
 
-    const screenWidth = Dimensions.get('window');
-    const carouselData = [
-        {
-            id: "1",
-            image: require('../assets/images/Carousel/images1.jpg'),
-        },
-        {
-            id: "2",
-            image: require('../assets/images/Carousel/images2.jpg'),
-        },
-        {
-            id: "3",
-            image: require('../assets/images/Carousel/images3.jpg'),
-        },
-        {
-            id: "4",
-            image: require('../assets/images/Carousel/images4.jpg'),
-        },
-        {
-            id: "5",
-            image: require('../assets/images/Carousel/image5.jpg'),
-        }
-    ];
+const CustomCarousel = ({ images, height = 300 }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const flatListRef = useRef(null);
 
-    // Display Images
-    const renderItem = ({ item, index }) => {
-        return (
-            <Carousel>
-                <Image source={item.image}
-                    style={{ width: screenWidth, height: 200 }} />
-            </Carousel>
-        )
-    };
-    return (
-        <View>
-            <Text>Carousel</Text>
-            <FlatList
-                data={carouselData}
-                renderItem={renderItem}
-                showsHorizontalScrollIndicator={false}
-                horizontal
-            />
-        </View>
-    )
-}
+  const handleScroll = (event) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const newIndex = Math.round(offsetX / screenWidth);
+    setCurrentIndex(newIndex);
+  };
 
-export default Carousel
+  return (
+    <View style={{ marginBottom: 20 }}>
+      {/* Carousel */}
+      <FlatList
+        ref={flatListRef}
+        data={images}
+        keyExtractor={(_, index) => index.toString()}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        renderItem={({ item }) => (
+          <Image source={{ uri: item }} style={[styles.carouselImage, { height }]} />
+        )}
+      />
+
+      {/* Pagination Dots */}
+      <View style={styles.paginationContainer}>
+        {images.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.paginationDot,
+              currentIndex === index ? styles.activeDot : styles.inactiveDot,
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
+export default CustomCarousel;
 
 const styles = StyleSheet.create({
-
-})
+  carouselImage: {
+    width: screenWidth,
+    resizeMode: "cover",
+  },
+  paginationContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: "#333",
+  },
+  inactiveDot: {
+    backgroundColor: "#ccc",
+  },
+});

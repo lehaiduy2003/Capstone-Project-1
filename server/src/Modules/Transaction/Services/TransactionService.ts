@@ -2,34 +2,31 @@ import SessionService from "../../../Base/SessionService";
 
 import { Transaction } from "../../../libs/zod/model/Transaction";
 
-import { Filter } from "../../../libs/zod/Filter";
-
 import { ObjectId } from "mongodb";
 import transactionsModel from "../Models/transactionsModel";
 import { TransactionDTO, validateTransactionDTO } from "../../../libs/zod/dto/TransactionDTO";
+import { Filter } from "../../../libs/zod/Filter";
+import UserProfileService from "../../UserProfile/Services/UserProfileService";
 
 export default class TransactionService extends SessionService {
-  public constructor() {
-    super();
-  }
-
-  async findManyByUserId(
-    user_id: ObjectId,
-    filter: Filter
-  ): Promise<Partial<Transaction>[] | null> {
+  async getPendingTransactions(ownerId: ObjectId, filter: Filter) {
     const transactions = await transactionsModel
-      .find({ user_id: user_id })
+      .find({ "product.owner": ownerId, transaction_status: "pending" })
       .sort({ [filter.sort]: filter.order })
       .skip(filter.skip)
       .limit(filter.limit)
       .lean();
 
-    // delete shipper_id for prevent leaking sensitive information of shipper
-    return transactions.map((transaction) => {
-      const dto = validateTransactionDTO(transaction);
-      delete dto.shipper_id;
-      return dto;
-    });
+    // console.log(transactions);
+
+    return transactions;
+  }
+  async findById(id: ObjectId) {
+    const transaction = await transactionsModel.findById(id).lean();
+    return validateTransactionDTO(transaction);
+  }
+  public constructor() {
+    super();
   }
 
   async create(data: Partial<Transaction>[]) {
@@ -67,6 +64,11 @@ export default class TransactionService extends SessionService {
         session,
         new: true,
       });
+      if (data.transaction_status === "completed") {
+        const user = new UserProfileService();
+        await user.increaseScore(updateStatus!.user_id, 10);
+        await user.increaseScore(updateStatus!.product.owner, 10);
+      }
       if (!updateStatus?.isModified) {
         await this.abortTransaction();
         return null;

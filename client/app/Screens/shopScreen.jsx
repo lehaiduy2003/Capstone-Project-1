@@ -7,27 +7,33 @@ import ScreenWrapper from "../../components/ScreenWrapper";
 import { useRoute } from "@react-navigation/native";
 import Header from "../../components/Header";
 import { getValueFor } from "../../utils/secureStore";
+import useSecureStore from "../../store/useSecureStore";
+import { useRouter } from "expo-router";
 
 const ShopScreen = () => {
+  const router = useRouter();
   const route = useRoute();
   const { ownerId } = route.params; // Selected owner ID
-  const { products, fetchProductsByOwner, updateProduct, deleteProduct, error, loading } = useProductStore();
+  const { products, fetchProductsByOwner, updateProduct, deleteProduct, error, loading } =
+    useProductStore();
   const [editingProduct, setEditingProduct] = useState(null);
-  const [userId, setUserId] = useState(null);
 
   // Fetch the logged-in user ID from storage
-  useEffect(() => {
-    const fetchUserId = async () => {
-      const userIdFromStorage = await getValueFor("userId");
-      setUserId(userIdFromStorage);
-    };
-    fetchUserId();
-  }, []);
+  const { userId } = useSecureStore();
 
-  // Fetch products owned by the selected owner
   useEffect(() => {
-    fetchProductsByOwner(ownerId);
-  }, [ownerId]);
+    if (userId) {
+      fetchProductsByOwner(userId);
+    }
+  }, [userId]);
+
+  // Fetch products owned by the selected owner or logged-in user
+  useEffect(() => {
+    if (ownerId || userId) {
+      console.log("Fetching products for ownerId:", ownerId, "userId:", userId);
+      fetchProductsByOwner(ownerId || userId);
+    }
+  }, [ownerId, userId]);
 
   const handleUpdateProduct = (updatedProduct) => {
     updateProduct(editingProduct._id, updatedProduct);
@@ -35,18 +41,14 @@ const ShopScreen = () => {
   };
 
   const handleDeleteProduct = (productId) => {
-    Alert.alert(
-      "Delete Product",
-      "Are you sure you want to delete this product?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => deleteProduct(productId),
-        },
-      ]
-    );
+    Alert.alert("Delete Product", "Are you sure you want to delete this product?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteProduct(productId),
+      },
+    ]);
   };
 
   // Filter products to display only those owned by the selected owner
@@ -54,7 +56,7 @@ const ShopScreen = () => {
 
   return (
     <ScreenWrapper>
-      <Header title="Shop" showBackButton />
+      <Header title="Shop" showBackButton backButtonPress={() => router.back()} />
       <View style={styles.container}>
         {loading && <Text style={styles.loadingText}>Loading products...</Text>}
         {error && <Text style={styles.errorText}>Error: {error}</Text>}

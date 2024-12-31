@@ -1,6 +1,6 @@
 import { createClient, RedisClientType } from "redis";
 import dotenv from "dotenv";
-import Connection from "./Connection";
+import Connection from "../Base/Connection";
 dotenv.config();
 
 class Redis extends Connection {
@@ -24,9 +24,7 @@ class Redis extends Connection {
         },
       });
 
-      this.redisClient.on("error", (error) =>
-        console.error(`Error : ${error}`),
-      );
+      this.redisClient.on("error", (error) => console.error(`Error : ${error}`));
       await this.redisClient.connect();
     } catch (error) {
       console.error(error);

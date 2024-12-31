@@ -12,6 +12,11 @@ import createProductOwnerRouter from "../Modules/UserProfile/Routers/ProductOwne
 import createRecycleCampaignRouter from "../Modules/RecycleCampaign/Routers/RecycleCampaignRouter";
 import createCloudinaryRouter from "../Modules/Cloudinary/CloudinaryRouter";
 import createUserCampaignRouter from "../Modules/UserProfile/Routers/UserCampaignRouter";
+import createUserTransactionRouter from "../Modules/UserProfile/Routers/UserTransactionRouter";
+import createPostRouter from "../Modules/Post/Routers/PostRouter";
+import createShippingRouter from "../Modules/Shippo/Routers/ShippoRouter";
+import createDonationRouter from "../Modules/Donation/Routers/DonationRouter";
+import createFollowerRouter from "../Modules/Follower/Routers/FollowerRouter";
 
 const setupRouters = (app: Application): void => {
   createAuthRouter().register("/auth", app);
@@ -20,6 +25,7 @@ const setupRouters = (app: Application): void => {
   createWishListRouter().register("/users/:id/wishlist", app);
   createProductOwnerRouter().register("/users/:id/products", app);
   createUserCampaignRouter().register("/users/:id/campaigns", app);
+  createUserTransactionRouter().register("/users/:id/transactions", app);
   createOtpRouter().register("/otp", app);
   createStripeRouter().register("/stripe", app);
   createTransactionRouter().register("/transactions", app);
@@ -27,6 +33,10 @@ const setupRouters = (app: Application): void => {
   createProfileEditingRouter().register("/profile", app);
   createRecycleCampaignRouter().register("/campaigns", app);
   createCloudinaryRouter().register("/cloudinary", app);
+  createShippingRouter().register("/shipping", app);
+  createPostRouter().register("/posts", app);
+  createDonationRouter().register("/donations", app);
+  createFollowerRouter().register("/followers", app);
   console.log("Routers initialized");
 };
 

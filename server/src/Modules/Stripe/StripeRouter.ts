@@ -3,6 +3,7 @@ import BaseRouter from "../../Base/BaseRouter";
 import StripeController from "./StripeController";
 import StripeService from "./StripeService";
 import PaymentService from "../Payment/Services/PaymentService";
+import { checkTokens } from "../../middlewares/authenticationMiddleware";
 
 class StripeRouter extends BaseRouter {
   private readonly stripeController: StripeController;
@@ -16,7 +17,7 @@ class StripeRouter extends BaseRouter {
   public initRoutes(): void {
     this.router.post(
       "/checkout",
-      validateToken,
+      checkTokens,
       this.stripeController.createPaymentIntent.bind(this.stripeController)
     );
   }

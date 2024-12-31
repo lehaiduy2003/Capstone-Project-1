@@ -22,7 +22,7 @@ const useCartStore = create((set, get) => ({
   totalPrice: 0,
   initializeCart: async () => {
     const data = await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart`,
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
       {
         method: "GET",
         headers: {
@@ -47,7 +47,7 @@ const useCartStore = create((set, get) => ({
     if (!get().cartItems) {
       try {
         const data = await fetchCart(
-          `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart/product`,
+          `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart/product`,
           {
             method: "PATCH",
             headers: {
@@ -86,7 +86,7 @@ const useCartStore = create((set, get) => ({
 
     try {
       const data = await fetchCart(
-        `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart/product`,
+        `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart/product`,
         {
           method: "PATCH",
           headers: {
@@ -120,7 +120,7 @@ const useCartStore = create((set, get) => ({
       .map((item) => ({ _id: item._id, quantity: item.cartQuantity })); // Only keep _id and cartQuantity as quantity
 
     const data = await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart`,
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
       {
         method: "PUT",
         headers: {
@@ -142,7 +142,7 @@ const useCartStore = create((set, get) => ({
   removeProduct: async (productId) => {
     const data = await fetchCart(
       `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor(
-        "user_id"
+        "userId"
       )}/cart/product/${productId}`,
       {
         method: "DELETE",
@@ -160,7 +160,7 @@ const useCartStore = create((set, get) => ({
 
   clearCart: async () => {
     const data = await fetchCart(
-      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("user_id")}/cart`,
+      `${process.env.EXPO_PUBLIC_API_URL}/users/${await getValueFor("userId")}/cart`,
       {
         method: "PUT",
         headers: {
