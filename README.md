@@ -29,7 +29,6 @@ The application aims to connect users who are interested in trading eco-friendly
 - **Remote**: origin
 
 <hr/>
-## Team Information
 
 ### Team Name
 
@@ -39,8 +38,8 @@ C1SE.43
 
 - **Member 1**: Le Hai Duy - [GitHub](https://github.com/lehaiduy2003)
 - **Member 2**: Dang Van Thoi Dai - [GitHub](https://github.com/thoidai12234556)
-- **Member 3**: Phung Minh Nghia - [GitHub](https://github.com/phungminhnghia) - (leaved in after sprint 1)
-- **Member 4**: Le Trung Hieu - [GitHub](https://github.com/trhieu2310) - (leaved in after sprint 1)
+- **Member 3**: Phung Minh Nghia - [GitHub](https://github.com/phungminhnghia) - (leaved after sprint 1)
+- **Member 4**: Le Trung Hieu - [GitHub](https://github.com/trhieu2310) - (leaved after sprint 1)
 - **Member 5**: Nguyen Anh Vu - [GitHub](https://github.com/vunguyenDev92)
 
 <hr/>
@@ -72,62 +71,25 @@ Ensure you have the following installed on your system:
       npm install
     ```
 
+### Running the Project
+
 ### Environment Variables
 
 Ensure you have a `.env` file in the root directory with the following of `.env.example` file in each server.
 
-### Running the Project
-
-#### Client
-
 1. **Start the Expo development server:**
    ```sh
    cd client
-   npm start
+   npx expo start
+    press a after run success to open emulator
+    or scan the QR to using physical device (downloaded expo go app)
    ```
 
-2. **Run on Android:**
-   ```sh
-   npm run android
-   ```
-
-3. **Run on iOS:**
-   ```sh
-   npm run ios
-   ```
-
-4. **Run on Web:**
-   ```sh
-   npm run web
-   ```
-
-#### Server
-
-1. **Start the Express server:**
+2. **Start the Express server:**
    ```sh
    cd server
-   npm start
+   npm start (or npm run dev)
    ```
-
-### Testing
-
-#### Client
-
-To run tests for the client, use the following command:
-
-```sh
-cd client
-npm test
-```
-
-#### Server
-
-To run tests for the server, use the following command:
-
-```sh
-cd server
-npm test
-```
 
 ### Directory Structure
 
